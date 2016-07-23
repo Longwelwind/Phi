@@ -9,9 +9,9 @@ namespace PhiClient
     {
         public abstract void Apply(User user, RealmData realmData);
 
-        public abstract Dictionary<string, object> ToRaw();
+        public abstract GenericDictionary ToRaw();
 
-        public static Packet FromRaw(RealmData realmData, Dictionary<string, object> data)
+        public static Packet FromRaw(RealmData realmData, GenericDictionary data)
         {
             string classType = (string)data["type"];
             switch (classType)
@@ -52,16 +52,16 @@ namespace PhiClient
             // Since Authentification packets are special, they are handled in Programm.cs
         }
 
-        public override Dictionary<string, object> ToRaw()
+        public override GenericDictionary ToRaw()
         {
-            return new Dictionary<string, object>()
+            return new GenericDictionary()
             {
                 ["type"] = TYPE_CLASS,
                 ["name"] = name
             };
         }
 
-        public new static AuthentificationPacket FromRaw(RealmData realmData, Dictionary<string, object> data)
+        public new static AuthentificationPacket FromRaw(RealmData realmData, GenericDictionary data)
         {
             string name = (string)data["name"];
 
@@ -80,16 +80,16 @@ namespace PhiClient
             realmData.ServerPostMessage(user, this.message);
         }
 
-        public override Dictionary<string, object> ToRaw()
+        public override GenericDictionary ToRaw()
         {
-            return new Dictionary<string, object>()
+            return new GenericDictionary()
             {
                 ["type"] = TYPE_CLASS,
                 ["message"] = message
             };
         }
 
-        public new static PostMessagePacket FromRaw(RealmData realmData, Dictionary<string, object> data)
+        public new static PostMessagePacket FromRaw(RealmData realmData, GenericDictionary data)
         {
             return new PostMessagePacket { message = (string)data["message"] };
         }
@@ -109,9 +109,9 @@ namespace PhiClient
             realmData.NotifyPacket(userTo, new ThingReceivedPacket { userFrom = user, realmThing = realmThing });
         }
 
-        public override Dictionary<string, object> ToRaw()
+        public override GenericDictionary ToRaw()
         {
-            return new Dictionary<string, object>()
+            return new GenericDictionary()
             {
                 ["type"] = TYPE_CLASS,
                 ["realmThing"] = realmThing.ToRaw(),
@@ -119,11 +119,11 @@ namespace PhiClient
             };
         }
 
-        public new static SendThingPacket FromRaw(RealmData realmData, Dictionary<string, object> data)
+        public new static SendThingPacket FromRaw(RealmData realmData, GenericDictionary data)
         {
             return new SendThingPacket
             {
-                realmThing=RealmThing.FromRaw(realmData, (Dictionary<string, object>)data["realmThing"]),
+                realmThing=RealmThing.FromRaw(realmData, (GenericDictionary)data["realmThing"]),
                 userTo=ID.Find(realmData.users, (int)data["userTo"])
             };
         }
@@ -144,9 +144,9 @@ namespace PhiClient
             // Since Synchronisation packets are special, they are handled in PhiClient.cs
         }
 
-        public override Dictionary<string, object> ToRaw()
+        public override GenericDictionary ToRaw()
         {
-            return new Dictionary<string, object>()
+            return new GenericDictionary()
             {
                 ["type"] = TYPE_CLASS,
                 ["realmData"] = realmData.ToRaw(),
@@ -154,9 +154,9 @@ namespace PhiClient
             };
         }
 
-        public new static SynchronisationPacket FromRaw(RealmData realmData, Dictionary<string, object> data)
+        public new static SynchronisationPacket FromRaw(RealmData realmData, GenericDictionary data)
         {
-            realmData = RealmData.FromRaw((Dictionary<string, object>) data["realmData"]);
+            realmData = RealmData.FromRaw((GenericDictionary) data["realmData"]);
             return new SynchronisationPacket
             {
                 realmData = realmData,
@@ -176,19 +176,19 @@ namespace PhiClient
             realmData.AddChatMessage(this.message);
         }
 
-        public override Dictionary<string, object> ToRaw()
+        public override GenericDictionary ToRaw()
         {
-            return new Dictionary<string, object>()
+            return new GenericDictionary()
             {
                 ["type"] = TYPE_CLASS,
                 ["message"] = message.ToRaw()
             };
         }
 
-        public new static ChatMessagePacket FromRaw(RealmData realmData, Dictionary<string, object> data)
+        public new static ChatMessagePacket FromRaw(RealmData realmData, GenericDictionary data)
         {
             return new ChatMessagePacket {
-                message = ChatMessage.FromRaw(realmData, (Dictionary<string, object>)data["message"])
+                message = ChatMessage.FromRaw(realmData, (GenericDictionary)data["message"])
             };
         }
     }
@@ -205,9 +205,9 @@ namespace PhiClient
             this.user.connected = this.connected;
         }
 
-        public override Dictionary<string, object> ToRaw()
+        public override GenericDictionary ToRaw()
         {
-            return new Dictionary<string, object>()
+            return new GenericDictionary()
             {
                 ["type"] = TYPE_CLASS,
                 ["user"] = user.getID(),
@@ -215,7 +215,7 @@ namespace PhiClient
             };
         }
 
-        public new static UserConnectedPacket FromRaw(RealmData realmData, Dictionary<string, object> data)
+        public new static UserConnectedPacket FromRaw(RealmData realmData, GenericDictionary data)
         {
             return new UserConnectedPacket
             {
@@ -236,20 +236,20 @@ namespace PhiClient
             realmData.AddUser(this.user);
         }
 
-        public override Dictionary<string, object> ToRaw()
+        public override GenericDictionary ToRaw()
         {
-            return new Dictionary<string, object>()
+            return new GenericDictionary()
             {
                 ["type"] = TYPE_CLASS,
                 ["user"] = user.ToRaw()
             };
         }
 
-        public new static NewUserPacket FromRaw(RealmData realmData, Dictionary<string, object> data)
+        public new static NewUserPacket FromRaw(RealmData realmData, GenericDictionary data)
         {
             return new NewUserPacket
             {
-                user = User.FromRaw(realmData, (Dictionary <string, object>) data["user"])
+                user = User.FromRaw(realmData, (GenericDictionary) data["user"])
             };
         }
     }
@@ -278,9 +278,9 @@ namespace PhiClient
             );
         }
 
-        public override Dictionary<string, object> ToRaw()
+        public override GenericDictionary ToRaw()
         {
-            return new Dictionary<string, object>()
+            return new GenericDictionary()
             {
                 ["type"] = TYPE_CLASS,
                 ["realmThing"] = realmThing.ToRaw(),
@@ -288,11 +288,11 @@ namespace PhiClient
             };
         }
 
-        public new static ThingReceivedPacket FromRaw(RealmData realmData, Dictionary<string, object> data)
+        public new static ThingReceivedPacket FromRaw(RealmData realmData, GenericDictionary data)
         {
             return new ThingReceivedPacket
             {
-                realmThing = RealmThing.FromRaw(realmData, (Dictionary<string, object>) data["realmThing"]),
+                realmThing = RealmThing.FromRaw(realmData, (GenericDictionary) data["realmThing"]),
                 userFrom = ID.Find(realmData.users, (int)data["userFrom"])
             };
         }

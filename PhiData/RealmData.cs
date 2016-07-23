@@ -85,24 +85,24 @@ namespace PhiClient
             this.BroadcastPacket(new ChatMessagePacket { message = chatMessage });
         }
 
-        public Dictionary<string, object> ToRaw()
+        public GenericDictionary ToRaw()
         {
-            return new Dictionary<string, object>()
+            return new GenericDictionary()
             {
                 ["users"] = users.ConvertAll((u) => { return u.ToRaw(); }),
                 ["chat"] = chat.ConvertAll((m) => { return m.ToRaw(); })
             };
         }
 
-        public static RealmData FromRaw(Dictionary<string, object> data)
+        public static RealmData FromRaw(GenericDictionary data)
         {
             RealmData realmData = new RealmData();
-            realmData.users = ((List<Dictionary<string, object>>)data["users"]).ConvertAll((Dictionary<string, object> du) =>
+            realmData.users = ((List<GenericDictionary>)data["users"]).ConvertAll((GenericDictionary du) =>
                 {
                     return User.FromRaw(realmData, du);
                 }
             );
-            realmData.chat = ((List<Dictionary<string, object>>)data["chat"]).ConvertAll((Dictionary<string, object> du) =>
+            realmData.chat = ((List<GenericDictionary>)data["chat"]).ConvertAll((GenericDictionary du) =>
                 {
                     return ChatMessage.FromRaw(realmData, du);
                 }    
@@ -135,7 +135,12 @@ namespace PhiClient
         public Thing FromRealmThing(RealmThing realmThing)
         {
             ThingDef thingDef = DefDatabase<ThingDef>.AllDefs.First((def) => { return def.label == realmThing.thingDefLabel; });
-            Thing thing = ThingMaker.MakeThing(thingDef);
+            ThingDef stuffDef = null;
+            if (realmThing.stuffDefLabel != "")
+            {
+                stuffDef = DefDatabase<ThingDef>.AllDefs.First((def) => { return def.label == realmThing.stuffDefLabel; });
+            }
+            Thing thing = ThingMaker.MakeThing(thingDef, stuffDef);
 
             thing.stackCount = realmThing.stackCount;
 
@@ -158,9 +163,9 @@ namespace PhiClient
         public bool connected;
         public bool inGame;
 
-        public Dictionary<string, object> ToRaw()
+        public GenericDictionary ToRaw()
         {
-            return new Dictionary<string, object>()
+            return new GenericDictionary()
             {
                 ["id"] = id,
                 ["name"] = name,
@@ -169,7 +174,7 @@ namespace PhiClient
             };
         }
 
-        public static User FromRaw(RealmData realmData, Dictionary<string, object> data)
+        public static User FromRaw(RealmData realmData, GenericDictionary data)
         {
             return new User {
                 id = (int)data["id"],
@@ -190,16 +195,16 @@ namespace PhiClient
         public User user;
         public string message;
 
-        public Dictionary<string, object> ToRaw()
+        public GenericDictionary ToRaw()
         {
-            return new Dictionary<string, object>()
+            return new GenericDictionary()
             {
                 ["user"] = user.getID(),
                 ["message"] = message
             };
         }
 
-        public static ChatMessage FromRaw(RealmData realmData, Dictionary<string, object> data)
+        public static ChatMessage FromRaw(RealmData realmData, GenericDictionary data)
         {
             return new ChatMessage
             {
@@ -217,9 +222,9 @@ namespace PhiClient
         public int stackCount;
         public int hitPoints;
 
-        public Dictionary<string, object> ToRaw()
+        public GenericDictionary ToRaw()
         {
-            return new Dictionary<string, object>()
+            return new GenericDictionary()
             {
                 ["thingDefLabel"] = thingDefLabel,
                 ["stuffDefLabel"] = stuffDefLabel,
@@ -229,7 +234,7 @@ namespace PhiClient
             };
         }
 
-        public static RealmThing FromRaw(RealmData realmData, Dictionary<string, object> data)
+        public static RealmThing FromRaw(RealmData realmData, GenericDictionary data)
         {
             return new RealmThing
             {

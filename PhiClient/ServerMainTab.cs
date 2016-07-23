@@ -143,9 +143,6 @@ namespace PhiClient
                 Rect messageSlot = messagesArea.BottomPart(0);
                 foreach (ChatMessage message in messages.AsEnumerable().Reverse())
                 {
-                    Log.Message(message.ToString());
-                    Log.Message(message.user.ToString());
-                    Log.Message(message.message);
                     string entry = message.user.name + ": " + message.message;
 
                     float height = Text.CalcHeight(entry, messageSlot.width);

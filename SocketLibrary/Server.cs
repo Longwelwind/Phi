@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
+using Verse;
 using WebSocketSharp;
 using WebSocketSharp.Server;
 
@@ -132,7 +133,6 @@ namespace SocketLibrary
             this.client.OnOpen += this.OpenCallback;
             this.client.OnClose += this.CloseCallback;
         }
-        
 
         public void Connect()
         {
@@ -162,8 +162,14 @@ namespace SocketLibrary
         private void MessageCallback(object sender, MessageEventArgs e)
         {
             byte[] rawData = e.RawData;
-            
-            this.Message(Packet.Deserialize(rawData));
+            try {
+
+                this.Message(Packet.Deserialize(rawData));
+            } catch (Exception ex)
+            {
+                Log.Notify_Exception(ex);
+                Log.Error(e.ToString());
+            }
         }
     }
 

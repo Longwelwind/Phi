@@ -66,7 +66,7 @@ namespace PhiServer
 
         private void MessageCallback(ServerClient client, object packetRaw)
         {
-            Packet packet = Packet.FromRaw(this.realmData, (Dictionary<string, object>)packetRaw);
+            Packet packet = Packet.FromRaw(this.realmData, (GenericDictionary)packetRaw);
             Console.WriteLine("Received packet " + packet);
 
             User user;
@@ -108,16 +108,7 @@ namespace PhiServer
         {
             Program program = new Program();
 
-            if (args.Length != 2)
-            {
-                Console.WriteLine("Usage: phiserver <host> <port>");
-                return;
-            }
-
-            IPAddress ipAddress = Dns.GetHostEntry(args[0]).AddressList[0];
-            int port = Int32.Parse(args[1]);
-
-            program.Start(ipAddress, port);
+            program.Start(IPAddress.Any, 16180);
 
             Console.Read();
         }

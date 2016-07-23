@@ -83,6 +83,7 @@ namespace PhiClient
              * Drawing the inventory
              */
             Rect rowArea = inventoryArea.TopPartPixels(ROW_HEIGHT).LeftPartPixels(COLUMN_WIDTH);
+            bool modified = false;
             foreach(Thing thing in this.inventory)
             {
                 // Have we have enough space to draw an other column
@@ -125,9 +126,15 @@ namespace PhiClient
                 if (Widgets.ButtonText(sendButtonArea, "Send"))
                 {
                     this.OnSendClick(thing);
+                    modified = true;
                 }
 
                 rowArea.x += COLUMN_WIDTH;
+            }
+
+            if (modified)
+            {
+                this.CountItems();
             }
 
             Text.Font = GameFont.Small;
@@ -137,7 +144,6 @@ namespace PhiClient
         public void OnSendClick(Thing thing)
         {
             PhiClient.instance.SendThing(this.user, thing);
-            this.CountItems();
         }
     }
 }

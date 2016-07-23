@@ -70,32 +70,22 @@ namespace PhiClient
 
         private void MessageCallback(object packetRaw)
         {
-            try
+            Packet packet = Packet.FromRaw(this.realmData, (GenericDictionary)packetRaw);
+            
+            Log.Message("Received packet from server: " + packet);
+
+            if (packet is SynchronisationPacket)
             {
-                Packet packet = Packet.FromRaw(this.realmData, (Dictionary<string, object>)packetRaw);
-                
-                Log.Message("Received packet from server: " + packet);
+                // This is the first packet that we receive
+                // It contains all the data of the server
+                SynchronisationPacket syncPacket = (SynchronisationPacket)packet;
 
-                if (packet is SynchronisationPacket)
-                {
-                    // This is the first packet that we receive
-                    // It contains all the data of the server
-                    SynchronisationPacket syncPacket = (SynchronisationPacket)packet;
-
-                    this.realmData = syncPacket.realmData;
-                    this.currentUser = syncPacket.user;
-                }
-                else
-                {
-                    packet.Apply(this.currentUser, this.realmData);
-                }
+                this.realmData = syncPacket.realmData;
+                this.currentUser = syncPacket.user;
             }
-            catch (Exception e)
+            else
             {
-                // We have to print them because the game hides them since it
-                // is in another thread
-                Log.Error(e.ToString());
-                return;
+                packet.Apply(this.currentUser, this.realmData);
             }
         }
         
