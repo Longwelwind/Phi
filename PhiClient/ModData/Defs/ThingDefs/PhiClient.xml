@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ThingDefs>
+  <ThingDef>
+    <defName>PhiClient</defName>
+    <category>Building</category>
+    <menuHidden>true</menuHidden>
+    <label>PhiClient_Initializer</label>
+    <thingClass>PhiClient.PhiInitializer</thingClass>
+    <inspectorTabs>
+      <li>PhiClient.PhiInitializer</li>
+    </inspectorTabs>
+  </ThingDef>
+</ThingDefs>
