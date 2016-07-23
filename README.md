@@ -3,7 +3,7 @@ Phi is a Rimworld mod that enables online multiplayer interactions between playe
 
 ## Projects
 ### PhiClient
-This is the mod for Rimworld. Rim-world specific files (like Defs) are located in PhiClient/ModData
+This is the mod for Rimworld. Rim-world specific files (like Defs) are located in PhiClient/Phi
 
 Since Rimworld doesn't handle multiple assemblies very well, the 4 assemblies (PhiClient, PhiData, SocketLibrary and websocket-sharp) must be bundled in a single .dll using a software like ILMerge.
 
