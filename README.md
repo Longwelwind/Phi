@@ -5,7 +5,14 @@ Phi is a Rimworld mod that enables online multiplayer interactions between playe
 ### PhiClient
 This is the mod for Rimworld. Rim-world specific files (like Defs) are located in PhiClient/Phi
 
-Since Rimworld doesn't handle multiple assemblies very well, the 4 assemblies (PhiClient, PhiData, SocketLibrary and websocket-sharp) must be bundled in a single .dll using a software like ILMerge.
+PhiClient has multiples dependencies, and Rimworld Mod's Launcher unfortunately requires assemblies to be loaded in the order in which all dependencies are available.
+A good way to ensure that is that change the name of the assemblies to make sure that the alphabetical order respects the dependency order. For example:
+
+* 1-Newtonsoft.Json.dll
+* 1-websocket-sharp.dll
+* 2-SocketLibrary.dll
+* 3.PhiData.dll
+* PhiClient.dll
 
 ### PhiServer
 This is the server program.
