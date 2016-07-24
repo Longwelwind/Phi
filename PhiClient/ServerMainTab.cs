@@ -97,7 +97,10 @@ namespace PhiClient
              */
             if (phiClient.IsUsable())
             {
-                foreach (User user in phiClient.realmData.users)
+                // Ordering the list according to connected status
+                List<User> users = phiClient.realmData.users.OrderBy(u => u.connected).ToList();
+
+                foreach (User user in users)
                 {
                     string line = user.name;
                     if (user.connected)

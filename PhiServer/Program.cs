@@ -93,6 +93,7 @@ namespace PhiServer
                 }
 
                 // We send a connect notification to all users
+                user.connected = true;
                 this.realmData.BroadcastPacketExcept(new UserConnectedPacket { user = user, connected = true }, user);
 
                 // We respond with a StatePacket that contains all synchronisation data
