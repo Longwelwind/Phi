@@ -11,7 +11,7 @@ A good way to ensure that is that change the name of the assemblies to make sure
 * 1-Newtonsoft.Json.dll
 * 1-websocket-sharp.dll
 * 2-SocketLibrary.dll
-* 3.PhiData.dll
+* 3-PhiData.dll
 * PhiClient.dll
 
 ### PhiServer
