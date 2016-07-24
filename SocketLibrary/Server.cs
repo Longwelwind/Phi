@@ -4,8 +4,10 @@ using System.IO;
 using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
 using Verse;
+using System.Xml;
 using WebSocketSharp;
 using WebSocketSharp.Server;
+using System.Xml.Serialization;
 
 namespace SocketLibrary
 {
@@ -17,7 +19,7 @@ namespace SocketLibrary
         public delegate void ConnectionHandler(ServerClient client);
         public event ConnectionHandler Connection;
 
-        public delegate void MessageHandler(ServerClient client, object packet);
+        public delegate void MessageHandler(ServerClient client, string data);
         public event MessageHandler Message;
 
         public delegate void DisconnectionHandler(ServerClient client);
@@ -28,11 +30,11 @@ namespace SocketLibrary
             this.server = new WebSocketServer(address, port);
         }
 
-        public void SendAll(object packet)
+        public void SendAll(string data)
         {
             foreach (ServerClient client in this.clients)
             {
-                client.Send(packet);
+                client.Send(data);
             }
         }
 
@@ -52,9 +54,9 @@ namespace SocketLibrary
             this.Connection(client);
         }
 
-        internal void MessageCallback(ServerClient client, object packet)
+        internal void MessageCallback(ServerClient client, string data)
         {
-            this.Message(client, packet);
+            this.Message(client, data);
         }
 
         internal void CloseCallback(ServerClient client)
@@ -74,19 +76,16 @@ namespace SocketLibrary
             this.server = server;
         }
 
-        public void Send(object packet)
+        public void Send(string data)
         {
-            this.SendAsync(Packet.Serialize(packet), null);
+            this.SendAsync(data, null);
         }
 
         protected override void OnMessage(MessageEventArgs e)
         {
             base.OnMessage(e);
-            byte[] rawData = e.RawData;
 
-            object packet = Packet.Deserialize(rawData);
-
-            this.server.MessageCallback(this, packet);
+            this.server.MessageCallback(this, e.Data);
         }
 
         protected override void OnOpen()
@@ -112,7 +111,7 @@ namespace SocketLibrary
     {
         WebSocket client;
 
-        public delegate void MessageHandler(object Packet);
+        public delegate void MessageHandler(string Packet);
         public event MessageHandler Message;
 
         public event Action Connection;
@@ -144,9 +143,9 @@ namespace SocketLibrary
             this.client.CloseAsync();
         }
 
-        public void Send(object packet)
+        public void Send(string data)
         {
-            this.client.SendAsync(Packet.Serialize(packet), null);
+            this.client.SendAsync(data, null);
         }
 
         private void OpenCallback(object sender, EventArgs e)
@@ -163,32 +162,12 @@ namespace SocketLibrary
         {
             byte[] rawData = e.RawData;
             try {
-
-                this.Message(Packet.Deserialize(rawData));
+                this.Message(e.Data);
             } catch (Exception ex)
             {
                 Log.Notify_Exception(ex);
-                Log.Error(e.ToString());
+                Log.Error(ex.ToString());
             }
-        }
-    }
-
-    class Packet
-    {
-        public static byte[] Serialize(object packet)
-        {
-            BinaryFormatter formatter = new BinaryFormatter();
-            MemoryStream m = new MemoryStream();
-            formatter.Serialize(m, packet);
-
-            return m.ToArray();
-        }
-
-        public static object Deserialize(byte[] rawData)
-        {
-            BinaryFormatter formatter = new BinaryFormatter();
-            MemoryStream m = new MemoryStream(rawData);
-            return formatter.Deserialize(m);
         }
     }
 }

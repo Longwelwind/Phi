@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using Newtonsoft.Json.Linq;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -85,29 +86,19 @@ namespace PhiClient
             this.BroadcastPacket(new ChatMessagePacket { message = chatMessage });
         }
 
-        public GenericDictionary ToRaw()
+        public JObject ToRaw()
         {
-            return new GenericDictionary()
-            {
-                ["users"] = users.ConvertAll((u) => { return u.ToRaw(); }),
-                ["chat"] = chat.ConvertAll((m) => { return m.ToRaw(); })
-            };
+            return new JObject(
+                new JProperty("users", new JArray(users.ConvertAll((u) => { return u.ToRaw(); }))),
+                new JProperty("chat", new JArray(chat.ConvertAll((m) => { return m.ToRaw(); })))
+            );
         }
 
-        public static RealmData FromRaw(GenericDictionary data)
+        public static RealmData FromRaw(JObject data)
         {
             RealmData realmData = new RealmData();
-            realmData.users = ((List<GenericDictionary>)data["users"]).ConvertAll((GenericDictionary du) =>
-                {
-                    return User.FromRaw(realmData, du);
-                }
-            );
-            realmData.chat = ((List<GenericDictionary>)data["chat"]).ConvertAll((GenericDictionary du) =>
-                {
-                    return ChatMessage.FromRaw(realmData, du);
-                }    
-            );
-
+            realmData.users = ((JArray)data["users"]).Select(du => User.FromRaw(realmData, (JObject)du)).ToList();
+            realmData.chat = ((JArray)data["chat"]).Select(du => ChatMessage.FromRaw(realmData, (JObject)du)).ToList();
             return realmData;
         }
 
@@ -163,18 +154,17 @@ namespace PhiClient
         public bool connected;
         public bool inGame;
 
-        public GenericDictionary ToRaw()
+        public JObject ToRaw()
         {
-            return new GenericDictionary()
-            {
-                ["id"] = id,
-                ["name"] = name,
-                ["connected"] = connected,
-                ["inGame"] = inGame
-            };
+            JObject obj = new JObject();
+            obj.Add("id", new JValue(id));
+            obj.Add("name", new JValue(name));
+            obj.Add("connected", new JValue(connected));
+            obj.Add("inGame", new JValue(inGame));
+            return obj;
         }
 
-        public static User FromRaw(RealmData realmData, GenericDictionary data)
+        public static User FromRaw(RealmData realmData, JObject data)
         {
             return new User {
                 id = (int)data["id"],
@@ -195,21 +185,20 @@ namespace PhiClient
         public User user;
         public string message;
 
-        public GenericDictionary ToRaw()
+        public JObject ToRaw()
         {
-            return new GenericDictionary()
-            {
-                ["user"] = user.getID(),
-                ["message"] = message
-            };
+            JObject obj = new JObject();
+            obj.Add("user", new JValue(user.getID()));
+            obj.Add("message", new JValue(message));
+            return obj;
         }
 
-        public static ChatMessage FromRaw(RealmData realmData, GenericDictionary data)
+        public static ChatMessage FromRaw(RealmData realmData, JObject data)
         {
             return new ChatMessage
             {
-                user = ID.Find(realmData.users, (int)data["user"]),
-                message = (string)data["message"]
+                user = ID.Find(realmData.users, data.Value<int>("user")),
+                message = data.Value<string>("message")
             };
         }
     }
@@ -222,27 +211,26 @@ namespace PhiClient
         public int stackCount;
         public int hitPoints;
 
-        public GenericDictionary ToRaw()
+        public JObject ToRaw()
         {
-            return new GenericDictionary()
-            {
-                ["thingDefLabel"] = thingDefLabel,
-                ["stuffDefLabel"] = stuffDefLabel,
-                ["stackCount"] = stackCount,
-                ["compQuality"] = compQuality,
-                ["hitPoints"] = hitPoints
-            };
+            JObject obj = new JObject();
+            obj.Add("thingDefLabel", new JValue(thingDefLabel));
+            obj.Add("stuffDefLabel", new JValue(stuffDefLabel));
+            obj.Add("stackCount", new JValue(stackCount));
+            obj.Add("compQuality", new JValue(compQuality));
+            obj.Add("hitPoints", new JValue(hitPoints));
+            return obj;
         }
 
-        public static RealmThing FromRaw(RealmData realmData, GenericDictionary data)
+        public static RealmThing FromRaw(RealmData realmData, JObject data)
         {
             return new RealmThing
             {
-                thingDefLabel = (string)data["thingDefLabel"],
-                stuffDefLabel = (string)data["stuffDefLabel"],
-                stackCount = (int)data["stackCount"],
-                compQuality = (int)data["compQuality"],
-                hitPoints = (int)data["hitPoints"]
+                thingDefLabel = data.Value<string>("thingDefLabel"),
+                stuffDefLabel = data.Value<string>("stuffDefLabel"),
+                stackCount = data.Value <int>("stackCount"),
+                compQuality = data.Value <int>("compQuality"),
+                hitPoints = data.Value <int>("hitPoints")
             };
         }
     }

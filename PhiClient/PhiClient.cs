@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Verse;
+using Newtonsoft.Json.Linq;
 
 namespace PhiClient
 {
@@ -46,7 +47,8 @@ namespace PhiClient
 
         public void SendPacket(Packet packet)
         {
-            this.client.Send(packet.ToRaw());
+            string data = packet.ToRaw().ToString();
+            this.client.Send(data);
         }
 
         public bool IsConnected()
@@ -68,9 +70,9 @@ namespace PhiClient
             Log.Message("Trying to authenticate as " + nickname);
         }
 
-        private void MessageCallback(object packetRaw)
+        private void MessageCallback(string data)
         {
-            Packet packet = Packet.FromRaw(this.realmData, (GenericDictionary)packetRaw);
+            Packet packet = Packet.FromRaw(this.realmData, JObject.Parse(data));
             
             Log.Message("Received packet from server: " + packet);
 

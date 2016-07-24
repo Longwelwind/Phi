@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Verse;
 using RimWorld;
+using Newtonsoft.Json.Linq;
 
 namespace PhiClient
 {
@@ -9,9 +10,9 @@ namespace PhiClient
     {
         public abstract void Apply(User user, RealmData realmData);
 
-        public abstract GenericDictionary ToRaw();
+        public abstract JObject ToRaw();
 
-        public static Packet FromRaw(RealmData realmData, GenericDictionary data)
+        public static Packet FromRaw(RealmData realmData, JObject data)
         {
             string classType = (string)data["type"];
             switch (classType)
@@ -52,20 +53,19 @@ namespace PhiClient
             // Since Authentification packets are special, they are handled in Programm.cs
         }
 
-        public override GenericDictionary ToRaw()
+        public override JObject ToRaw()
         {
-            return new GenericDictionary()
-            {
-                ["type"] = TYPE_CLASS,
-                ["name"] = name
-            };
+            return new JObject(
+                new JProperty("type", TYPE_CLASS),
+                new JProperty("name", name)
+            );
         }
 
-        public new static AuthentificationPacket FromRaw(RealmData realmData, GenericDictionary data)
+        public new static AuthentificationPacket FromRaw(RealmData realmData, JObject data)
         {
-            string name = (string)data["name"];
-
-            return new AuthentificationPacket { name = name };
+            return new AuthentificationPacket {
+                name = (string)data["name"]
+            };
         }
     }
     
@@ -80,16 +80,15 @@ namespace PhiClient
             realmData.ServerPostMessage(user, this.message);
         }
 
-        public override GenericDictionary ToRaw()
+        public override JObject ToRaw()
         {
-            return new GenericDictionary()
-            {
-                ["type"] = TYPE_CLASS,
-                ["message"] = message
-            };
+            return new JObject(
+                new JProperty("type", TYPE_CLASS),
+                new JProperty("message", message)
+            );
         }
 
-        public new static PostMessagePacket FromRaw(RealmData realmData, GenericDictionary data)
+        public new static PostMessagePacket FromRaw(RealmData realmData, JObject data)
         {
             return new PostMessagePacket { message = (string)data["message"] };
         }
@@ -109,21 +108,20 @@ namespace PhiClient
             realmData.NotifyPacket(userTo, new ThingReceivedPacket { userFrom = user, realmThing = realmThing });
         }
 
-        public override GenericDictionary ToRaw()
+        public override JObject ToRaw()
         {
-            return new GenericDictionary()
-            {
-                ["type"] = TYPE_CLASS,
-                ["realmThing"] = realmThing.ToRaw(),
-                ["userTo"] = userTo.getID()
-            };
+            return new JObject(
+                new JProperty("type", TYPE_CLASS),
+                new JProperty("realmThing", realmThing.ToRaw()),
+                new JProperty("userTo", userTo.getID())
+            );
         }
 
-        public new static SendThingPacket FromRaw(RealmData realmData, GenericDictionary data)
+        public new static SendThingPacket FromRaw(RealmData realmData, JObject data)
         {
             return new SendThingPacket
             {
-                realmThing=RealmThing.FromRaw(realmData, (GenericDictionary)data["realmThing"]),
+                realmThing=RealmThing.FromRaw(realmData, (JObject)data["realmThing"]),
                 userTo=ID.Find(realmData.users, (int)data["userTo"])
             };
         }
@@ -144,19 +142,18 @@ namespace PhiClient
             // Since Synchronisation packets are special, they are handled in PhiClient.cs
         }
 
-        public override GenericDictionary ToRaw()
+        public override JObject ToRaw()
         {
-            return new GenericDictionary()
-            {
-                ["type"] = TYPE_CLASS,
-                ["realmData"] = realmData.ToRaw(),
-                ["user"] = user.getID()
-            };
+            return new JObject(
+                new JProperty("type", TYPE_CLASS),
+                new JProperty("realmData", realmData.ToRaw()),
+                new JProperty("user", user.getID())
+            );
         }
 
-        public new static SynchronisationPacket FromRaw(RealmData realmData, GenericDictionary data)
+        public new static SynchronisationPacket FromRaw(RealmData realmData, JObject data)
         {
-            realmData = RealmData.FromRaw((GenericDictionary) data["realmData"]);
+            realmData = RealmData.FromRaw((JObject) data["realmData"]);
             return new SynchronisationPacket
             {
                 realmData = realmData,
@@ -176,19 +173,18 @@ namespace PhiClient
             realmData.AddChatMessage(this.message);
         }
 
-        public override GenericDictionary ToRaw()
+        public override JObject ToRaw()
         {
-            return new GenericDictionary()
-            {
-                ["type"] = TYPE_CLASS,
-                ["message"] = message.ToRaw()
-            };
+            return new JObject(
+                new JProperty("type", TYPE_CLASS),
+                new JProperty("message", message.ToRaw())
+            );
         }
 
-        public new static ChatMessagePacket FromRaw(RealmData realmData, GenericDictionary data)
+        public new static ChatMessagePacket FromRaw(RealmData realmData, JObject data)
         {
             return new ChatMessagePacket {
-                message = ChatMessage.FromRaw(realmData, (GenericDictionary)data["message"])
+                message = ChatMessage.FromRaw(realmData, (JObject)data["message"])
             };
         }
     }
@@ -205,17 +201,16 @@ namespace PhiClient
             this.user.connected = this.connected;
         }
 
-        public override GenericDictionary ToRaw()
+        public override JObject ToRaw()
         {
-            return new GenericDictionary()
-            {
-                ["type"] = TYPE_CLASS,
-                ["user"] = user.getID(),
-                ["connected"] = connected
-            };
+            return new JObject(
+                new JProperty("type", TYPE_CLASS),
+                new JProperty("user", user.getID()),
+                new JProperty("connected", connected)
+            );
         }
 
-        public new static UserConnectedPacket FromRaw(RealmData realmData, GenericDictionary data)
+        public new static UserConnectedPacket FromRaw(RealmData realmData, JObject data)
         {
             return new UserConnectedPacket
             {
@@ -236,20 +231,19 @@ namespace PhiClient
             realmData.AddUser(this.user);
         }
 
-        public override GenericDictionary ToRaw()
+        public override JObject ToRaw()
         {
-            return new GenericDictionary()
-            {
-                ["type"] = TYPE_CLASS,
-                ["user"] = user.ToRaw()
-            };
+            return new JObject(
+                new JProperty("type", TYPE_CLASS),
+                new JProperty("user", user.ToRaw())
+            );
         }
 
-        public new static NewUserPacket FromRaw(RealmData realmData, GenericDictionary data)
+        public new static NewUserPacket FromRaw(RealmData realmData, JObject data)
         {
             return new NewUserPacket
             {
-                user = User.FromRaw(realmData, (GenericDictionary) data["user"])
+                user = User.FromRaw(realmData, (JObject) data["user"])
             };
         }
     }
@@ -278,21 +272,20 @@ namespace PhiClient
             );
         }
 
-        public override GenericDictionary ToRaw()
+        public override JObject ToRaw()
         {
-            return new GenericDictionary()
-            {
-                ["type"] = TYPE_CLASS,
-                ["realmThing"] = realmThing.ToRaw(),
-                ["userFrom"] = userFrom.getID()
-            };
+            return new JObject(
+                new JProperty("type", TYPE_CLASS),
+                new JProperty("realmThing", realmThing.ToRaw()),
+                new JProperty("userFrom", userFrom.getID())
+            );
         }
 
-        public new static ThingReceivedPacket FromRaw(RealmData realmData, GenericDictionary data)
+        public new static ThingReceivedPacket FromRaw(RealmData realmData, JObject data)
         {
             return new ThingReceivedPacket
             {
-                realmThing = RealmThing.FromRaw(realmData, (GenericDictionary) data["realmThing"]),
+                realmThing = RealmThing.FromRaw(realmData, (JObject) data["realmThing"]),
                 userFrom = ID.Find(realmData.users, (int)data["userFrom"])
             };
         }

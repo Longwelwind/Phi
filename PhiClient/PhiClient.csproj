@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\MSBuild.ILMerge.Task.1.0.5\build\MSBuild.ILMerge.Task.props" Condition="Exists('..\packages\MSBuild.ILMerge.Task.1.0.5\build\MSBuild.ILMerge.Task.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -9,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PhiClient</RootNamespace>
-    <AssemblyName>PhiTotal</AssemblyName>
+    <AssemblyName>PhiClient</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>
@@ -44,7 +43,6 @@
     <Compile Include="UserGiveWindow.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ILMergeOrder.txt" />
     <Content Include="ModData\About\About.xml" />
     <Content Include="ModData\Defs\MainTabDefs\PhiClient.xml" />
     <Content Include="ModData\Defs\ThingDefs\PhiClient.xml" />
@@ -53,6 +51,10 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\RimWorld\RimWorldWin_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=3.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.3.5.8\lib\35\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
@@ -68,7 +70,6 @@
     <Folder Include="ModData\Assemblies\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ILMerge.props" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -84,17 +85,21 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /Y "$(TargetDir)PhiTotal.dll" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Phi\Assemblies\PhiTotal.dll"
-copy /Y "$(TargetDir)PhiTotal.dll" "D:\Documents\IGG-RimWorld.Alpha.14\Mods\Phi\Assemblies\PhiTotal.dll"</PostBuildEvent>
+    <PostBuildEvent>copy /Y "$(TargetDir)PhiClient.dll" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Phi\Assemblies\PhiClient.dll"
+copy /Y "$(TargetDir)PhiClient.dll" "D:\Documents\IGG-RimWorld.Alpha.14\Mods\Phi\Assemblies\PhiClient.dll"
+
+copy /Y "$(TargetDir)websocket-sharp.dll" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Phi\Assemblies\1-websocket-sharp.dll"
+copy /Y "$(TargetDir)websocket-sharp.dll" "D:\Documents\IGG-RimWorld.Alpha.14\Mods\Phi\Assemblies\1-websocket-sharp.dll"
+
+copy /Y "$(TargetDir)SocketLibrary.dll" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Phi\Assemblies\2-SocketLibrary.dll"
+copy /Y "$(TargetDir)SocketLibrary.dll" "D:\Documents\IGG-RimWorld.Alpha.14\Mods\Phi\Assemblies\2-SocketLibrary.dll"
+
+copy /Y "$(TargetDir)Newtonsoft.Json.dll" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Phi\Assemblies\1-Newtonsoft.Json.dll"
+copy /Y "$(TargetDir)Newtonsoft.Json.dll" "D:\Documents\IGG-RimWorld.Alpha.14\Mods\Phi\Assemblies\1-Newtonsoft.Json.dll"
+
+copy /Y "$(TargetDir)PhiData.dll" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Phi\Assemblies\3-PhiData.dll"
+copy /Y "$(TargetDir)PhiData.dll" "D:\Documents\IGG-RimWorld.Alpha.14\Mods\Phi\Assemblies\3-PhiData.dll"</PostBuildEvent>
   </PropertyGroup>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\MSBuild.ILMerge.Task.1.0.5\build\MSBuild.ILMerge.Task.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSBuild.ILMerge.Task.1.0.5\build\MSBuild.ILMerge.Task.props'))" />
-    <Error Condition="!Exists('..\packages\MSBuild.ILMerge.Task.1.0.5\build\MSBuild.ILMerge.Task.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSBuild.ILMerge.Task.1.0.5\build\MSBuild.ILMerge.Task.targets'))" />
-  </Target>
-  <Import Project="..\packages\MSBuild.ILMerge.Task.1.0.5\build\MSBuild.ILMerge.Task.targets" Condition="Exists('..\packages\MSBuild.ILMerge.Task.1.0.5\build\MSBuild.ILMerge.Task.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

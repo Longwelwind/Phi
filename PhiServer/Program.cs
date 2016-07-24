@@ -3,6 +3,7 @@ using System.Net;
 using SocketLibrary;
 using PhiClient;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace PhiServer
 {
@@ -49,7 +50,7 @@ namespace PhiServer
         private void SendPacket(ServerClient client, Packet packet)
         {
             Console.WriteLine("Sending packet " + packet);
-            client.Send(packet.ToRaw());
+            client.Send(packet.ToRaw().ToString());
         }
 
         private void DisconnectionCallback(ServerClient client)
@@ -60,13 +61,14 @@ namespace PhiServer
             {
                 Console.WriteLine("Disconnection of " + user.name);
                 this.connectedUsers.Remove(client);
+                user.connected = false;
                 this.realmData.BroadcastPacket(new UserConnectedPacket { user = user, connected = false });
             }
         }
 
-        private void MessageCallback(ServerClient client, object packetRaw)
+        private void MessageCallback(ServerClient client, string data)
         {
-            Packet packet = Packet.FromRaw(this.realmData, (GenericDictionary)packetRaw);
+            Packet packet = Packet.FromRaw(this.realmData, JObject.Parse(data));
             Console.WriteLine("Received packet " + packet);
 
             User user;
