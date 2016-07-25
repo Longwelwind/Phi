@@ -140,7 +140,7 @@ namespace PhiClient
 
                 // We fill the chat by the bottom, inverting the order of messages
                 Rect messageSlot = messagesArea.BottomPart(0);
-                foreach (ChatMessage message in messages.AsEnumerable().Reverse())
+                foreach (ChatMessage message in messages.AsEnumerable().Reverse<ChatMessage>().Take(30))
                 {
                     string entry = message.user.name + ": " + message.message;
 
