@@ -5,6 +5,9 @@ using System.Linq;
 using System.Collections.Generic;
 using Verse;
 using Newtonsoft.Json.Linq;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace PhiClient
 {
@@ -12,6 +15,8 @@ namespace PhiClient
     {
         public static PhiClient instance;
 
+        const string KEY_FILE = "phikey.txt";
+        const int KEY_LENGTH = 32;
         const int PORT = 16180;
 
         public string address;
@@ -66,7 +71,8 @@ namespace PhiClient
             Log.Message("Connected to " + this.address);
 
             string nickname = SteamUtility.SteamPersonaName;
-            this.SendPacket(new AuthentificationPacket { name = nickname, version = RealmData.VERSION });
+            string hashedKey = GetHashedAuthKey();
+            this.SendPacket(new AuthentificationPacket { name = nickname, hashedKey = hashedKey, version = RealmData.VERSION });
             Log.Message("Trying to authenticate as " + nickname);
         }
 
@@ -89,6 +95,43 @@ namespace PhiClient
             {
                 packet.Apply(this.currentUser, this.realmData);
             }
+        }
+
+        private string GetHashedAuthKey()
+        {
+            string authKey = GetAuthKey();
+
+            var sha = SHA256.Create();
+            var hash = sha.ComputeHash(Encoding.ASCII.GetBytes(authKey));
+            StringBuilder sb = new StringBuilder();
+            foreach (byte b in hash)
+            {
+                sb.Append(b.ToString("X2"));
+            }
+            return sb.ToString();
+        }
+
+        private string GetAuthKey()
+        {
+            if (File.Exists(KEY_FILE))
+            {
+                return File.ReadAllLines(KEY_FILE)[0];
+            }
+            else
+            {
+                string key = GenerateKey(KEY_LENGTH);
+
+                File.WriteAllLines(KEY_FILE, new string[] { key });
+                return key;
+            }
+        }
+
+        private string GenerateKey(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            Random random = new Random();
+            return new string(Enumerable.Repeat(chars, length)
+              .Select(s => s[random.Next(s.Length)]).ToArray());
         }
         
         private void DisconnectCallback()

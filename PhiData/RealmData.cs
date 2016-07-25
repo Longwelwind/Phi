@@ -153,6 +153,7 @@ namespace PhiClient
     {
         public int id;
         public string name;
+        public string hashedKey;
         public bool connected;
         public bool inGame;
 
@@ -172,7 +173,8 @@ namespace PhiClient
                 id = (int)data["id"],
                 name = (string)data["name"],
                 connected = (bool)data["connected"],
-                inGame = (bool)data["inGame"]
+                inGame = (bool)data["inGame"],
+                hashedKey = "" // It is never disclosed to users
             };
         }
 

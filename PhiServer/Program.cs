@@ -88,6 +88,7 @@ namespace PhiServer
                             error = "Server is version " + RealmData.VERSION  + " but client is version " + authPacket.version
                         }
                     );
+                    return;
                 }
 
 
@@ -101,6 +102,19 @@ namespace PhiServer
 
                     // We send a notify to all users connected about the new user
                     this.realmData.BroadcastPacketExcept(new NewUserPacket { user = user }, user);
+                }
+                else
+                {
+                    // We must verify the key of the user
+                    if (user.hashedKey != authPacket.hashedKey)
+                    {
+                        this.SendPacket(client, new AuthentificationErrorPacket
+                            {
+                                error = "Wrong key for user " + authPacket.name
+                            }
+                        );
+                        return;
+                    }
                 }
 
                 this.connectedUsers.Add(client, user);

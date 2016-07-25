@@ -49,6 +49,7 @@ namespace PhiClient
         public const string TYPE_CLASS = "auth";
 
         public string name;
+        public string hashedKey;
         public string version;
 
         public override void Apply(User user, RealmData realmData)
@@ -61,7 +62,8 @@ namespace PhiClient
             return new JObject(
                 new JProperty("type", TYPE_CLASS),
                 new JProperty("name", name),
-                new JProperty("version", version)
+                new JProperty("version", version),
+                new JProperty("hashedKey", hashedKey)
             );
         }
 
@@ -69,7 +71,8 @@ namespace PhiClient
         {
             return new AuthentificationPacket {
                 name = (string)data["name"],
-                version = (string)data["version"]
+                version = (string)data["version"],
+                hashedKey = (string)data["hashedKey"]
             };
         }
     }
