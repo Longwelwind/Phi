@@ -66,7 +66,7 @@ namespace PhiClient
             Log.Message("Connected to " + this.address);
 
             string nickname = SteamUtility.SteamPersonaName;
-            this.SendPacket(new AuthentificationPacket { name = nickname });
+            this.SendPacket(new AuthentificationPacket { name = nickname, version = RealmData.VERSION });
             Log.Message("Trying to authenticate as " + nickname);
         }
 

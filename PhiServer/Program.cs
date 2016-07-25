@@ -80,6 +80,17 @@ namespace PhiServer
                 // Special packets, (first sent from the client)
                 AuthentificationPacket authPacket = (AuthentificationPacket)packet;
 
+                // We first check if the version corresponds
+                if (authPacket.version != RealmData.VERSION)
+                {
+                    this.SendPacket(client, new AuthentificationErrorPacket
+                        {
+                            error = "Server is version " + RealmData.VERSION  + " but client is version " + authPacket.version
+                        }
+                    );
+                }
+
+
                 // We check if an user already exists with this name
                 user = this.realmData.users.FindLast(delegate (User u) { return u.name == authPacket.name; });
                 if (user == null)

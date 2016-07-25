@@ -33,6 +33,8 @@ namespace PhiClient
                     return ThingReceivedPacket.FromRaw(realmData, data);
                 case SendThingPacket.TYPE_CLASS:
                     return SendThingPacket.FromRaw(realmData, data);
+                case AuthentificationErrorPacket.TYPE_CLASS:
+                    return AuthentificationErrorPacket.FromRaw(realmData, data);
             }
 
             throw new Exception("Packet type not found");
@@ -47,6 +49,7 @@ namespace PhiClient
         public const string TYPE_CLASS = "auth";
 
         public string name;
+        public string version;
 
         public override void Apply(User user, RealmData realmData)
         {
@@ -57,14 +60,16 @@ namespace PhiClient
         {
             return new JObject(
                 new JProperty("type", TYPE_CLASS),
-                new JProperty("name", name)
+                new JProperty("name", name),
+                new JProperty("version", version)
             );
         }
 
         public new static AuthentificationPacket FromRaw(RealmData realmData, JObject data)
         {
             return new AuthentificationPacket {
-                name = (string)data["name"]
+                name = (string)data["name"],
+                version = (string)data["version"]
             };
         }
     }
@@ -161,7 +166,35 @@ namespace PhiClient
             };
         }
     }
-    
+
+    public class AuthentificationErrorPacket : Packet
+    {
+        public const string TYPE_CLASS = "authentification-error";
+
+        public string error;
+
+        public override void Apply(User user, RealmData realmData)
+        {
+            Log.Error(error);
+        }
+
+        public override JObject ToRaw()
+        {
+            return new JObject(
+                new JProperty("type", TYPE_CLASS),
+                new JProperty("error", error)
+            );
+        }
+
+        public static AuthentificationErrorPacket FromRaw(RealmData realmData, JObject data)
+        {
+            return new AuthentificationErrorPacket
+            {
+                error = (string)data["error"]
+            };
+        }
+    }
+
     public class ChatMessagePacket : Packet
     {
         public const string TYPE_CLASS = "chat-message";

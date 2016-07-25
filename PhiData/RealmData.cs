@@ -10,6 +10,8 @@ namespace PhiClient
 {
     public class RealmData
     {
+        public const string VERSION = "0.4";
+
         public List<User> users = new List<User>();
         public List<ChatMessage> chat = new List<ChatMessage>();
 
