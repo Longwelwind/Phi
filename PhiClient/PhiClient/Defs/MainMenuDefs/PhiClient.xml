@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+    <CommunityCoreLibrary.MainMenuDef>
+        <defName>phiserver</defName>
+        <label>Phi Server</label>
+        <order>450</order>
+        <menuClass>PhiClient.ServerMainMenuButton</menuClass>
+        <closeMainTab>true</closeMainTab>
+    </CommunityCoreLibrary.MainMenuDef>
+</Defs>

@@ -35,6 +35,10 @@ namespace PhiClient
                     return SendThingPacket.FromRaw(realmData, data);
                 case AuthentificationErrorPacket.TYPE_CLASS:
                     return AuthentificationErrorPacket.FromRaw(realmData, data);
+                case UpdatePreferencesPacket.TYPE_CLASS:
+                    return UpdatePreferencesPacket.FromRaw(realmData, data);
+                case UpdatePreferencesNotifyPacket.TYPE_CLASS:
+                    return UpdatePreferencesNotifyPacket.FromRaw(realmData, data);
             }
 
             throw new Exception("Packet type not found");
@@ -135,6 +139,39 @@ namespace PhiClient
         }
     }
 
+    public class UpdatePreferencesPacket : Packet
+    {
+        public const string TYPE_CLASS = "update-preferences";
+
+        public UserPreferences preferences;
+
+        public override void Apply(User user, RealmData realmData)
+        {
+            user.preferences = preferences;
+            realmData.BroadcastPacketExcept(new UpdatePreferencesNotifyPacket
+            {
+                user = user,
+                preferences = preferences
+            }, user);
+        }
+
+        public override JObject ToRaw()
+        {
+            return new JObject(
+                new JProperty("type", TYPE_CLASS),
+                new JProperty("preferences", preferences.ToRaw())
+            );
+        }
+
+        public new static UpdatePreferencesPacket FromRaw(RealmData realmData, JObject data)
+        {
+            return new UpdatePreferencesPacket
+            {
+                preferences = UserPreferences.FromRaw(realmData, (JObject)data["preferences"])
+            };
+        }
+    }
+
     /**
      * Packet sent to client
      */
@@ -166,6 +203,37 @@ namespace PhiClient
             {
                 realmData = realmData,
                 user = ID.Find(realmData.users, (int)data["user"])
+            };
+        }
+    }
+
+    public class UpdatePreferencesNotifyPacket : Packet
+    {
+        public const string TYPE_CLASS = "update-preferences-notify";
+
+        public User user;
+        public UserPreferences preferences;
+
+        public override void Apply(User user, RealmData realmData)
+        {
+            this.user.preferences = preferences;
+        }
+
+        public override JObject ToRaw()
+        {
+            return new JObject(
+                new JProperty("type", TYPE_CLASS),
+                new JProperty("user", user.getID()),
+                new JProperty("preferences", preferences.ToRaw())
+            );
+        }
+
+        public new static UpdatePreferencesNotifyPacket FromRaw(RealmData realmData, JObject data)
+        {
+            return new UpdatePreferencesNotifyPacket
+            {
+                user = ID.Find(realmData.users, (int)data["user"]),
+                preferences = UserPreferences.FromRaw(realmData, (JObject)data["preferences"]),
             };
         }
     }

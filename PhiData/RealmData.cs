@@ -156,15 +156,17 @@ namespace PhiClient
         public string hashedKey;
         public bool connected;
         public bool inGame;
+        public UserPreferences preferences = new UserPreferences();
 
         public JObject ToRaw()
         {
-            JObject obj = new JObject();
-            obj.Add("id", new JValue(id));
-            obj.Add("name", new JValue(name));
-            obj.Add("connected", new JValue(connected));
-            obj.Add("inGame", new JValue(inGame));
-            return obj;
+            return new JObject(
+                new JProperty("id", new JValue(id)),
+                new JProperty("name", new JValue(name)),
+                new JProperty("connected", new JValue(connected)),
+                new JProperty("inGame", new JValue(inGame)),
+                new JProperty("preferences", preferences.ToRaw())
+            );
         }
 
         public static User FromRaw(RealmData realmData, JObject data)
@@ -174,7 +176,8 @@ namespace PhiClient
                 name = (string)data["name"],
                 connected = (bool)data["connected"],
                 inGame = (bool)data["inGame"],
-                hashedKey = "" // It is never disclosed to users
+                hashedKey = "", // It is never disclosed to users,
+                preferences = UserPreferences.FromRaw(realmData, (JObject)data["preferences"])
             };
         }
 

@@ -16,17 +16,17 @@ namespace PhiClient
         public static PhiClient instance;
 
         const string KEY_FILE = "phikey.txt";
+        const string SERVER_FILE = "phiserver.txt";
+        const string DEFAULT_SERVER_ADDRESS = "longwelwind.net";
         const int KEY_LENGTH = 32;
         const int PORT = 16180;
 
-        public string address;
         public RealmData realmData;
         public User currentUser;
         public Client client;
 
-        public PhiClient(string address)
+        public PhiClient()
         {
-            this.address = address;
             this.realmData = new RealmData();
 
             PhiClient.instance = this;
@@ -41,12 +41,14 @@ namespace PhiClient
                 this.realmData = null;
             }
 
-            this.client = new Client(this.address, PORT);
+            string address = GetServerAddress();
+
+            this.client = new Client(address, PORT);
             this.client.Connection += this.ConnectionCallback;
             this.client.Message += this.MessageCallback;
             this.client.Disconnection += this.DisconnectCallback;
 
-            Log.Message("Try connecting to " + this.address);
+            Log.Message("Try connecting to " + address);
             client.Connect();
         }
 
@@ -68,7 +70,7 @@ namespace PhiClient
 
         private void ConnectionCallback()
         {
-            Log.Message("Connected to " + this.address);
+            Log.Message("Connected to the server");
 
             string nickname = SteamUtility.SteamPersonaName;
             string hashedKey = GetHashedAuthKey();
@@ -136,7 +138,33 @@ namespace PhiClient
         
         private void DisconnectCallback()
         {
-            Log.Message("Disconnected from " + this.address);
+            Log.Message("Disconnected from the server");
+        }
+
+        public string GetServerAddress()
+        {
+            if (!File.Exists(SERVER_FILE))
+            {
+                using (StreamWriter w = File.AppendText(SERVER_FILE))
+                {
+                    w.WriteLine(DEFAULT_SERVER_ADDRESS);
+                    return DEFAULT_SERVER_ADDRESS;
+                }
+            }
+            else
+            {
+                return File.ReadAllLines(SERVER_FILE)[0];
+            }
+        }
+
+        public void SetServerAddress(string address)
+        {
+            File.WriteAllLines(SERVER_FILE, new string[] { address });
+        }
+
+        public void UpdatePreferences()
+        {
+            SendPacket(new UpdatePreferencesPacket { preferences = currentUser.preferences });
         }
 
         public void SendMessage(string message)

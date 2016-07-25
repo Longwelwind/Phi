@@ -91,7 +91,6 @@ namespace PhiServer
                     return;
                 }
 
-
                 // We check if an user already exists with this name
                 user = this.realmData.users.FindLast(delegate (User u) { return u.name == authPacket.name; });
                 if (user == null)

@@ -185,7 +185,15 @@ namespace PhiClient
             // We open a trade window with this user
             if (user != phiClient.currentUser || true)
             {
-                Find.WindowStack.Add(new UserGiveWindow(user));
+                if (user.preferences.receiveItems)
+                {
+                    Find.WindowStack.Add(new UserGiveWindow(user));
+                }
+                else
+                {
+                    Messages.Message(user.name + " does not accept items", MessageSound.Silent);
+                }
+
             }
         }
     }
