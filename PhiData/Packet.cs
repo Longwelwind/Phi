@@ -80,6 +80,36 @@ namespace PhiClient
             };
         }
     }
+
+    public class ChangeNicknamePacket : Packet
+    {
+        public const string TYPE_CLASS = "change-nickname";
+
+        public string name;
+
+        public override void Apply(User user, RealmData realmData)
+        {
+            user.name = name;
+            realmData.BroadcastPacket(new ChangeNicknameNotifyPacket { user = user, name = name });
+        }
+
+        public override JObject ToRaw()
+        {
+            return new JObject(
+                new JProperty("type", TYPE_CLASS),
+                new JProperty("name", name)
+            );
+        }
+
+        public new static ChangeNicknamePacket FromRaw(RealmData realmData, JObject data)
+        {
+            return new ChangeNicknamePacket
+            {
+                name = (string)data["name"],
+            };
+        }
+
+    }
     
     public class PostMessagePacket : Packet
     {
@@ -203,6 +233,37 @@ namespace PhiClient
             {
                 realmData = realmData,
                 user = ID.Find(realmData.users, (int)data["user"])
+            };
+        }
+    }
+
+    public class ChangeNicknameNotifyPacket : Packet
+    {
+        public const string TYPE_CLASS = "change-nickname-notify";
+
+        public User user;
+        public string name;
+
+        public override void Apply(User user, RealmData realmData)
+        {
+            this.user.name = name;
+        }
+
+        public override JObject ToRaw()
+        {
+            return new JObject(
+                new JProperty("type", TYPE_CLASS),
+                new JProperty("user", user.getID()),
+                new JProperty("name", name)
+            );
+        }
+
+        public new static ChangeNicknameNotifyPacket FromRaw(RealmData realmData, JObject data)
+        {
+            return new ChangeNicknameNotifyPacket
+            {
+                user = ID.Find(realmData.users, (int)data["user"]),
+                name = (string)data["name"],
             };
         }
     }
