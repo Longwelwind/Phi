@@ -60,7 +60,7 @@ namespace PhiClient
             }
         }
 
-        public User ServerAddUser(string name)
+        public User ServerAddUser(string name, string hashKey)
         {
             this.lastUserGivenId++;
             int id = this.lastUserGivenId;
@@ -70,7 +70,8 @@ namespace PhiClient
                 id = id,
                 name = name,
                 connected = true,
-                inGame = false
+                inGame = false,
+                hashedKey= hashKey
             };
 
             this.AddUser(user);

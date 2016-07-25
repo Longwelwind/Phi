@@ -91,29 +91,16 @@ namespace PhiServer
                     return;
                 }
 
-                // We check if an user already exists with this name
-                user = this.realmData.users.FindLast(delegate (User u) { return u.name == authPacket.name; });
+                // We check if an user already uses this key
+                user = this.realmData.users.FindLast(delegate (User u) { return u.hashedKey == authPacket.hashedKey; });
                 if (user == null)
                 {
-                    user = this.realmData.ServerAddUser(authPacket.name);
+                    user = this.realmData.ServerAddUser(authPacket.name, authPacket.hashedKey);
 
                     Console.WriteLine("Creating user \"" + user.name + "\" with ID " + user.getID());
 
                     // We send a notify to all users connected about the new user
                     this.realmData.BroadcastPacketExcept(new NewUserPacket { user = user }, user);
-                }
-                else
-                {
-                    // We must verify the key of the user
-                    if (user.hashedKey != authPacket.hashedKey)
-                    {
-                        this.SendPacket(client, new AuthentificationErrorPacket
-                            {
-                                error = "Wrong key for user " + authPacket.name
-                            }
-                        );
-                        return;
-                    }
                 }
 
                 this.connectedUsers.Add(client, user);
