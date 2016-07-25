@@ -98,15 +98,11 @@ namespace PhiClient
             if (phiClient.IsUsable())
             {
                 // Ordering the list according to connected status
-                List<User> users = phiClient.realmData.users.OrderBy(u => u.connected).ToList();
+                List<User> users = phiClient.realmData.users.Where(u => u.connected).ToList();
 
                 foreach (User user in users)
                 {
                     string line = user.name;
-                    if (user.connected)
-                    {
-                        line = "• " + line;
-                    }
                     textHeight = Text.CalcHeight(line, rect.width);
 
                     // We check if we have not run out of space
