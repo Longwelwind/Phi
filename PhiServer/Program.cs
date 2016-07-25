@@ -68,6 +68,7 @@ namespace PhiServer
 
         private void MessageCallback(ServerClient client, string data)
         {
+            Console.WriteLine(data);
             Packet packet = Packet.FromRaw(this.realmData, JObject.Parse(data));
             Console.WriteLine("Received packet " + packet);
 
@@ -84,13 +85,14 @@ namespace PhiServer
                 if (user == null)
                 {
                     user = this.realmData.ServerAddUser(authPacket.name);
-                    this.connectedUsers.Add(client, user);
 
                     Console.WriteLine("Creating user \"" + user.name + "\" with ID " + user.getID());
 
                     // We send a notify to all users connected about the new user
                     this.realmData.BroadcastPacketExcept(new NewUserPacket { user = user }, user);
                 }
+
+                this.connectedUsers.Add(client, user);
 
                 // We send a connect notification to all users
                 user.connected = true;
@@ -101,6 +103,13 @@ namespace PhiServer
             }
             else
             {
+                if (user == null)
+                {
+                    // We ignore this package
+                    Console.WriteLine("Ignore packet because unknown user");
+                    return;
+                }
+
                 // Normal packets, we defer the execution
                 packet.Apply(user, this.realmData);
             }
