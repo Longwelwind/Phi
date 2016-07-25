@@ -43,11 +43,6 @@
     <Compile Include="UserGiveWindow.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ModData\About\About.xml" />
-    <Content Include="ModData\Defs\MainTabDefs\PhiClient.xml" />
-    <Content Include="ModData\Defs\ThingDefs\PhiClient.xml" />
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\RimWorld\RimWorldWin_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
@@ -67,9 +62,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="ModData\Assemblies\" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -82,6 +74,14 @@
       <Project>{3ea9fa43-01fc-4af5-bda8-81bac9df7900}</Project>
       <Name>SocketLibrary</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="PhiClient\About\About.xml" />
+    <Content Include="PhiClient\Defs\MainTabDefs\PhiClient.xml" />
+    <Content Include="PhiClient\Defs\ThingDefs\PhiClient.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="PhiClient\Assemblies\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
