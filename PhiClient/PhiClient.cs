@@ -78,8 +78,8 @@ namespace PhiClient
 
         private void MessageCallback(string data)
         {
+            Log.Message(data);
             Packet packet = Packet.FromRaw(this.realmData, JObject.Parse(data));
-            
             Log.Message("Received packet from server: " + packet);
 
             if (packet is SynchronisationPacket)
