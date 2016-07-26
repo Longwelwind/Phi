@@ -158,6 +158,7 @@ namespace PhiClient
             Rect sendButtonArea = inputArea.RightPartPixels(CHAT_INPUT_SEND_BUTTON_WIDTH);
 
             messageToSend = Widgets.TextField(textFieldArea, messageToSend);
+            
             if (Widgets.ButtonText(sendButtonArea, "Send", true, true))
             {
                 this.OnSendClick();
@@ -176,6 +177,14 @@ namespace PhiClient
         }
 
         public void OnUserClick(User user)
+        {
+            List<FloatMenuOption> options = new List<FloatMenuOption>();
+            options.Add(new FloatMenuOption("Ship items", () => { OnShipItemsOptionClick(user); }));
+
+            Find.WindowStack.Add(new FloatMenu(options));
+        }
+
+        public void OnShipItemsOptionClick(User user)
         {
             PhiClient phiClient = PhiClient.instance;
             // We open a trade window with this user
