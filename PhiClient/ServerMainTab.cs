@@ -83,7 +83,7 @@ namespace PhiClient
                 ListContainer usersList = new ListContainer();
                 foreach (User user in phi.realmData.users.Where((u) => u.connected))
                 {
-                    usersList.Add(new HeightContainer(new Button(user.name, () => { OnUserClick(user); }, false), 40f));
+                    usersList.Add(new Button(user.name, () => { OnUserClick(user); }, false));
                 }
 
                 cont.Add(usersList);

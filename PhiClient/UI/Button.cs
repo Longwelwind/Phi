@@ -27,5 +27,15 @@ namespace PhiClient.UI
                 clickAction();
             }
         }
+
+        public override bool IsFluidHeight()
+        {
+            return !drawBackground;
+        }
+
+        public override float CalcHeight(float width)
+        {
+            return Text.CalcHeight(label, width);
+        }
     }
 }

@@ -11,7 +11,7 @@ namespace PhiClient.UI
         List<Displayable> children;
         ListFlow flow;
         ListDirection direction;
-        public float spaceBetween;
+        public float spaceBetween = 0f;
 
         public ListContainer(List<Displayable> children, ListFlow flow = ListFlow.COLUMN, ListDirection direction = ListDirection.NORMAL)
         {
@@ -61,6 +61,8 @@ namespace PhiClient.UI
 
         public override void Draw(Rect inRect)
         {
+            GUI.BeginGroup(inRect);
+
             if (flow == ListFlow.COLUMN)
             {
                 DrawColumn(inRect);
@@ -69,6 +71,8 @@ namespace PhiClient.UI
             {
                 DrawRow(inRect);
             }
+
+            GUI.EndGroup();
         }
 
         private void DrawRow(Rect inRect)
@@ -102,7 +106,7 @@ namespace PhiClient.UI
             // We remove the width taken by the spaces between elements
             widthForFluid -= (children.Count - 1) * spaceBetween;
 
-            float beginX = inRect.x;
+            float beginX = 0;
             // If going right to left, we begin at the end of the Rect
             if (direction == ListDirection.OPPOSITE)
             {
@@ -124,7 +128,7 @@ namespace PhiClient.UI
                     beginX -= width + spaceBetween;
                 }
 
-                Rect childArea = new Rect(beginX, inRect.y, width, height);
+                Rect childArea = new Rect(beginX, 0, width, height);
                 child.Draw(childArea);
 
                 // If going from left to right, we then add the width
@@ -167,7 +171,7 @@ namespace PhiClient.UI
             // We remove the height taken by the spaces between elements
             heightForFluid -= (children.Count - 1) * spaceBetween;
 
-            float beginY = inRect.y;
+            float beginY = 0;
             // If going bottom to top, we begin at the end of the Rect
             if (direction == ListDirection.OPPOSITE)
             {
@@ -189,7 +193,7 @@ namespace PhiClient.UI
                     beginY -= height + spaceBetween;
                 }
 
-                Rect childArea = new Rect(inRect.x, beginY, width, height);
+                Rect childArea = new Rect(0, beginY, width, height);
                 child.Draw(childArea);
 
                 // If going from top to bottom, we then add the height
