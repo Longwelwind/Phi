@@ -105,6 +105,17 @@ namespace PhiClient
             return realmData;
         }
 
+        public RealmPawn ToRealmPawn(Pawn pawn)
+        {
+            return new RealmPawn();
+        }
+
+        public Pawn FromRealmPawn(RealmPawn realmPawn)
+        {
+            PawnKindDef pawnKindDef = PawnKindDefOf.Villager;
+            return PawnGenerator.GeneratePawn(pawnKindDef, Faction.OfPlayer);
+        }
+
         public RealmThing ToRealmThing(Thing thing)
         {
             string stuffDefLabel = thing.Stuff != null ? thing.Stuff.label : "";
@@ -209,6 +220,24 @@ namespace PhiClient
                 message = data.Value<string>("message")
             };
         }
+    }
+
+    public class RealmPawn
+    {
+
+        public JObject ToRaw()
+        {
+            return new JObject();
+        }
+
+        public static RealmPawn FromRaw(RealmData realmData, JObject data)
+        {
+            return new RealmPawn
+            {
+                
+            };
+        }
+
     }
 
     public class RealmThing

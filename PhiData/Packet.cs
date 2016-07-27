@@ -39,6 +39,10 @@ namespace PhiClient
                     return UpdatePreferencesPacket.FromRaw(realmData, data);
                 case UpdatePreferencesNotifyPacket.TYPE_CLASS:
                     return UpdatePreferencesNotifyPacket.FromRaw(realmData, data);
+                case SendColonistPacket.TYPE_CLASS:
+                    return SendColonistPacket.FromRaw(realmData, data);
+                case ReceiveColonistPacket.TYPE_CLASS:
+                    return ReceiveColonistPacket.FromRaw(realmData, data);
             }
 
             throw new Exception("Packet type not found");
@@ -202,6 +206,38 @@ namespace PhiClient
         }
     }
 
+    public class SendColonistPacket : Packet
+    {
+        public const string TYPE_CLASS = "send-colonist";
+
+        public User userTo;
+        public RealmPawn realmPawn;
+
+        public override void Apply(User user, RealmData realmData)
+        {
+            realmData.NotifyPacket(userTo, new ReceiveColonistPacket { userFrom = user, realmPawn = realmPawn });
+        }
+
+        public override JObject ToRaw()
+        {
+            return new JObject(
+                new JProperty("type", TYPE_CLASS),
+                new JProperty("userTo", userTo.getID()),
+                new JProperty("realmPawn", realmPawn.ToRaw())
+            );
+        }
+
+        public new static SendColonistPacket FromRaw(RealmData realmData, JObject data)
+        {
+            return new SendColonistPacket
+            {
+                userTo = ID.Find(realmData.users, (int)data["userTo"]),
+                realmPawn = RealmPawn.FromRaw(realmData, (JObject) data["realmPawn"])
+            };
+        }
+
+    }
+
     /**
      * Packet sent to client
      */
@@ -235,6 +271,47 @@ namespace PhiClient
                 user = ID.Find(realmData.users, (int)data["user"])
             };
         }
+    }
+
+    public class ReceiveColonistPacket : Packet
+    {
+        public const string TYPE_CLASS = "receive-colonist";
+
+        public User userFrom;
+        public RealmPawn realmPawn;
+
+        public override void Apply(User user, RealmData realmData)
+        {
+            Pawn pawn = realmData.FromRealmPawn(realmPawn);
+
+            // We drop it
+            IntVec3 position = DropCellFinder.RandomDropSpot();
+            DropPodUtility.MakeDropPodAt(position, new DropPodInfo
+            {
+                SingleContainedThing = pawn,
+                openDelay = 110,
+                leaveSlag = false
+            });
+        }
+
+        public override JObject ToRaw()
+        {
+            return new JObject(
+                new JProperty("type", TYPE_CLASS),
+                new JProperty("userFrom", userFrom.getID()),
+                new JProperty("realmPawn", realmPawn.ToRaw())
+            );
+        }
+
+        public new static ReceiveColonistPacket FromRaw(RealmData realmData, JObject data)
+        {
+            return new ReceiveColonistPacket
+            {
+                userFrom = ID.Find(realmData.users, (int)data["userFrom"]),
+                realmPawn = RealmPawn.FromRaw(realmData, (JObject)data["realmPawn"])
+            };
+        }
+
     }
 
     public class ChangeNicknameNotifyPacket : Packet
