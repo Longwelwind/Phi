@@ -36,13 +36,22 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="UI\Button.cs" />
+    <Compile Include="UI\Container.cs" />
+    <Compile Include="UI\HeightContainer.cs" />
+    <Compile Include="UI\ListContainer.cs" />
+    <Compile Include="UI\Displayable.cs" />
     <Compile Include="PhiClient.cs" />
     <Compile Include="PhiInitializer.cs" />
     <Compile Include="ServerMainMenuWindow.cs" />
     <Compile Include="ServerMainMenuButton.cs" />
     <Compile Include="ServerMainTab.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\TextFieldWidget.cs" />
+    <Compile Include="UI\TextWidget.cs" />
+    <Compile Include="UI\WidthContainer.cs" />
     <Compile Include="UserGiveWindow.cs" />
+    <Compile Include="UserSendColonistWindow.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
