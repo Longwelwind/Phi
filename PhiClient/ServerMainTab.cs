@@ -38,6 +38,8 @@ namespace PhiClient
             mainList.Draw(inRect);
         }
 
+        Vector2 chatScroll = Vector2.zero;
+
         private Displayable DoChat()
         {
             PhiClient phi = PhiClient.instance;
@@ -49,7 +51,7 @@ namespace PhiClient
                 cont.Add(new TextWidget(c.user.name + ": " + c.message));
             }
 
-            return cont;
+            return new ScrollContainer(cont, chatScroll, (v) => { chatScroll = v; });
         }
 
         Vector2 userScrollPosition = Vector2.zero;
