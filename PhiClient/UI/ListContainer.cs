@@ -8,6 +8,8 @@ namespace PhiClient.UI
 {
     class ListContainer : Displayable
     {
+        public const float SPACE = 10f;
+
         List<Displayable> children;
         ListFlow flow;
         ListDirection direction;
@@ -81,6 +83,7 @@ namespace PhiClient.UI
 
             // We first calculate the remaining space that will be given to the fluid element
             float takenWidth;
+            int countFluidElements = 0;
             if (IsFluidWidth())
             {
                 takenWidth = children.Sum((c) =>
@@ -92,6 +95,7 @@ namespace PhiClient.UI
                     }
                     else
                     {
+                        countFluidElements++;
                         return 0;
                     }
                 });
@@ -105,6 +109,8 @@ namespace PhiClient.UI
             float widthForFluid = inRect.width - takenWidth;
             // We remove the width taken by the spaces between elements
             widthForFluid -= (children.Count - 1) * spaceBetween;
+            // Each fluid element will take equal space
+            widthForFluid /= countFluidElements;
 
             float beginX = 0;
             // If going right to left, we begin at the end of the Rect
@@ -129,7 +135,12 @@ namespace PhiClient.UI
                 }
 
                 Rect childArea = new Rect(beginX, 0, width, height);
+                GUI.BeginGroup(childArea);
+                childArea.x = 0;
+                
                 child.Draw(childArea);
+
+                GUI.EndGroup();
 
                 // If going from left to right, we then add the width
                 // of the child
@@ -146,6 +157,7 @@ namespace PhiClient.UI
 
             // We first calculate the remaining space that will be given to the fluid element
             float takenHeight;
+            int countFluidElements = 0;
             if (IsFluidWidth())
             {
                 takenHeight = children.Sum((c) =>
@@ -157,6 +169,7 @@ namespace PhiClient.UI
                     }
                     else
                     {
+                        countFluidElements++;
                         return 0;
                     }
                 });
@@ -170,6 +183,8 @@ namespace PhiClient.UI
             float heightForFluid = inRect.height - takenHeight;
             // We remove the height taken by the spaces between elements
             heightForFluid -= (children.Count - 1) * spaceBetween;
+            // Each fluid element will take equal space
+            heightForFluid /= countFluidElements;
 
             float beginY = 0;
             // If going bottom to top, we begin at the end of the Rect
@@ -194,7 +209,12 @@ namespace PhiClient.UI
                 }
 
                 Rect childArea = new Rect(0, beginY, width, height);
+                GUI.BeginGroup(childArea);
+                childArea.y = 0;
+
                 child.Draw(childArea);
+
+                GUI.EndGroup();
 
                 // If going from top to bottom, we then add the height
                 // of the child

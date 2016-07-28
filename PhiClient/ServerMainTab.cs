@@ -16,9 +16,7 @@ namespace PhiClient
         const float CHAT_MARGIN = 10f;
         const float STATUS_AREA_WIDTH = 160f;
 
-        const float SPACE_BETWEEN = 10f;
-        
-        TextFieldWidget inputField = new TextFieldWidget();
+        string enteredMessage = "";
 
         public override void DoWindowContents(Rect inRect)
         {
@@ -27,7 +25,7 @@ namespace PhiClient
             PhiClient phi = PhiClient.instance;
 
             ListContainer mainList = new ListContainer();
-            mainList.spaceBetween = SPACE_BETWEEN;
+            mainList.spaceBetween = ListContainer.SPACE;
             
             mainList.Add(new TextWidget("Realm", GameFont.Medium, TextAnchor.MiddleCenter));
             mainList.Add(new ListContainer(new List<Displayable>()
@@ -83,7 +81,7 @@ namespace PhiClient
                 ListContainer usersList = new ListContainer();
                 foreach (User user in phi.realmData.users.Where((u) => u.connected))
                 {
-                    usersList.Add(new Button(user.name, () => { OnUserClick(user); }, false));
+                    usersList.Add(new ButtonWidget(user.name, () => { OnUserClick(user); }, false));
                 }
 
                 cont.Add(usersList);
@@ -94,18 +92,18 @@ namespace PhiClient
         private Displayable DoFooter()
         {
             ListContainer footerList = new ListContainer(ListFlow.ROW);
-            footerList.spaceBetween = SPACE_BETWEEN;
+            footerList.spaceBetween = ListContainer.SPACE;
 
-            footerList.Add(inputField);
-            footerList.Add(new WidthContainer(new Button("Send", OnSendClick), CHAT_INPUT_SEND_BUTTON_WIDTH));
+            footerList.Add(new TextFieldWidget(enteredMessage, (s) => { enteredMessage = s; }));
+            footerList.Add(new WidthContainer(new ButtonWidget("Send", OnSendClick), CHAT_INPUT_SEND_BUTTON_WIDTH));
             
             return footerList;
         }
 
         public void OnSendClick()
         {
-            PhiClient.instance.SendMessage(this.inputField.text);
-            this.inputField.text = "";
+            PhiClient.instance.SendMessage(this.enteredMessage);
+            this.enteredMessage = "";
         }
 
         public void OnReconnectClick()

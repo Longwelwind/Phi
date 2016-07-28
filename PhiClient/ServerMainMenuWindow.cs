@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PhiClient.UI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,6 @@ namespace PhiClient
 {
     class ServerMainMenuWindow : Window
     {
-        const float MARGIN = 8f;
 
         public override Vector2 InitialSize
         {
@@ -26,18 +26,57 @@ namespace PhiClient
             this.enteredAddress = PhiClient.instance.GetServerAddress();
         }
 
+        Vector2 scrollPosition = Vector2.zero;
+
         public override void DoWindowContents(Rect inRect)
         {
             PhiClient client = PhiClient.instance;
 
-            if (client.IsUsable())
+            ListContainer cont = new ListContainer();
+            cont.Add(new HeightContainer(DoHeader(), 30f));
+
+            ListContainer messages = new ListContainer();
+            ScrollContainer scroll = new ScrollContainer(messages, scrollPosition, (s) => { scrollPosition = s; });
+
+            for (int i = 0; i < 100; i++)
+            {
+                messages.Add(new TextWidget("message" + i));
+            }
+
+
+            cont.Add(scroll);
+
+            /*if (client.IsUsable())
             {
                 DrawConnectedContent(inRect);
             }
             else
             {
                 DrawnDisconnectedContent(inRect);
+            }*/
+
+            cont.Draw(inRect);
+        }
+
+        string enteredAddress = "";
+
+        public Displayable DoHeader()
+        {
+            PhiClient client = PhiClient.instance;
+            ListContainer cont = new ListContainer(ListFlow.ROW);
+            cont.spaceBetween = ListContainer.SPACE;
+
+            if (client.IsUsable())
+            {
+
             }
+            else
+            {
+                cont.Add(new TextFieldWidget(enteredAddress, (s) => { enteredAddress = s; }));
+                cont.Add(new ButtonWidget("Connect", () => { OnConnectButtonClick(); }));
+            }
+
+            return cont;
         }
 
         const float PREFERENCE_ROW_HEIGHT = 30f;
@@ -49,7 +88,7 @@ namespace PhiClient
 
             Widgets.Label(inRect, "Connected");
 
-            Rect preferencesArea = inRect.BottomPartPixels(inRect.height - 30f - MARGIN);
+            Rect preferencesArea = inRect.BottomPartPixels(inRect.height - 30f - ListContainer.SPACE);
             Rect rowArea = preferencesArea.LeftPartPixels(PREFERENCE_ROW_WIDTH).TopPartPixels(PREFERENCE_ROW_HEIGHT);
 
             bool oldReceiveItems = client.currentUser.preferences.receiveItems;
@@ -63,7 +102,6 @@ namespace PhiClient
 
         const float CONNECT_BUTTON_WIDTH = 150f;
         const float CONNECT_HEIGHT = 40f;
-        string enteredAddress = "";
 
         public void DrawnDisconnectedContent(Rect inRect)
         {
@@ -71,7 +109,7 @@ namespace PhiClient
              * Input for the server address
              */
             Rect topArea = inRect.TopPartPixels(CONNECT_HEIGHT);
-            Rect inputArea = topArea.LeftPartPixels(inRect.width - CONNECT_BUTTON_WIDTH - MARGIN);
+            Rect inputArea = topArea.LeftPartPixels(inRect.width - CONNECT_BUTTON_WIDTH - ListContainer.SPACE);
             Rect connectButton = topArea.RightPartPixels(CONNECT_BUTTON_WIDTH);
 
             enteredAddress = Widgets.TextField(inputArea, enteredAddress);

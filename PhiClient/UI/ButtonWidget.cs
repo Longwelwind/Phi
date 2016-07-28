@@ -7,13 +7,13 @@ using Verse;
 
 namespace PhiClient.UI
 {
-    class Button : Displayable
+    class ButtonWidget : Displayable
     {
         public string label;
         public bool drawBackground;
         public Action clickAction;
 
-        public Button(string label, Action clickAction, bool drawBackground = true)
+        public ButtonWidget(string label, Action clickAction, bool drawBackground = true)
         {
             this.label = label;
             this.drawBackground = drawBackground;

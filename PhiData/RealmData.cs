@@ -10,7 +10,7 @@ namespace PhiClient
 {
     public class RealmData
     {
-        public const string VERSION = "0.5";
+        public const string VERSION = "0.4";
 
         public List<User> users = new List<User>();
         public List<ChatMessage> chat = new List<ChatMessage>();
@@ -224,20 +224,46 @@ namespace PhiClient
 
     public class RealmPawn
     {
+        List<RealmSkillRecord> skills;
 
         public JObject ToRaw()
         {
-            return new JObject();
+            return new JObject(
+                new JProperty("skills", new JArray(skills.Select((s) => s.ToRaw())))
+            );
         }
 
         public static RealmPawn FromRaw(RealmData realmData, JObject data)
         {
             return new RealmPawn
             {
-                
+                skills = ((JArray)data["skills"]).Select((s) => RealmSkillRecord.FromRaw(realmData, (JObject)s)).ToList()
             };
         }
 
+    }
+
+    public class RealmSkillRecord
+    {
+        public string skillDefLabel;
+        public int level;
+
+        public JObject ToRaw()
+        {
+            return new JObject(
+                new JProperty("skillDefLabel", skillDefLabel),
+                new JProperty("level", level)    
+            );
+        }
+
+        public static RealmSkillRecord FromRaw(RealmData realmData, JObject data)
+        {
+            return new RealmSkillRecord
+            {
+                skillDefLabel = (string) data["skillDefLabel"],
+                level = (int) data["level"]
+            };
+        }
     }
 
     public class RealmThing

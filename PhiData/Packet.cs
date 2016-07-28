@@ -43,6 +43,10 @@ namespace PhiClient
                     return SendColonistPacket.FromRaw(realmData, data);
                 case ReceiveColonistPacket.TYPE_CLASS:
                     return ReceiveColonistPacket.FromRaw(realmData, data);
+                case ChangeNicknamePacket.TYPE_CLASS:
+                    return ChangeNicknamePacket.FromRaw(realmData, data);
+                case ChangeNicknameNotifyPacket.TYPE_CLASS:
+                    return ChangeNicknameNotifyPacket.FromRaw(realmData, data);
             }
 
             throw new Exception("Packet type not found");
@@ -93,6 +97,12 @@ namespace PhiClient
 
         public override void Apply(User user, RealmData realmData)
         {
+            // Is this nick available ?
+            if (realmData.users.Any((u) => u.name == name))
+            {
+                return;
+            }
+
             user.name = name;
             realmData.BroadcastPacket(new ChangeNicknameNotifyPacket { user = user, name = name });
         }
