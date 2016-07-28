@@ -48,15 +48,23 @@ namespace PhiClient
             PhiClient client = PhiClient.instance;
             UserPreferences pref = client.currentUser.preferences;
 
-            ListContainer cont = new ListContainer();
+            ListContainer twoColumn = new ListContainer(ListFlow.ROW);
+            twoColumn.spaceBetween = ListContainer.SPACE;
 
-            cont.Add(new CheckboxLabeledWidget("Allow receiving items", pref.receiveItems, (b) =>
+            ListContainer firstColumn = new ListContainer();
+            twoColumn.Add(firstColumn);
+
+            firstColumn.Add(new CheckboxLabeledWidget("Allow receiving items", pref.receiveItems, (b) =>
             {
                 pref.receiveItems = b;
                 client.UpdatePreferences();
             }));
 
-            return cont;
+            // Just to take spaces while the column is empty
+            ListContainer secondColumn = new ListContainer();
+            twoColumn.Add(secondColumn);
+
+            return twoColumn;
         }
 
         string enteredAddress = "";

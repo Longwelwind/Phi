@@ -90,7 +90,6 @@ namespace PhiClient
 
                     ListContainer cellCont = new ListContainer(ListFlow.ROW);
                     rowCont.Add(new Container(cellCont, CELL_WIDTH, CELL_HEIGHT));
-
                     
                     cellCont.Add(new Container(new ThingIconWidget(thing), CELL_HEIGHT, CELL_HEIGHT));
                     cellCont.Add(new TextWidget(thing.Label, GameFont.Small, TextAnchor.MiddleLeft));
