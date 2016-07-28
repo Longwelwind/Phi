@@ -9,13 +9,16 @@ namespace PhiClient.UI
 {
     class CheckboxLabeledWidget : Displayable
     {
+        const float CHECKBOX_SIZE = 40f;
+
         string label;
-        Boolean checkedOn;
+        bool checkedOn;
         Action<bool> onChange;
 
-        public CheckboxLabeledWidget(string label, Action<bool> onChange)
+        public CheckboxLabeledWidget(string label, bool checkedOn, Action<bool> onChange)
         {
             this.label = label;
+            this.checkedOn = checkedOn;
             this.onChange = onChange;
         }
 
@@ -37,7 +40,7 @@ namespace PhiClient.UI
 
         public override float CalcHeight(float width)
         {
-            return Text.LineHeight;
+            return CHECKBOX_SIZE;
         }
     }
 }

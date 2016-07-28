@@ -92,13 +92,32 @@ namespace PhiClient
 
         public RealmPawn ToRealmPawn(Pawn pawn)
         {
-            return new RealmPawn();
+            Dictionary<string, int> skills = new Dictionary<string, int>();
+            foreach (SkillRecord rec in pawn.skills.skills)
+            {
+                skills.Add(rec.def.label, rec.level);
+            }
+
+            return new RealmPawn
+            {
+                skills = skills
+            };
         }
 
         public Pawn FromRealmPawn(RealmPawn realmPawn)
         {
             PawnKindDef pawnKindDef = PawnKindDefOf.Villager;
-            return PawnGenerator.GeneratePawn(pawnKindDef, Faction.OfPlayer);
+            Pawn pawn = PawnGenerator.GeneratePawn(pawnKindDef, Faction.OfPlayer);
+
+            // We attribute the skills level
+            foreach (KeyValuePair<string, int> rec in realmPawn.skills.AsEnumerable())
+            {
+                SkillDef skillDef = DefDatabase<SkillDef>.AllDefs.First((def) => def.label == rec.Key );
+
+                pawn.skills.GetSkill(skillDef).level = rec.Value;
+            }
+
+            return pawn;
         }
 
         public RealmThing ToRealmThing(Thing thing)
@@ -189,23 +208,7 @@ namespace PhiClient
     [Serializable]
     public class RealmPawn
     {
-        List<RealmSkillRecord> skills;
-
-        public JObject ToRaw()
-        {
-            return new JObject(
-                new JProperty("skills", new JArray(skills.Select((s) => s.ToRaw())))
-            );
-        }
-
-        public static RealmPawn FromRaw(RealmData realmData, JObject data)
-        {
-            return new RealmPawn
-            {
-                skills = ((JArray)data["skills"]).Select((s) => RealmSkillRecord.FromRaw(realmData, (JObject)s)).ToList()
-            };
-        }
-
+        public Dictionary<string, int> skills;
     }
 
     [Serializable]

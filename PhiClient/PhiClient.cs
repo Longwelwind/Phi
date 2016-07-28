@@ -23,12 +23,15 @@ namespace PhiClient
         public RealmData realmData;
         public User currentUser;
         public Client client;
+        private Queue<Packet> packetsToProcess = new Queue<Packet>();
+        public string serverAddress;
 
         public PhiClient()
         {
             this.realmData = new RealmData();
 
             PhiClient.instance = this;
+            this.serverAddress = this.GetServerAddress();
         }
 
         public void TryConnect()
@@ -40,14 +43,12 @@ namespace PhiClient
                 this.realmData = null;
             }
 
-            string address = GetServerAddress();
-
-            this.client = new Client(address, PORT);
+            this.client = new Client(serverAddress, PORT);
             this.client.Connection += this.ConnectionCallback;
             this.client.Message += this.MessageCallback;
             this.client.Disconnection += this.DisconnectCallback;
 
-            Log.Message("Try connecting to " + address);
+            Log.Message("Try connecting to " + serverAddress);
             client.Connect();
         }
 
@@ -61,6 +62,35 @@ namespace PhiClient
             catch (Exception e)
             {
                 Log.Error(e.ToString());
+            }
+        }
+
+        internal void OnUpdate()
+        {
+            lock (packetsToProcess)
+            {
+                while (packetsToProcess.Count > 0)
+                {
+                    Packet packet = packetsToProcess.Dequeue();
+                    ProcessPacket(packet);
+                }
+            }
+        }
+
+        private void ProcessPacket(Packet packet)
+        {
+            if (packet is SynchronisationPacket)
+            {
+                // This is the first packet that we receive
+                // It contains all the data of the server
+                SynchronisationPacket syncPacket = (SynchronisationPacket)packet;
+
+                this.realmData = syncPacket.realmData;
+                this.currentUser = syncPacket.user;
+            }
+            else
+            {
+                packet.Apply(this.currentUser, this.realmData);
             }
         }
 
@@ -91,19 +121,11 @@ namespace PhiClient
                 Packet packet = Packet.Deserialize(data, this.realmData);
                 Log.Message("Received packet from server: " + packet);
 
-                if (packet is SynchronisationPacket)
+                lock (packetsToProcess)
                 {
-                    // This is the first packet that we receive
-                    // It contains all the data of the server
-                    SynchronisationPacket syncPacket = (SynchronisationPacket)packet;
+                    this.packetsToProcess.Enqueue(packet);
+                }
 
-                    this.realmData = syncPacket.realmData;
-                    this.currentUser = syncPacket.user;
-                }
-                else
-                {
-                    packet.Apply(this.currentUser, this.realmData);
-                }
             }
             catch (Exception e)
             {
@@ -154,7 +176,7 @@ namespace PhiClient
             Log.Message("Disconnected from the server");
         }
 
-        public string GetServerAddress()
+        private string GetServerAddress()
         {
             if (!File.Exists(SERVER_FILE))
             {

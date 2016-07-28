@@ -52,6 +52,8 @@ namespace PhiClient
             return cont;
         }
 
+        Vector2 userScrollPosition = Vector2.zero;
+
         private Displayable DoBodyRightBar()
         {
             PhiClient phi = PhiClient.instance;
@@ -84,7 +86,7 @@ namespace PhiClient
                     usersList.Add(new ButtonWidget(user.name, () => { OnUserClick(user); }, false));
                 }
 
-                cont.Add(usersList);
+                cont.Add(new ScrollContainer(usersList, userScrollPosition, (v) => { userScrollPosition = v; }));
             }
             return cont;
         }

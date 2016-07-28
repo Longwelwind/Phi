@@ -98,11 +98,8 @@ namespace PhiClient
                     
                     index++;
                 }
-
             }
-
             mainCont.Draw(inRect);
-        
         }
 
         public void OnSendClick(Thing thing)
