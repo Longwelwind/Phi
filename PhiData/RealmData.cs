@@ -8,6 +8,7 @@ using Verse;
 
 namespace PhiClient
 {
+    [Serializable]
     public class RealmData
     {
         public const string VERSION = "0.4";
@@ -89,22 +90,6 @@ namespace PhiClient
             this.BroadcastPacket(new ChatMessagePacket { message = chatMessage });
         }
 
-        public JObject ToRaw()
-        {
-            return new JObject(
-                new JProperty("users", new JArray(users.ConvertAll((u) => { return u.ToRaw(); }))),
-                new JProperty("chat", new JArray(chat.ConvertAll((m) => { return m.ToRaw(); })))
-            );
-        }
-
-        public static RealmData FromRaw(JObject data)
-        {
-            RealmData realmData = new RealmData();
-            realmData.users = ((JArray)data["users"]).Select(du => User.FromRaw(realmData, (JObject)du)).ToList();
-            realmData.chat = ((JArray)data["chat"]).Select(du => ChatMessage.FromRaw(realmData, (JObject)du)).ToList();
-            return realmData;
-        }
-
         public RealmPawn ToRealmPawn(Pawn pawn)
         {
             return new RealmPawn();
@@ -160,7 +145,8 @@ namespace PhiClient
             return thing;
         }
     }
-    
+
+    [Serializable]
     public class User : IDable
     {
         public int id;
@@ -170,35 +156,13 @@ namespace PhiClient
         public bool inGame;
         public UserPreferences preferences = new UserPreferences();
 
-        public JObject ToRaw()
-        {
-            return new JObject(
-                new JProperty("id", new JValue(id)),
-                new JProperty("name", new JValue(name)),
-                new JProperty("connected", new JValue(connected)),
-                new JProperty("inGame", new JValue(inGame)),
-                new JProperty("preferences", preferences.ToRaw())
-            );
-        }
-
-        public static User FromRaw(RealmData realmData, JObject data)
-        {
-            return new User {
-                id = (int)data["id"],
-                name = (string)data["name"],
-                connected = (bool)data["connected"],
-                inGame = (bool)data["inGame"],
-                hashedKey = "", // It is never disclosed to users,
-                preferences = UserPreferences.FromRaw(realmData, (JObject)data["preferences"])
-            };
-        }
-
         public int getID()
         {
             return this.id;
         }
     }
-    
+
+    [Serializable]
     public class ChatMessage
     {
         public User user;
@@ -222,6 +186,7 @@ namespace PhiClient
         }
     }
 
+    [Serializable]
     public class RealmPawn
     {
         List<RealmSkillRecord> skills;
@@ -243,6 +208,7 @@ namespace PhiClient
 
     }
 
+    [Serializable]
     public class RealmSkillRecord
     {
         public string skillDefLabel;
@@ -266,6 +232,7 @@ namespace PhiClient
         }
     }
 
+    [Serializable]
     public class RealmThing
     {
         public string thingDefLabel;

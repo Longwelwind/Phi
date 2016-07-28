@@ -3,63 +3,42 @@ using System.Collections.Generic;
 using Verse;
 using RimWorld;
 using Newtonsoft.Json.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace PhiClient
 {
+    [Serializable]
     public abstract class Packet
     {
         public abstract void Apply(User user, RealmData realmData);
 
-        public abstract JObject ToRaw();
-
-        public static Packet FromRaw(RealmData realmData, JObject data)
+        public static byte[] Serialize(Packet packet)
         {
-            string classType = (string)data["type"];
-            switch (classType)
-            {
-                case AuthentificationPacket.TYPE_CLASS:
-                    return AuthentificationPacket.FromRaw(realmData, data);
-                case PostMessagePacket.TYPE_CLASS:
-                    return PostMessagePacket.FromRaw(realmData, data);
-                case SynchronisationPacket.TYPE_CLASS:
-                    return SynchronisationPacket.FromRaw(realmData, data);
-                case ChatMessagePacket.TYPE_CLASS:
-                    return ChatMessagePacket.FromRaw(realmData, data);
-                case NewUserPacket.TYPE_CLASS:
-                    return NewUserPacket.FromRaw(realmData, data);
-                case UserConnectedPacket.TYPE_CLASS:
-                    return UserConnectedPacket.FromRaw(realmData, data);
-                case ThingReceivedPacket.TYPE_CLASS:
-                    return ThingReceivedPacket.FromRaw(realmData, data);
-                case SendThingPacket.TYPE_CLASS:
-                    return SendThingPacket.FromRaw(realmData, data);
-                case AuthentificationErrorPacket.TYPE_CLASS:
-                    return AuthentificationErrorPacket.FromRaw(realmData, data);
-                case UpdatePreferencesPacket.TYPE_CLASS:
-                    return UpdatePreferencesPacket.FromRaw(realmData, data);
-                case UpdatePreferencesNotifyPacket.TYPE_CLASS:
-                    return UpdatePreferencesNotifyPacket.FromRaw(realmData, data);
-                case SendColonistPacket.TYPE_CLASS:
-                    return SendColonistPacket.FromRaw(realmData, data);
-                case ReceiveColonistPacket.TYPE_CLASS:
-                    return ReceiveColonistPacket.FromRaw(realmData, data);
-                case ChangeNicknamePacket.TYPE_CLASS:
-                    return ChangeNicknamePacket.FromRaw(realmData, data);
-                case ChangeNicknameNotifyPacket.TYPE_CLASS:
-                    return ChangeNicknameNotifyPacket.FromRaw(realmData, data);
-            }
+            var bf = new BinaryFormatter();
+            var ms = new MemoryStream();
+            bf.Serialize(ms, packet);
 
-            throw new Exception("Packet type not found");
+            return ms.ToArray();
+        }
+
+        public static Packet Deserialize(byte[] data, RealmData realmData)
+        {
+            var bf = new BinaryFormatter(null, new StreamingContext(StreamingContextStates.All, realmData));
+            var ms = new MemoryStream(data);
+
+            return (Packet) bf.Deserialize(ms);
         }
     }
 
     /**
      * Packet sent to server 
      */
+    [Serializable]
     public class AuthentificationPacket : Packet
     {
-        public const string TYPE_CLASS = "auth";
-
         public string name;
         public string hashedKey;
         public string version;
@@ -68,31 +47,11 @@ namespace PhiClient
         {
             // Since Authentification packets are special, they are handled in Programm.cs
         }
-
-        public override JObject ToRaw()
-        {
-            return new JObject(
-                new JProperty("type", TYPE_CLASS),
-                new JProperty("name", name),
-                new JProperty("version", version),
-                new JProperty("hashedKey", hashedKey)
-            );
-        }
-
-        public new static AuthentificationPacket FromRaw(RealmData realmData, JObject data)
-        {
-            return new AuthentificationPacket {
-                name = (string)data["name"],
-                version = (string)data["version"],
-                hashedKey = (string)data["hashedKey"]
-            };
-        }
     }
 
+    [Serializable]
     public class ChangeNicknamePacket : Packet
     {
-        public const string TYPE_CLASS = "change-nickname";
-
         public string name;
 
         public override void Apply(User user, RealmData realmData)
@@ -107,55 +66,26 @@ namespace PhiClient
             realmData.BroadcastPacket(new ChangeNicknameNotifyPacket { user = user, name = name });
         }
 
-        public override JObject ToRaw()
-        {
-            return new JObject(
-                new JProperty("type", TYPE_CLASS),
-                new JProperty("name", name)
-            );
-        }
-
-        public new static ChangeNicknamePacket FromRaw(RealmData realmData, JObject data)
-        {
-            return new ChangeNicknamePacket
-            {
-                name = (string)data["name"],
-            };
-        }
-
     }
-    
+
+    [Serializable]
     public class PostMessagePacket : Packet
     {
-        public const string TYPE_CLASS = "post-message";
-
         public string message;
 
         public override void Apply(User user, RealmData realmData)
         {
             realmData.ServerPostMessage(user, this.message);
         }
-
-        public override JObject ToRaw()
-        {
-            return new JObject(
-                new JProperty("type", TYPE_CLASS),
-                new JProperty("message", message)
-            );
-        }
-
-        public new static PostMessagePacket FromRaw(RealmData realmData, JObject data)
-        {
-            return new PostMessagePacket { message = (string)data["message"] };
-        }
     }
 
+    [Serializable]
     public class SendThingPacket : Packet
     {
-        public const string TYPE_CLASS = "send-thing";
-
         public RealmThing realmThing;
+        [NonSerialized]
         public User userTo;
+        private int userToId;
 
         public override void Apply(User user, RealmData realmData)
         {
@@ -164,29 +94,24 @@ namespace PhiClient
             realmData.NotifyPacket(userTo, new ThingReceivedPacket { userFrom = user, realmThing = realmThing });
         }
 
-        public override JObject ToRaw()
+        [OnSerializing]
+        internal void OnSerializingCallback(StreamingContext c)
         {
-            return new JObject(
-                new JProperty("type", TYPE_CLASS),
-                new JProperty("realmThing", realmThing.ToRaw()),
-                new JProperty("userTo", userTo.getID())
-            );
+            userToId = userTo.id;
         }
 
-        public new static SendThingPacket FromRaw(RealmData realmData, JObject data)
+        [OnDeserialized]
+        internal void OnDeserializedCallback(StreamingContext c)
         {
-            return new SendThingPacket
-            {
-                realmThing=RealmThing.FromRaw(realmData, (JObject)data["realmThing"]),
-                userTo=ID.Find(realmData.users, (int)data["userTo"])
-            };
+            RealmData realmData = c.Context as RealmData;
+
+            userTo = ID.Find(realmData.users, userToId);
         }
     }
 
+    [Serializable]
     public class UpdatePreferencesPacket : Packet
     {
-        public const string TYPE_CLASS = "update-preferences";
-
         public UserPreferences preferences;
 
         public override void Apply(User user, RealmData realmData)
@@ -198,96 +123,71 @@ namespace PhiClient
                 preferences = preferences
             }, user);
         }
-
-        public override JObject ToRaw()
-        {
-            return new JObject(
-                new JProperty("type", TYPE_CLASS),
-                new JProperty("preferences", preferences.ToRaw())
-            );
-        }
-
-        public new static UpdatePreferencesPacket FromRaw(RealmData realmData, JObject data)
-        {
-            return new UpdatePreferencesPacket
-            {
-                preferences = UserPreferences.FromRaw(realmData, (JObject)data["preferences"])
-            };
-        }
     }
 
+    [Serializable]
     public class SendColonistPacket : Packet
     {
-        public const string TYPE_CLASS = "send-colonist";
-
-        public User userTo;
         public RealmPawn realmPawn;
+        [NonSerialized]
+        public User userTo;
+        private int userToId;
 
         public override void Apply(User user, RealmData realmData)
         {
             realmData.NotifyPacket(userTo, new ReceiveColonistPacket { userFrom = user, realmPawn = realmPawn });
         }
 
-        public override JObject ToRaw()
+        [OnSerializing]
+        internal void OnSerializingCallback(StreamingContext c)
         {
-            return new JObject(
-                new JProperty("type", TYPE_CLASS),
-                new JProperty("userTo", userTo.getID()),
-                new JProperty("realmPawn", realmPawn.ToRaw())
-            );
+            userToId = userTo.id;
         }
 
-        public new static SendColonistPacket FromRaw(RealmData realmData, JObject data)
+        [OnDeserialized]
+        internal void OnDeserializedCallback(StreamingContext c)
         {
-            return new SendColonistPacket
-            {
-                userTo = ID.Find(realmData.users, (int)data["userTo"]),
-                realmPawn = RealmPawn.FromRaw(realmData, (JObject) data["realmPawn"])
-            };
-        }
+            RealmData realmData = c.Context as RealmData;
 
+            userTo = ID.Find(realmData.users, userToId);
+        }
     }
 
     /**
      * Packet sent to client
      */
+    [Serializable]
     public class SynchronisationPacket : Packet
     {
-        public const string TYPE_CLASS = "sync";
-
         public RealmData realmData;
+        [NonSerialized]
         public User user;
+        private int userId;
 
         public override void Apply(User user, RealmData realmData)
         {
             // Since Synchronisation packets are special, they are handled in PhiClient.cs
         }
 
-        public override JObject ToRaw()
+        [OnSerializing]
+        internal void OnSerializingCallback(StreamingContext c)
         {
-            return new JObject(
-                new JProperty("type", TYPE_CLASS),
-                new JProperty("realmData", realmData.ToRaw()),
-                new JProperty("user", user.getID())
-            );
+            userId = user.id;
         }
 
-        public new static SynchronisationPacket FromRaw(RealmData realmData, JObject data)
+        [OnDeserialized]
+        internal void OnDeserializedCallback(StreamingContext c)
         {
-            realmData = RealmData.FromRaw((JObject) data["realmData"]);
-            return new SynchronisationPacket
-            {
-                realmData = realmData,
-                user = ID.Find(realmData.users, (int)data["user"])
-            };
+            user = ID.Find(realmData.users, userId);
         }
     }
 
+    [Serializable]
     public class ReceiveColonistPacket : Packet
     {
-        public const string TYPE_CLASS = "receive-colonist";
-
+        [NonSerialized]
         public User userFrom;
+        private int userFromId;
         public RealmPawn realmPawn;
 
         public override void Apply(User user, RealmData realmData)
@@ -304,31 +204,28 @@ namespace PhiClient
             });
         }
 
-        public override JObject ToRaw()
+        [OnSerializing]
+        internal void OnSerializingCallback(StreamingContext c)
         {
-            return new JObject(
-                new JProperty("type", TYPE_CLASS),
-                new JProperty("userFrom", userFrom.getID()),
-                new JProperty("realmPawn", realmPawn.ToRaw())
-            );
+            userFromId = userFrom.id;
         }
 
-        public new static ReceiveColonistPacket FromRaw(RealmData realmData, JObject data)
+        [OnDeserialized]
+        internal void OnDeserializedCallback(StreamingContext c)
         {
-            return new ReceiveColonistPacket
-            {
-                userFrom = ID.Find(realmData.users, (int)data["userFrom"]),
-                realmPawn = RealmPawn.FromRaw(realmData, (JObject)data["realmPawn"])
-            };
+            RealmData realmData = c.Context as RealmData;
+
+            userFrom = ID.Find(realmData.users, userFromId);
         }
 
     }
 
+    [Serializable]
     public class ChangeNicknameNotifyPacket : Packet
     {
-        public const string TYPE_CLASS = "change-nickname-notify";
-
+        [NonSerialized]
         public User user;
+        public int userId;
         public string name;
 
         public override void Apply(User user, RealmData realmData)
@@ -336,30 +233,27 @@ namespace PhiClient
             this.user.name = name;
         }
 
-        public override JObject ToRaw()
+        [OnSerializing]
+        internal void OnSerializingCallback(StreamingContext c)
         {
-            return new JObject(
-                new JProperty("type", TYPE_CLASS),
-                new JProperty("user", user.getID()),
-                new JProperty("name", name)
-            );
+            userId = user.id;
         }
 
-        public new static ChangeNicknameNotifyPacket FromRaw(RealmData realmData, JObject data)
+        [OnDeserialized]
+        internal void OnDeserializedCallback(StreamingContext c)
         {
-            return new ChangeNicknameNotifyPacket
-            {
-                user = ID.Find(realmData.users, (int)data["user"]),
-                name = (string)data["name"],
-            };
+            RealmData realmData = c.Context as RealmData;
+
+            user = ID.Find(realmData.users, userId);
         }
     }
 
+    [Serializable]
     public class UpdatePreferencesNotifyPacket : Packet
     {
-        public const string TYPE_CLASS = "update-preferences-notify";
-
+        [NonSerialized]
         public User user;
+        public int userId;
         public UserPreferences preferences;
 
         public override void Apply(User user, RealmData realmData)
@@ -367,85 +261,49 @@ namespace PhiClient
             this.user.preferences = preferences;
         }
 
-        public override JObject ToRaw()
+        [OnSerializing]
+        internal void OnSerializingCallback(StreamingContext c)
         {
-            return new JObject(
-                new JProperty("type", TYPE_CLASS),
-                new JProperty("user", user.getID()),
-                new JProperty("preferences", preferences.ToRaw())
-            );
+            userId = user.id;
         }
 
-        public new static UpdatePreferencesNotifyPacket FromRaw(RealmData realmData, JObject data)
+        [OnDeserialized]
+        internal void OnDeserializedCallback(StreamingContext c)
         {
-            return new UpdatePreferencesNotifyPacket
-            {
-                user = ID.Find(realmData.users, (int)data["user"]),
-                preferences = UserPreferences.FromRaw(realmData, (JObject)data["preferences"]),
-            };
+            RealmData realmData = c.Context as RealmData;
+
+            user = ID.Find(realmData.users, userId);
         }
     }
 
+    [Serializable]
     public class AuthentificationErrorPacket : Packet
     {
-        public const string TYPE_CLASS = "authentification-error";
-
         public string error;
 
         public override void Apply(User user, RealmData realmData)
         {
             Log.Error(error);
         }
-
-        public override JObject ToRaw()
-        {
-            return new JObject(
-                new JProperty("type", TYPE_CLASS),
-                new JProperty("error", error)
-            );
-        }
-
-        public static AuthentificationErrorPacket FromRaw(RealmData realmData, JObject data)
-        {
-            return new AuthentificationErrorPacket
-            {
-                error = (string)data["error"]
-            };
-        }
     }
 
+    [Serializable]
     public class ChatMessagePacket : Packet
     {
-        public const string TYPE_CLASS = "chat-message";
-
         public ChatMessage message;
 
         public override void Apply(User user, RealmData realmData)
         {
             realmData.AddChatMessage(this.message);
         }
-
-        public override JObject ToRaw()
-        {
-            return new JObject(
-                new JProperty("type", TYPE_CLASS),
-                new JProperty("message", message.ToRaw())
-            );
-        }
-
-        public new static ChatMessagePacket FromRaw(RealmData realmData, JObject data)
-        {
-            return new ChatMessagePacket {
-                message = ChatMessage.FromRaw(realmData, (JObject)data["message"])
-            };
-        }
     }
-    
+
+    [Serializable]
     public class UserConnectedPacket: Packet
     {
-        public const string TYPE_CLASS = "user-connected";
-
+        [NonSerialized]
         public User user;
+        public int userId;
         public bool connected;
 
         public override void Apply(User cUser, RealmData realmData)
@@ -453,59 +311,39 @@ namespace PhiClient
             this.user.connected = this.connected;
         }
 
-        public override JObject ToRaw()
+        [OnSerializing]
+        internal void OnSerializingCallback(StreamingContext c)
         {
-            return new JObject(
-                new JProperty("type", TYPE_CLASS),
-                new JProperty("user", user.getID()),
-                new JProperty("connected", connected)
-            );
+            userId = user.id;
         }
 
-        public new static UserConnectedPacket FromRaw(RealmData realmData, JObject data)
+        [OnDeserialized]
+        internal void OnDeserializedCallback(StreamingContext c)
         {
-            return new UserConnectedPacket
-            {
-                user = ID.Find(realmData.users, (int)data["user"]),
-                connected = (bool)data["connected"]
-            };
+            RealmData realmData = c.Context as RealmData;
+
+            user = ID.Find(realmData.users, userId);
         }
     }
-    
+
+    [Serializable]
     public class NewUserPacket : Packet
     {
-        public const string TYPE_CLASS = "new-user";
-
         public User user;
 
         public override void Apply(User user, RealmData realmData)
         {
             realmData.AddUser(this.user);
         }
-
-        public override JObject ToRaw()
-        {
-            return new JObject(
-                new JProperty("type", TYPE_CLASS),
-                new JProperty("user", user.ToRaw())
-            );
-        }
-
-        public new static NewUserPacket FromRaw(RealmData realmData, JObject data)
-        {
-            return new NewUserPacket
-            {
-                user = User.FromRaw(realmData, (JObject) data["user"])
-            };
-        }
     }
 
+    [Serializable]
     public class ThingReceivedPacket : Packet
     {
-        public const string TYPE_CLASS = "thing-received";
-
         public RealmThing realmThing;
+        [NonSerialized]
         public User userFrom;
+        private int userFromId;
 
         public override void Apply(User user, RealmData realmData)
         {
@@ -524,22 +362,18 @@ namespace PhiClient
             );
         }
 
-        public override JObject ToRaw()
+        [OnSerializing]
+        internal void OnSerializingCallback(StreamingContext c)
         {
-            return new JObject(
-                new JProperty("type", TYPE_CLASS),
-                new JProperty("realmThing", realmThing.ToRaw()),
-                new JProperty("userFrom", userFrom.getID())
-            );
+            userFromId = userFrom.id;
         }
 
-        public new static ThingReceivedPacket FromRaw(RealmData realmData, JObject data)
+        [OnDeserialized]
+        internal void OnDeserializedCallback(StreamingContext c)
         {
-            return new ThingReceivedPacket
-            {
-                realmThing = RealmThing.FromRaw(realmData, (JObject) data["realmThing"]),
-                userFrom = ID.Find(realmData.users, (int)data["userFrom"])
-            };
+            RealmData realmData = c.Context as RealmData;
+
+            userFrom = ID.Find(realmData.users, userFromId);
         }
     }
 }

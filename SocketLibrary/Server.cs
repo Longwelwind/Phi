@@ -15,15 +15,13 @@ namespace SocketLibrary
     {
         WebSocketServer server;
         List<ServerClient> clients = new List<ServerClient>();
+        
+        public event Action<ServerClient> Connection;
 
-        public delegate void ConnectionHandler(ServerClient client);
-        public event ConnectionHandler Connection;
-
-        public delegate void MessageHandler(ServerClient client, string data);
+        public delegate void MessageHandler(ServerClient client, byte[] data);
         public event MessageHandler Message;
-
-        public delegate void DisconnectionHandler(ServerClient client);
-        public event DisconnectionHandler Disconnection;
+        
+        public event Action<ServerClient> Disconnection;
 
         public Server(IPAddress address, int port)
         {
@@ -54,7 +52,7 @@ namespace SocketLibrary
             this.Connection(client);
         }
 
-        internal void MessageCallback(ServerClient client, string data)
+        internal void MessageCallback(ServerClient client, byte[] data)
         {
             this.Message(client, data);
         }
@@ -81,11 +79,16 @@ namespace SocketLibrary
             this.SendAsync(data, null);
         }
 
+        public void Send(byte[] data)
+        {
+            this.SendAsync(data, null);
+        }
+
         protected override void OnMessage(MessageEventArgs e)
         {
             base.OnMessage(e);
 
-            this.server.MessageCallback(this, e.Data);
+            this.server.MessageCallback(this, e.RawData);
         }
 
         protected override void OnOpen()
@@ -111,8 +114,7 @@ namespace SocketLibrary
     {
         WebSocket client;
 
-        public delegate void MessageHandler(string Packet);
-        public event MessageHandler Message;
+        public event Action<byte[]> Message;
 
         public event Action Connection;
         public event Action Disconnection;
@@ -148,6 +150,11 @@ namespace SocketLibrary
             this.client.SendAsync(data, null);
         }
 
+        public void Send(byte[] data)
+        {
+            this.client.SendAsync(data, null);
+        }
+
         private void OpenCallback(object sender, EventArgs e)
         {
             this.Connection();
@@ -162,7 +169,7 @@ namespace SocketLibrary
         {
             byte[] rawData = e.RawData;
             try {
-                this.Message(e.Data);
+                this.Message(e.RawData);
             } catch (Exception ex)
             {
                 Log.Notify_Exception(ex);

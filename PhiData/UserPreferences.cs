@@ -1,28 +1,10 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
 
 namespace PhiClient
 {
+    [Serializable]
     public class UserPreferences
     {
         public bool receiveItems = true;
-
-        public JObject ToRaw()
-        {
-            return new JObject(
-                new JProperty("receiveItems", receiveItems)
-            );
-        }
-
-        public static UserPreferences FromRaw(RealmData realmData, JObject data)
-        {
-            return new UserPreferences
-            {
-                receiveItems = (bool)data["receiveItems"]
-            };
-        }
     }
 }

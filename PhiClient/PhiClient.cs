@@ -4,7 +4,6 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Verse;
-using Newtonsoft.Json.Linq;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -54,8 +53,15 @@ namespace PhiClient
 
         public void SendPacket(Packet packet)
         {
-            string data = packet.ToRaw().ToString();
-            this.client.Send(data);
+            try
+            {
+                byte[] data = Packet.Serialize(packet);
+                this.client.Send(data);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.ToString());
+            }
         }
 
         public bool IsConnected()
@@ -78,25 +84,32 @@ namespace PhiClient
             Log.Message("Trying to authenticate as " + nickname);
         }
 
-        private void MessageCallback(string data)
+        private void MessageCallback(byte[] data)
         {
-            Log.Message(data);
-            Packet packet = Packet.FromRaw(this.realmData, JObject.Parse(data));
-            Log.Message("Received packet from server: " + packet);
-
-            if (packet is SynchronisationPacket)
+            try
             {
-                // This is the first packet that we receive
-                // It contains all the data of the server
-                SynchronisationPacket syncPacket = (SynchronisationPacket)packet;
+                Packet packet = Packet.Deserialize(data, this.realmData);
+                Log.Message("Received packet from server: " + packet);
 
-                this.realmData = syncPacket.realmData;
-                this.currentUser = syncPacket.user;
+                if (packet is SynchronisationPacket)
+                {
+                    // This is the first packet that we receive
+                    // It contains all the data of the server
+                    SynchronisationPacket syncPacket = (SynchronisationPacket)packet;
+
+                    this.realmData = syncPacket.realmData;
+                    this.currentUser = syncPacket.user;
+                }
+                else
+                {
+                    packet.Apply(this.currentUser, this.realmData);
+                }
             }
-            else
+            catch (Exception e)
             {
-                packet.Apply(this.currentUser, this.realmData);
+                Log.Error(e.ToString());
             }
+            
         }
 
         private string GetHashedAuthKey()
@@ -174,7 +187,6 @@ namespace PhiClient
                 return;
             }
 
-            Log.Message("Sending " + message + " to server");
             this.SendPacket(new PostMessagePacket { message = message });
         }
 

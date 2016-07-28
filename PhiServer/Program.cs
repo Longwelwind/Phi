@@ -3,7 +3,6 @@ using System.Net;
 using SocketLibrary;
 using PhiClient;
 using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
 
 namespace PhiServer
 {
@@ -50,7 +49,7 @@ namespace PhiServer
         private void SendPacket(ServerClient client, Packet packet)
         {
             Console.WriteLine("Sending packet " + packet);
-            client.Send(packet.ToRaw().ToString());
+            client.Send(Packet.Serialize(packet));
         }
 
         private void DisconnectionCallback(ServerClient client)
@@ -66,10 +65,9 @@ namespace PhiServer
             }
         }
 
-        private void MessageCallback(ServerClient client, string data)
+        private void MessageCallback(ServerClient client, byte[] data)
         {
-            Console.WriteLine(data);
-            Packet packet = Packet.FromRaw(this.realmData, JObject.Parse(data));
+            Packet packet = Packet.Deserialize(data, this.realmData);
             Console.WriteLine("Received packet " + packet);
 
             User user;
