@@ -5,27 +5,26 @@ using System.Text;
 using UnityEngine;
 using Verse;
 using RimWorld;
+using PhiClient.UI;
 
 namespace PhiClient
 {
     class UserGiveWindow : Window
     {
         const float TITLE_HEIGHT = 45f;
-
-        const float ROW_HEIGHT = 40f;
-        const float ICON_SIZE = 40f;
-        const float TEXT_LEFT_MARGIN = 50f;
-        const float SEND_BUTTON_WIDTH = 60f;
-        const float COLUMN_WIDTH = 250f;
+        
+        const float CELL_HEIGHT = 30f;
+        const float CELL_WIDTH = 250f;
 
         List<Thing> inventory = new List<Thing>();
         User user;
+        Vector2 scrollPosition = Vector2.zero;
 
         public override Vector2 InitialSize
         {
             get
             {
-                return new Vector2(1250f, (float)Screen.height);
+                return new Vector2(1100f, (float)Screen.height);
             }
         }
 
@@ -67,78 +66,43 @@ namespace PhiClient
 
         public override void DoWindowContents(Rect inRect)
         {
-            /**
-             * Drawing the title
-             */
-            Rect titleArea = inRect.TopPartPixels(TITLE_HEIGHT);
-            Rect inventoryArea = inRect.BottomPartPixels(inRect.height - TITLE_HEIGHT);
+            ListContainer mainCont = new ListContainer();
 
-            string title = "Ship to " + this.user.name;
-            Text.Anchor = TextAnchor.MiddleCenter;
-            Text.Font = GameFont.Medium;
+            // Title
+            mainCont.Add(new TextWidget("Ship to " + this.user.name, GameFont.Medium, TextAnchor.MiddleCenter));
 
-            Widgets.Label(titleArea, title);
+            ListContainer columnCont = new ListContainer();
+            columnCont.spaceBetween = ListContainer.SPACE;
+            mainCont.Add(new ScrollContainer(columnCont, scrollPosition, (s) => { scrollPosition = s; }));
 
-            /**
-             * Drawing the inventory
-             */
-            Rect rowArea = inventoryArea.TopPartPixels(ROW_HEIGHT).LeftPartPixels(COLUMN_WIDTH);
-            bool modified = false;
-            foreach(Thing thing in this.inventory)
+            int countColumns = (int) (inRect.width / CELL_WIDTH);
+            int countRows = Mathf.CeilToInt((float)this.inventory.Count / countColumns);
+            int index = 0;
+            for (int rowIndex = 0;rowIndex < countRows; rowIndex++)
             {
-                // Have we have enough space to draw an other column
-                float availableWidth = inventoryArea.width - (rowArea.x - inventoryArea.x);
-                if (availableWidth < COLUMN_WIDTH)
+                ListContainer rowCont = new ListContainer(ListFlow.ROW);
+                rowCont.spaceBetween = ListContainer.SPACE;
+                columnCont.Add(new HeightContainer(rowCont, CELL_HEIGHT));
+
+                for (int columnIndex = 0;columnIndex < countColumns && index < this.inventory.Count;columnIndex++)
                 {
-                    // We have reached the far right
-                    // Can we fill an other row ?
-                    float availableHeight = inventoryArea.height - (rowArea.y - inventoryArea.y);
-                    if (availableHeight < ROW_HEIGHT)
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        // We begin a new line
-                        rowArea = new Rect(inventoryArea.x, rowArea.y + ROW_HEIGHT, COLUMN_WIDTH, ROW_HEIGHT);
-                    }
+                    Thing thing = this.inventory[index];
+
+                    ListContainer cellCont = new ListContainer(ListFlow.ROW);
+                    rowCont.Add(new Container(cellCont, CELL_WIDTH, CELL_HEIGHT));
+
+                    
+                    cellCont.Add(new Container(new ThingIconWidget(thing), CELL_HEIGHT, CELL_HEIGHT));
+                    cellCont.Add(new TextWidget(thing.Label, GameFont.Small, TextAnchor.MiddleLeft));
+                    cellCont.Add(new WidthContainer(new ButtonWidget("Send", () => { OnSendClick(thing); }), 50f));
+                    
+                    index++;
                 }
 
-                /**
-                 * We draw a row
-                 */
-                // Icon
-                Rect iconArea = rowArea.LeftPartPixels(ICON_SIZE);
-                Widgets.ThingIcon(iconArea, thing);
-                
-                // Thing's name
-                string label = thing.Label;
-                Rect textArea = rowArea.RightPartPixels(rowArea.width - TEXT_LEFT_MARGIN);
-                textArea.height = Text.CalcHeight(label, textArea.width);
-
-                Text.Anchor = TextAnchor.MiddleLeft;
-                Text.Font = GameFont.Small;
-                Widgets.Label(textArea, label);
-
-                // Button to send
-                Rect sendButtonArea = rowArea.RightPartPixels(SEND_BUTTON_WIDTH).ContractedBy(3f);
-
-                if (Widgets.ButtonText(sendButtonArea, "Send"))
-                {
-                    this.OnSendClick(thing);
-                    modified = true;
-                }
-
-                rowArea.x += COLUMN_WIDTH;
             }
 
-            if (modified)
-            {
-                this.CountItems();
-            }
-
-            Text.Font = GameFont.Small;
-            Text.Anchor = TextAnchor.UpperLeft;
+            mainCont.Draw(inRect);
+        
         }
 
         public void OnSendClick(Thing thing)

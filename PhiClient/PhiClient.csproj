@@ -51,6 +51,7 @@
     <Compile Include="UI\ScrollContainer.cs" />
     <Compile Include="UI\TextFieldWidget.cs" />
     <Compile Include="UI\TextWidget.cs" />
+    <Compile Include="UI\ThingIconWidget.cs" />
     <Compile Include="UI\WidthContainer.cs" />
     <Compile Include="UserGiveWindow.cs" />
     <Compile Include="UserSendColonistWindow.cs" />
