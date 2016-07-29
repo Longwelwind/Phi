@@ -23,7 +23,7 @@ namespace PhiClient
         public RealmData realmData;
         public User currentUser;
         public Client client;
-        private Queue<Packet> packetsToProcess = new Queue<Packet>();
+        private Queue<byte[]> packetsToProcess = new Queue<byte[]>();
         public string serverAddress;
 
         public event Action OnUsable;
@@ -79,7 +79,11 @@ namespace PhiClient
             {
                 while (packetsToProcess.Count > 0)
                 {
-                    Packet packet = packetsToProcess.Dequeue();
+                    byte[] data = packetsToProcess.Dequeue();
+
+                    Packet packet = Packet.Deserialize(data, this.realmData);
+                    Log.Message("Received packet from server: " + packet);
+
                     ProcessPacket(packet);
                 }
             }
@@ -132,12 +136,9 @@ namespace PhiClient
         {
             try
             {
-                Packet packet = Packet.Deserialize(data, this.realmData);
-                Log.Message("Received packet from server: " + packet);
-
                 lock (packetsToProcess)
                 {
-                    this.packetsToProcess.Enqueue(packet);
+                    this.packetsToProcess.Enqueue(data);
                 }
 
             }
