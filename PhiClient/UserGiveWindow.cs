@@ -34,7 +34,6 @@ namespace PhiClient
         public UserGiveWindow(User user)
         {
             this.user = user;
-            this.doCloseX = true;
             this.closeOnClickedOutside = true;
             this.doCloseX = true;
             this.closeOnEscapeKey = true;

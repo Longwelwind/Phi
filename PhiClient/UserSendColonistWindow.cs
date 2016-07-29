@@ -15,6 +15,9 @@ namespace PhiClient
         public UserSendColonistWindow(User user)
         {
             this.user = user;
+            this.doCloseX = true;
+            this.closeOnClickedOutside = true;
+            this.closeOnEscapeKey = true;
         }
 
         public override void DoWindowContents(Rect inRect)

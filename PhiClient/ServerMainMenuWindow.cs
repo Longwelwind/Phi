@@ -10,6 +10,12 @@ namespace PhiClient
 {
     class ServerMainMenuWindow : Window
     {
+        public ServerMainMenuWindow()
+        {
+            this.doCloseX = true;
+            this.closeOnClickedOutside = true;
+            this.closeOnEscapeKey = true;
+        }
 
         public override Vector2 InitialSize
         {
@@ -76,12 +82,12 @@ namespace PhiClient
             if (client.IsUsable())
             {
                 cont.Add(new TextWidget("Connected to " + client.serverAddress, GameFont.Small, TextAnchor.MiddleLeft));
-                cont.Add(new WidthContainer(new ButtonWidget("Disconnect", () => { OnDisconnectButtonClick(); }), 120f));
+                cont.Add(new WidthContainer(new ButtonWidget("Disconnect", () => { OnDisconnectButtonClick(); }), 140f));
             }
             else
             {
                 cont.Add(new TextFieldWidget(enteredAddress, (s) => { enteredAddress = s; }));
-                cont.Add(new WidthContainer(new ButtonWidget("Connect", () => { OnConnectButtonClick(); }), 120f));
+                cont.Add(new WidthContainer(new ButtonWidget("Connect", () => { OnConnectButtonClick(); }), 140f));
             }
 
             return cont;
@@ -103,7 +109,7 @@ namespace PhiClient
             mainCont.Add(new HeightContainer(changeNickCont, 30f));
             
             changeNickCont.Add(new TextFieldWidget(wantedNickname, (s) => wantedNickname = s));
-            changeNickCont.Add(new WidthContainer(new ButtonWidget("Change nickname", OnChangeNicknameClick), 120f));
+            changeNickCont.Add(new WidthContainer(new ButtonWidget("Change nickname", OnChangeNicknameClick), 140f));
 
             /**
              * Preferences list
