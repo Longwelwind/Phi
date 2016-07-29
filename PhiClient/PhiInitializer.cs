@@ -16,6 +16,7 @@ namespace PhiClient
             // Since the whole network layer receives messages in a different thread
             // than the game thread, we use this to resynchronize the whole thing.
             GameObject obj = new GameObject("Phi helper objects");
+            
             obj.AddComponent<PhiComponent>();
         }
 
@@ -27,6 +28,11 @@ namespace PhiClient
 
     public class PhiComponent : MonoBehaviour
     {
+        void Start()
+        {
+            DontDestroyOnLoad(gameObject);
+        }
+
         void Update()
         {
             PhiClient.instance.OnUpdate();
