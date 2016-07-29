@@ -76,7 +76,7 @@ namespace PhiClient
             if (client.IsUsable())
             {
                 cont.Add(new TextWidget("Connected to " + client.serverAddress, GameFont.Small, TextAnchor.MiddleLeft));
-                cont.Add(new WidthContainer(new ButtonWidget("Disconnected", () => { OnConnectButtonClick(); }), 120f));
+                cont.Add(new WidthContainer(new ButtonWidget("Disconnect", () => { OnDisconnectButtonClick(); }), 120f));
             }
             else
             {
@@ -135,6 +135,11 @@ namespace PhiClient
 
             client.SetServerAddress(enteredAddress);
             client.TryConnect();
+        }
+
+        public void OnDisconnectButtonClick()
+        {
+            PhiClient.instance.Disconnect();
         }
 
         void OnChangeNicknameClick()

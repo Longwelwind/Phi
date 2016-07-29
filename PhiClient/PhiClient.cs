@@ -41,8 +41,7 @@ namespace PhiClient
             // We clean the old states
             if (this.client != null)
             {
-                this.client.Disconnect();
-                this.realmData = null;
+                this.Disconnect();
             }
 
             this.client = new Client(serverAddress, PORT);
@@ -52,6 +51,13 @@ namespace PhiClient
 
             Log.Message("Try connecting to " + serverAddress);
             client.Connect();
+        }
+
+        public void Disconnect()
+        {
+            this.client.Disconnect();
+            this.client = null;
+            this.realmData = null;
         }
 
         public void SendPacket(Packet packet)
@@ -104,7 +110,7 @@ namespace PhiClient
 
         public bool IsConnected()
         {
-            return this.client.state == WebSocketSharp.WebSocketState.Open;
+            return this.client != null && this.client.state == WebSocketSharp.WebSocketState.Open;
         }
 
         public bool IsUsable()
