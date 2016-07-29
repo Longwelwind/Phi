@@ -45,7 +45,7 @@ namespace PhiClient.UI
             }
             else
             {
-                return children.Sum((c) => c.CalcHeight(width));
+                return children.Sum((c) => c.CalcHeight(width)) + (children.Count - 1) * spaceBetween;
             }
         }
 
