@@ -11,7 +11,7 @@ namespace PhiClient
     [Serializable]
     public class RealmData
     {
-        public const string VERSION = "0.6";
+        public const string VERSION = "0.6.1";
 
         public List<User> users = new List<User>();
         public List<ChatMessage> chat = new List<ChatMessage>();
@@ -92,7 +92,7 @@ namespace PhiClient
 
         public RealmThing ToRealmThing(Thing thing)
         {
-            string stuffDefLabel = thing.Stuff != null ? thing.Stuff.label : "";
+            string stuffDefLabel = thing.Stuff != null ? thing.Stuff.defName : "";
 
             int compQualityRaw = -1;
             CompQuality compQuality = thing.TryGetComp<CompQuality>();
@@ -103,9 +103,9 @@ namespace PhiClient
 
             return new RealmThing
             {
-                thingDefLabel = thing.def.label,
+                thingDefName = thing.def.defName,
                 stackCount = thing.stackCount,
-                stuffDefLabel = stuffDefLabel,
+                stuffDefName = stuffDefLabel,
                 compQuality = compQualityRaw,
                 hitPoints = thing.HitPoints
             };
@@ -113,11 +113,11 @@ namespace PhiClient
 
         public Thing FromRealmThing(RealmThing realmThing)
         {
-            ThingDef thingDef = DefDatabase<ThingDef>.AllDefs.First((def) => { return def.label == realmThing.thingDefLabel; });
+            ThingDef thingDef = DefDatabase<ThingDef>.AllDefs.First((def) => { return def.defName == realmThing.thingDefName; });
             ThingDef stuffDef = null;
-            if (realmThing.stuffDefLabel != "")
+            if (realmThing.stuffDefName != "")
             {
-                stuffDef = DefDatabase<ThingDef>.AllDefs.First((def) => { return def.label == realmThing.stuffDefLabel; });
+                stuffDef = DefDatabase<ThingDef>.AllDefs.First((def) => { return def.defName == realmThing.stuffDefName; });
             }
             Thing thing = ThingMaker.MakeThing(thingDef, stuffDef);
 
@@ -304,8 +304,8 @@ namespace PhiClient
     [Serializable]
     public class RealmThing
     {
-        public string thingDefLabel;
-        public string stuffDefLabel;
+        public string thingDefName;
+        public string stuffDefName;
         public int compQuality;
         public int stackCount;
         public int hitPoints;

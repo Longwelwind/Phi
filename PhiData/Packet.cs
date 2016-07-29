@@ -87,7 +87,7 @@ namespace PhiClient
 
         public override void Apply(User user, RealmData realmData)
         {
-            Console.WriteLine(user.name + " sending " + realmThing.stackCount + "x" + realmThing.thingDefLabel + " to " + userTo.name);
+            Console.WriteLine(user.name + " sending " + realmThing.stackCount + "x" + realmThing.thingDefName + " to " + userTo.name);
             // We rewire the thing to the targeted user
             realmData.NotifyPacket(userTo, new ThingReceivedPacket { userFrom = user, realmThing = realmThing });
         }
