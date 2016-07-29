@@ -30,8 +30,6 @@ namespace PhiClient
 
         public PhiClient()
         {
-            this.realmData = new RealmData();
-
             PhiClient.instance = this;
             this.serverAddress = this.GetServerAddress();
         }
@@ -79,12 +77,19 @@ namespace PhiClient
             {
                 while (packetsToProcess.Count > 0)
                 {
-                    byte[] data = packetsToProcess.Dequeue();
+                    try
+                    {
+                        byte[] data = packetsToProcess.Dequeue();
 
-                    Packet packet = Packet.Deserialize(data, this.realmData);
-                    Log.Message("Received packet from server: " + packet);
+                        Packet packet = Packet.Deserialize(data, this.realmData);
+                        Log.Message("Received packet from server: " + packet);
 
-                    ProcessPacket(packet);
+                        ProcessPacket(packet);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e.ToString());
+                    }
                 }
             }
         }
@@ -134,19 +139,10 @@ namespace PhiClient
 
         private void MessageCallback(byte[] data)
         {
-            try
+            lock (packetsToProcess)
             {
-                lock (packetsToProcess)
-                {
-                    this.packetsToProcess.Enqueue(data);
-                }
-
+                this.packetsToProcess.Enqueue(data);
             }
-            catch (Exception e)
-            {
-                Log.Error(e.ToString());
-            }
-            
         }
 
         private string GetHashedAuthKey()

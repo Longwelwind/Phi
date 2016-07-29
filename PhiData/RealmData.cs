@@ -11,7 +11,7 @@ namespace PhiClient
     [Serializable]
     public class RealmData
     {
-        public const string VERSION = "0.6.1";
+        public const string VERSION = "0.6";
 
         public List<User> users = new List<User>();
         public List<ChatMessage> chat = new List<ChatMessage>();
@@ -154,7 +154,6 @@ namespace PhiClient
     [Serializable]
     public class ChatMessage
     {
-        [NonSerialized]
         public User user;
         public int userId;
         public string message;
@@ -168,9 +167,12 @@ namespace PhiClient
         [OnDeserialized]
         internal void OnDeserializedCallback(StreamingContext c)
         {
-            RealmData realmData = c.Context as RealmData;
+            RealmData realmData = (RealmData) c.Context;
 
-            user = ID.Find(realmData.users, userId);
+            if (realmData != null)
+            {
+                user = ID.Find(realmData.users, userId);
+            }
         }
     }
 
