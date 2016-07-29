@@ -81,16 +81,24 @@ namespace PhiClient
                 {
                     byte[] data = packetsToProcess.Dequeue();
 
-                    Packet packet = Packet.Deserialize(data, this.realmData);
-                    Log.Message("Received packet from server: " + packet);
+                    try
+                    {
+                        Packet packet = Packet.Deserialize(data, this.realmData);
 
-                    ProcessPacket(packet);
+                        ProcessPacket(packet);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e.ToString());
+                    }
                 }
             }
         }
 
         private void ProcessPacket(Packet packet)
         {
+            Log.Message("Received packet from server: " + packet);
+
             if (packet is SynchronisationPacket)
             {
                 // This is the first packet that we receive
@@ -110,7 +118,7 @@ namespace PhiClient
             {
                 packet.Apply(this.currentUser, this.realmData);
             }
-        }
+}
 
         public bool IsConnected()
         {
@@ -119,10 +127,10 @@ namespace PhiClient
 
         public bool IsUsable()
         {
-            return this.IsConnected() && this.realmData != null;
+            return this.IsConnected() && this.realmData != null && this.currentUser != null;
         }
-
-        private void ConnectionCallback()
+        
+        void ConnectionCallback()
         {
             Log.Message("Connected to the server");
 
@@ -134,19 +142,10 @@ namespace PhiClient
 
         private void MessageCallback(byte[] data)
         {
-            try
+            lock (packetsToProcess)
             {
-                lock (packetsToProcess)
-                {
-                    this.packetsToProcess.Enqueue(data);
-                }
-
+                this.packetsToProcess.Enqueue(data);
             }
-            catch (Exception e)
-            {
-                Log.Error(e.ToString());
-            }
-            
         }
 
         private string GetHashedAuthKey()
@@ -209,6 +208,7 @@ namespace PhiClient
 
         public void SetServerAddress(string address)
         {
+            this.serverAddress = address;
             File.WriteAllLines(SERVER_FILE, new string[] { address });
         }
 
