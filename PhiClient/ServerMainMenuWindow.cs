@@ -54,6 +54,7 @@ namespace PhiClient
             PhiClient client = PhiClient.instance;
 
             ListContainer cont = new ListContainer();
+            cont.spaceBetween = ListContainer.SPACE;
             cont.Add(new HeightContainer(DoHeader(), 30f));
 
             if (client.IsUsable())
