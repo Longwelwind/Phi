@@ -200,6 +200,13 @@ namespace PhiClient
                 openDelay = 110,
                 leaveSlag = false
             });
+
+            Find.LetterStack.ReceiveLetter(
+                "Colonist pod",
+                "A colonist was sent to you by " + userFrom.name,
+                LetterType.Good,
+                position
+            );
         }
 
         [OnSerializing]
