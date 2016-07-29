@@ -23,7 +23,28 @@ namespace PhiClient
         {
             base.PreOpen();
 
-            this.enteredAddress = PhiClient.instance.serverAddress;
+            PhiClient client = PhiClient.instance;
+
+            this.enteredAddress = client.serverAddress;
+
+            if (client.IsUsable())
+            {
+                OnUsableCallback();
+            }
+            client.OnUsable += OnUsableCallback;
+        }
+
+        public override void PostClose()
+        {
+            base.PostClose();
+
+            PhiClient client = PhiClient.instance;
+            client.OnUsable -= OnUsableCallback;
+        }
+
+        void OnUsableCallback()
+        {
+            this.wantedNickname = PhiClient.instance.currentUser.name;
         }
 
         Vector2 scrollPosition = Vector2.zero;
@@ -43,13 +64,53 @@ namespace PhiClient
             cont.Draw(inRect);
         }
 
+        string enteredAddress = "";
+
+        public Displayable DoHeader()
+        {
+            PhiClient client = PhiClient.instance;
+            ListContainer cont = new ListContainer(ListFlow.ROW);
+            cont.spaceBetween = ListContainer.SPACE;
+
+            if (client.IsUsable())
+            {
+                cont.Add(new TextWidget("Connected to " + client.serverAddress, GameFont.Small, TextAnchor.MiddleLeft));
+                cont.Add(new WidthContainer(new ButtonWidget("Disconnected", () => { OnConnectButtonClick(); }), 120f));
+            }
+            else
+            {
+                cont.Add(new TextFieldWidget(enteredAddress, (s) => { enteredAddress = s; }));
+                cont.Add(new WidthContainer(new ButtonWidget("Connect", () => { OnConnectButtonClick(); }), 120f));
+            }
+
+            return cont;
+        }
+
+        string wantedNickname;
+
         public Displayable DoConnectedContent()
         {
             PhiClient client = PhiClient.instance;
-            UserPreferences pref = client.currentUser.preferences;
+            ListContainer mainCont = new ListContainer();
+            mainCont.spaceBetween = ListContainer.SPACE;
 
+            /**
+             * Changing your nickname
+             */
+            ListContainer changeNickCont = new ListContainer(ListFlow.ROW);
+            changeNickCont.spaceBetween = ListContainer.SPACE;
+            mainCont.Add(new HeightContainer(changeNickCont, 30f));
+            
+            changeNickCont.Add(new TextFieldWidget(wantedNickname, (s) => wantedNickname = s));
+            changeNickCont.Add(new WidthContainer(new ButtonWidget("Change nickname", OnChangeNicknameClick), 120f));
+
+            /**
+             * Preferences list
+             */
+            UserPreferences pref = client.currentUser.preferences;
             ListContainer twoColumn = new ListContainer(ListFlow.ROW);
             twoColumn.spaceBetween = ListContainer.SPACE;
+            mainCont.Add(twoColumn);
 
             ListContainer firstColumn = new ListContainer();
             twoColumn.Add(firstColumn);
@@ -64,29 +125,7 @@ namespace PhiClient
             ListContainer secondColumn = new ListContainer();
             twoColumn.Add(secondColumn);
 
-            return twoColumn;
-        }
-
-        string enteredAddress = "";
-
-        public Displayable DoHeader()
-        {
-            PhiClient client = PhiClient.instance;
-            ListContainer cont = new ListContainer(ListFlow.ROW);
-            cont.spaceBetween = ListContainer.SPACE;
-
-            if (client.IsUsable())
-            {
-                cont.Add(new TextWidget("Connected to" + client.serverAddress, GameFont.Small, TextAnchor.MiddleLeft));
-                cont.Add(new WidthContainer(new ButtonWidget("Disconnected", () => { OnConnectButtonClick(); }), 120f));
-            }
-            else
-            {
-                cont.Add(new TextFieldWidget(enteredAddress, (s) => { enteredAddress = s; }));
-                cont.Add(new WidthContainer(new ButtonWidget("Connect", () => { OnConnectButtonClick(); }), 120f));
-            }
-
-            return cont;
+            return mainCont;
         }
 
         public void OnConnectButtonClick()
@@ -95,6 +134,11 @@ namespace PhiClient
 
             client.SetServerAddress(enteredAddress);
             client.TryConnect();
+        }
+
+        void OnChangeNicknameClick()
+        {
+            PhiClient.instance.ChangeNickname(wantedNickname);
         }
     }
 }

@@ -26,6 +26,8 @@ namespace PhiClient
         private Queue<Packet> packetsToProcess = new Queue<Packet>();
         public string serverAddress;
 
+        public event Action OnUsable;
+
         public PhiClient()
         {
             this.realmData = new RealmData();
@@ -87,6 +89,12 @@ namespace PhiClient
 
                 this.realmData = syncPacket.realmData;
                 this.currentUser = syncPacket.user;
+
+                // The instance has now became usable
+                if (OnUsable != null)
+                {
+                    OnUsable();
+                }
             }
             else
             {
@@ -218,5 +226,9 @@ namespace PhiClient
             thing.Destroy();
         }
         
+        public void ChangeNickname(string newNickname)
+        {
+            this.SendPacket(new ChangeNicknamePacket { name = newNickname });
+        }
     }
 }

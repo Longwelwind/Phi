@@ -59,6 +59,7 @@ namespace PhiClient
             // Is this nick available ?
             if (realmData.users.Any((u) => u.name == name))
             {
+                realmData.NotifyPacket(user, new ErrorPacket { error = "Nickname " + name + " is already taken"});
                 return;
             }
 
@@ -192,7 +193,7 @@ namespace PhiClient
 
         public override void Apply(User user, RealmData realmData)
         {
-            Pawn pawn = realmData.FromRealmPawn(realmPawn);
+            Pawn pawn = realmPawn.FromRealmPawn(realmData);
 
             // We drop it
             IntVec3 position = DropCellFinder.RandomDropSpot();
@@ -374,6 +375,18 @@ namespace PhiClient
             RealmData realmData = c.Context as RealmData;
 
             userFrom = ID.Find(realmData.users, userFromId);
+        }
+    }
+
+    [Serializable]
+    public class ErrorPacket : Packet
+    {
+        public string error;
+
+        public override void Apply(User user, RealmData realmData)
+        {
+            Dialog_Confirm d = new Dialog_Confirm(error, () => { });
+            Find.WindowStack.Add(d);
         }
     }
 }

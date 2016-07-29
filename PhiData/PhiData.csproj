@@ -38,6 +38,7 @@
     <Compile Include="Packet.cs" />
     <Compile Include="RealmData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Transaction.cs" />
     <Compile Include="UserPreferences.cs" />
   </ItemGroup>
   <ItemGroup>
