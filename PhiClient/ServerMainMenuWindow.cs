@@ -15,7 +15,7 @@ namespace PhiClient
         {
             get
             {
-                return new Vector2(600, 600);
+                return new Vector2(700, 700);
             }
         }
 
