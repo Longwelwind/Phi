@@ -133,13 +133,13 @@ namespace PhiClient
         {
             PhiClient phiClient = PhiClient.instance;
             // We open a trade window with this user
-            if (user.preferences.receiveItems)
+            if (user.preferences.receiveColonists)
             {
                 Find.WindowStack.Add(new UserSendColonistWindow(user));
             }
             else
             {
-                Messages.Message(user.name + " does not accept colonists", MessageSound.Silent);
+                Messages.Message(user.name + " does not accept colonists", MessageSound.RejectInput);
             }
         }
 
@@ -153,7 +153,7 @@ namespace PhiClient
             }
             else
             {
-                Messages.Message(user.name + " does not accept items", MessageSound.Silent);
+                Messages.Message(user.name + " does not accept items", MessageSound.RejectInput);
             }
         }
     }

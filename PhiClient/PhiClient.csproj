@@ -104,16 +104,13 @@
     <PostBuildEvent>copy /Y "$(TargetDir)PhiClient.dll" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\PhiClient\Assemblies\PhiClient.dll"
 copy /Y "$(TargetDir)PhiClient.dll" "D:\Documents\IGG-RimWorld.Alpha.14\Mods\PhiClient\Assemblies\PhiClient.dll"
 
-copy /Y "$(TargetDir)websocket-sharp.dll" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Phi\Assemblies\1-websocket-sharp.dll"
+copy /Y "$(TargetDir)websocket-sharp.dll" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\PhiClient\Assemblies\1-websocket-sharp.dll"
 copy /Y "$(TargetDir)websocket-sharp.dll" "D:\Documents\IGG-RimWorld.Alpha.14\Mods\PhiClient\Assemblies\1-websocket-sharp.dll"
 
-copy /Y "$(TargetDir)SocketLibrary.dll" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Phi\Assemblies\2-SocketLibrary.dll"
+copy /Y "$(TargetDir)SocketLibrary.dll" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\PhiClient\Assemblies\2-SocketLibrary.dll"
 copy /Y "$(TargetDir)SocketLibrary.dll" "D:\Documents\IGG-RimWorld.Alpha.14\Mods\PhiClient\Assemblies\2-SocketLibrary.dll"
 
-copy /Y "$(TargetDir)Newtonsoft.Json.dll" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Phi\Assemblies\1-Newtonsoft.Json.dll"
-copy /Y "$(TargetDir)Newtonsoft.Json.dll" "D:\Documents\IGG-RimWorld.Alpha.14\Mods\PhiClient\Assemblies\1-Newtonsoft.Json.dll"
-
-copy /Y "$(TargetDir)PhiData.dll" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Phi\Assemblies\3-PhiData.dll"
+copy /Y "$(TargetDir)PhiData.dll" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\PhiClient\Assemblies\3-PhiData.dll"
 copy /Y "$(TargetDir)PhiData.dll" "D:\Documents\IGG-RimWorld.Alpha.14\Mods\PhiClient\Assemblies\3-PhiData.dll"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

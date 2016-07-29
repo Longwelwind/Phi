@@ -122,6 +122,12 @@ namespace PhiClient
                 client.UpdatePreferences();
             }));
 
+            firstColumn.Add(new CheckboxLabeledWidget("Allow receiving colonists (EXPERIMENTAL)", pref.receiveColonists, (b) =>
+            {
+                pref.receiveColonists = b;
+                client.UpdatePreferences();
+            }));
+
             // Just to take spaces while the column is empty
             ListContainer secondColumn = new ListContainer();
             twoColumn.Add(secondColumn);

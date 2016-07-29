@@ -6,5 +6,6 @@ namespace PhiClient
     public class UserPreferences
     {
         public bool receiveItems = true;
+        public bool receiveColonists = false;
     }
 }
