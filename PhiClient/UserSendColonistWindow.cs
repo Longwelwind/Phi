@@ -38,7 +38,7 @@ namespace PhiClient
         public void OnColonistClick(Pawn pawn)
         {
             PhiClient client = PhiClient.instance;
-            client.SendPacket(new SendColonistPacket { userTo=user, realmPawn= client.realmData.ToRealmPawn(pawn) });
+            client.SendPacket(new SendColonistPacket { userTo=user, realmPawn= RealmPawn.ToRealmPawn(pawn, client.realmData) });
         }
     }
 }

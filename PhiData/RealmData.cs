@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using UnityEngine;
 using Verse;
 
 namespace PhiClient
@@ -88,36 +89,6 @@ namespace PhiClient
 
             // We broadcast the message
             this.BroadcastPacket(new ChatMessagePacket { message = chatMessage });
-        }
-
-        public RealmPawn ToRealmPawn(Pawn pawn)
-        {
-            Dictionary<string, int> skills = new Dictionary<string, int>();
-            foreach (SkillRecord rec in pawn.skills.skills)
-            {
-                skills.Add(rec.def.label, rec.level);
-            }
-
-            return new RealmPawn
-            {
-                skills = skills
-            };
-        }
-
-        public Pawn FromRealmPawn(RealmPawn realmPawn)
-        {
-            PawnKindDef pawnKindDef = PawnKindDefOf.Villager;
-            Pawn pawn = PawnGenerator.GeneratePawn(pawnKindDef, Faction.OfPlayer);
-
-            // We attribute the skills level
-            foreach (KeyValuePair<string, int> rec in realmPawn.skills.AsEnumerable())
-            {
-                SkillDef skillDef = DefDatabase<SkillDef>.AllDefs.First((def) => def.label == rec.Key );
-
-                pawn.skills.GetSkill(skillDef).level = rec.Value;
-            }
-
-            return pawn;
         }
 
         public RealmThing ToRealmThing(Thing thing)
@@ -208,7 +179,112 @@ namespace PhiClient
     [Serializable]
     public class RealmPawn
     {
-        public Dictionary<string, int> skills;
+        public string[] name;
+        public Backstory childhood;
+        public Backstory adulthood;
+        public float[] hairColor;
+        public List<RealmSkillRecord> skills;
+        public List<RealmTrait> traits;
+        public Gender gender;
+        public float skinWhiteness;
+
+        public static RealmPawn ToRealmPawn(Pawn pawn, RealmData realmData)
+        {
+            List<RealmSkillRecord> skills = new List<RealmSkillRecord>();
+            foreach (SkillRecord rec in pawn.skills.skills)
+            {
+                skills.Add(new RealmSkillRecord
+                {
+                    skillDefLabel = rec.def.label,
+                    level = rec.level,
+                    passion = rec.passion
+                });
+            }
+
+            List<RealmTrait> traits = new List<RealmTrait>();
+            foreach (Trait trait in pawn.story.traits.allTraits)
+            {
+                traits.Add(new RealmTrait
+                {
+                    traitDefLabel = trait.def.label,
+                    degree = trait.Degree
+                });
+            }
+
+            Color hairColor = pawn.story.hairColor;
+
+            return new RealmPawn
+            {
+                name = pawn.Name.ToStringFull.Split(' '),
+                gender = pawn.gender,
+                skills = skills,
+                traits = traits,
+                skinWhiteness = pawn.story.skinWhiteness,
+                childhood = pawn.story.childhood,
+                adulthood = pawn.story.adulthood,
+                hairColor = new float[]
+                {
+                    hairColor.r,
+                    hairColor.g,
+                    hairColor.b,
+                    hairColor.a
+                }
+            };
+        }
+
+        public Pawn FromRealmPawn(RealmData realmData)
+        {
+            PawnKindDef pawnKindDef = PawnKindDefOf.Villager;
+            Pawn pawn = PawnGenerator.GeneratePawn(pawnKindDef, Faction.OfPlayer);
+
+            // Name, by default, we keep the default one
+            Name nameObj = pawn.Name;
+            switch (name.Count())
+            {
+                case 1:
+                    nameObj = new NameSingle(name[0]);
+                    break;
+                case 2:
+                    nameObj = new NameTriple(name[0], name[1], name[1]);
+                    break;
+                case 3:
+                    nameObj = new NameTriple(name[0], name[1], name[2]);
+                    break;
+            }
+
+            pawn.Name = nameObj;
+
+            // # Story
+            Pawn_StoryTracker story = pawn.story;
+            story.childhood = childhood;
+            story.adulthood = adulthood;
+            story.skinWhiteness = skinWhiteness;
+            story.hairColor = new Color(hairColor[0], hairColor[1], hairColor[2], hairColor[3]);
+
+            // Traits
+            TraitSet traitSet = story.traits;
+            traitSet.allTraits.Clear();
+            foreach (RealmTrait trait in traits)
+            {
+                TraitDef traitDef = DefDatabase<TraitDef>.AllDefs.First((td) => td.label == trait.traitDefLabel);
+                traitSet.allTraits.Add(new Trait(traitDef, trait.degree));
+            }
+
+            // Gender
+            pawn.gender = gender;
+
+            // We attribute the skills level
+            foreach (RealmSkillRecord rec in skills.AsEnumerable())
+            {
+                SkillDef skillDef = DefDatabase<SkillDef>.AllDefs.First((def) => def.label == rec.skillDefLabel);
+
+                SkillRecord skill = pawn.skills.GetSkill(skillDef);
+                skill.level = rec.level;
+                skill.passion = rec.passion;
+            }
+
+            return pawn;
+        }
     }
 
     [Serializable]
@@ -216,23 +292,14 @@ namespace PhiClient
     {
         public string skillDefLabel;
         public int level;
+        public Passion passion;
+    }
 
-        public JObject ToRaw()
-        {
-            return new JObject(
-                new JProperty("skillDefLabel", skillDefLabel),
-                new JProperty("level", level)    
-            );
-        }
-
-        public static RealmSkillRecord FromRaw(RealmData realmData, JObject data)
-        {
-            return new RealmSkillRecord
-            {
-                skillDefLabel = (string) data["skillDefLabel"],
-                level = (int) data["level"]
-            };
-        }
+    [Serializable]
+    public class RealmTrait
+    {
+        public string traitDefLabel;
+        public int degree;
     }
 
     [Serializable]
