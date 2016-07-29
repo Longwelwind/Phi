@@ -20,6 +20,9 @@ namespace PhiClient
         User user;
         Vector2 scrollPosition = Vector2.zero;
 
+        string filterTerm = "";
+        List<Thing> filteredInventory;
+
         public override Vector2 InitialSize
         {
             get
@@ -56,6 +59,15 @@ namespace PhiClient
                     }
                 }
             }
+
+            FilterInventory();
+        }
+
+        public void FilterInventory()
+        {
+            this.filteredInventory = this.inventory.Where((t) => t.Label.Contains(filterTerm)).ToList();
+            // To avoid problems with the scrolling bar if the new height is lower than the old height
+            scrollPosition = Vector2.zero;
         }
 
         public override void PreOpen()
@@ -67,16 +79,28 @@ namespace PhiClient
         public override void DoWindowContents(Rect inRect)
         {
             ListContainer mainCont = new ListContainer();
+            mainCont.spaceBetween = ListContainer.SPACE;
 
             // Title
             mainCont.Add(new TextWidget("Ship to " + this.user.name, GameFont.Medium, TextAnchor.MiddleCenter));
+            
+            /**
+             * Draw the search input
+             */
+            mainCont.Add(new Container(new TextFieldWidget(filterTerm, (s) => {
+                filterTerm = s;
+                FilterInventory();
+            }), 150f, 30f));
 
+            /**
+             * Drawing the inventory
+             */
             ListContainer columnCont = new ListContainer();
             columnCont.spaceBetween = ListContainer.SPACE;
             mainCont.Add(new ScrollContainer(columnCont, scrollPosition, (s) => { scrollPosition = s; }));
 
             int countColumns = (int) (inRect.width / CELL_WIDTH);
-            int countRows = Mathf.CeilToInt((float)this.inventory.Count / countColumns);
+            int countRows = Mathf.CeilToInt((float)this.filteredInventory.Count / countColumns);
             int index = 0;
             for (int rowIndex = 0;rowIndex < countRows; rowIndex++)
             {
@@ -84,9 +108,9 @@ namespace PhiClient
                 rowCont.spaceBetween = ListContainer.SPACE;
                 columnCont.Add(new HeightContainer(rowCont, CELL_HEIGHT));
 
-                for (int columnIndex = 0;columnIndex < countColumns && index < this.inventory.Count;columnIndex++)
+                for (int columnIndex = 0;columnIndex < countColumns && index < this.filteredInventory.Count;columnIndex++)
                 {
-                    Thing thing = this.inventory[index];
+                    Thing thing = this.filteredInventory[index];
 
                     ListContainer cellCont = new ListContainer(ListFlow.ROW);
                     rowCont.Add(new Container(cellCont, CELL_WIDTH, CELL_HEIGHT));
@@ -98,12 +122,14 @@ namespace PhiClient
                     index++;
                 }
             }
+
             mainCont.Draw(inRect);
         }
 
         public void OnSendClick(Thing thing)
         {
             PhiClient.instance.SendThing(this.user, thing);
+            CountItems();
         }
     }
 }
