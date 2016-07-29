@@ -116,10 +116,12 @@ namespace PhiClient
         {
             user.preferences = preferences;
             realmData.BroadcastPacketExcept(new UpdatePreferencesNotifyPacket
-            {
-                user = user,
-                preferences = preferences
-            }, user);
+                {
+                    user = user,
+                    preferences = preferences
+                },
+                user
+            );
         }
     }
 

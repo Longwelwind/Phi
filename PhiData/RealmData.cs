@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using UnityEngine;
 using Verse;
 
@@ -153,8 +154,24 @@ namespace PhiClient
     [Serializable]
     public class ChatMessage
     {
+        [NonSerialized]
         public User user;
+        public int userId;
         public string message;
+
+        [OnSerializing]
+        internal void OnSerializingCallback(StreamingContext c)
+        {
+            userId = user.id;
+        }
+
+        [OnDeserialized]
+        internal void OnDeserializedCallback(StreamingContext c)
+        {
+            RealmData realmData = c.Context as RealmData;
+
+            user = ID.Find(realmData.users, userId);
+        }
     }
 
     [Serializable]
@@ -192,9 +209,16 @@ namespace PhiClient
 
             Color hairColor = pawn.story.hairColor;
 
+            string[] name = pawn.Name.ToStringFull.Split(' ');
+            // Rimworld adds ' before and after the second name
+            if (name.Count() == 3)
+            {
+                name[1] = name[1].Replace("'", "");
+            }
+
             return new RealmPawn
             {
-                name = pawn.Name.ToStringFull.Split(' '),
+                name = name,
                 gender = pawn.gender,
                 skills = skills,
                 traits = traits,
