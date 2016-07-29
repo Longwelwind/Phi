@@ -1,9 +1,7 @@
-﻿using Newtonsoft.Json.Linq;
-using RimWorld;
+﻿using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
 using UnityEngine;
 using Verse;
 
@@ -157,31 +155,12 @@ namespace PhiClient
     {
         public User user;
         public string message;
-
-        public JObject ToRaw()
-        {
-            JObject obj = new JObject();
-            obj.Add("user", new JValue(user.getID()));
-            obj.Add("message", new JValue(message));
-            return obj;
-        }
-
-        public static ChatMessage FromRaw(RealmData realmData, JObject data)
-        {
-            return new ChatMessage
-            {
-                user = ID.Find(realmData.users, data.Value<int>("user")),
-                message = data.Value<string>("message")
-            };
-        }
     }
 
     [Serializable]
     public class RealmPawn
     {
         public string[] name;
-        public Backstory childhood;
-        public Backstory adulthood;
         public float[] hairColor;
         public List<RealmSkillRecord> skills;
         public List<RealmTrait> traits;
@@ -206,7 +185,7 @@ namespace PhiClient
             {
                 traits.Add(new RealmTrait
                 {
-                    traitDefLabel = trait.def.label,
+                    traitDefName = trait.def.defName,
                     degree = trait.Degree
                 });
             }
@@ -220,8 +199,6 @@ namespace PhiClient
                 skills = skills,
                 traits = traits,
                 skinWhiteness = pawn.story.skinWhiteness,
-                childhood = pawn.story.childhood,
-                adulthood = pawn.story.adulthood,
                 hairColor = new float[]
                 {
                     hairColor.r,
@@ -256,8 +233,6 @@ namespace PhiClient
 
             // # Story
             Pawn_StoryTracker story = pawn.story;
-            story.childhood = childhood;
-            story.adulthood = adulthood;
             story.skinWhiteness = skinWhiteness;
             story.hairColor = new Color(hairColor[0], hairColor[1], hairColor[2], hairColor[3]);
 
@@ -266,7 +241,7 @@ namespace PhiClient
             traitSet.allTraits.Clear();
             foreach (RealmTrait trait in traits)
             {
-                TraitDef traitDef = DefDatabase<TraitDef>.AllDefs.First((td) => td.label == trait.traitDefLabel);
+                TraitDef traitDef = DefDatabase<TraitDef>.AllDefs.First((td) => td.defName == trait.traitDefName);
                 traitSet.allTraits.Add(new Trait(traitDef, trait.degree));
             }
 
@@ -298,7 +273,7 @@ namespace PhiClient
     [Serializable]
     public class RealmTrait
     {
-        public string traitDefLabel;
+        public string traitDefName;
         public int degree;
     }
 
@@ -310,28 +285,5 @@ namespace PhiClient
         public int compQuality;
         public int stackCount;
         public int hitPoints;
-
-        public JObject ToRaw()
-        {
-            JObject obj = new JObject();
-            obj.Add("thingDefLabel", new JValue(thingDefLabel));
-            obj.Add("stuffDefLabel", new JValue(stuffDefLabel));
-            obj.Add("stackCount", new JValue(stackCount));
-            obj.Add("compQuality", new JValue(compQuality));
-            obj.Add("hitPoints", new JValue(hitPoints));
-            return obj;
-        }
-
-        public static RealmThing FromRaw(RealmData realmData, JObject data)
-        {
-            return new RealmThing
-            {
-                thingDefLabel = data.Value<string>("thingDefLabel"),
-                stuffDefLabel = data.Value<string>("stuffDefLabel"),
-                stackCount = data.Value <int>("stackCount"),
-                compQuality = data.Value <int>("compQuality"),
-                hitPoints = data.Value <int>("hitPoints")
-            };
-        }
     }
 }
