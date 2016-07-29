@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PhiClient.UI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,27 +19,25 @@ namespace PhiClient
 
         public override void DoWindowContents(Rect inRect)
         {
+            ListContainer cont = new ListContainer();
+
+            cont.Add(new TextWidget("ATTENTION: This feature is highly experimental. Only use it if you're playing with a save you could potentially corrupt."));
+
             float beginY = 0f;
             foreach (Pawn colonist in Find.MapPawns.FreeColonists)
             {
-                string label = colonist.Label;
-                float height = Text.CalcHeight(label, inRect.width);
-
-                Rect rowArea = new Rect(inRect.x, inRect.y + beginY, inRect.width, height);
-
-                if (Widgets.ButtonText(rowArea, label, false))
-                {
-                    OnColonistClick(colonist);
-                }
-
-                beginY += height;
+                cont.Add(new ButtonWidget(colonist.Label, () => OnColonistClick(colonist), false));
             }
+
+            cont.Draw(inRect);
         }
 
         public void OnColonistClick(Pawn pawn)
         {
             PhiClient client = PhiClient.instance;
             client.SendPacket(new SendColonistPacket { userTo=user, realmPawn= RealmPawn.ToRealmPawn(pawn, client.realmData) });
+
+            pawn.Destroy(DestroyMode.Vanish);
         }
     }
 }
