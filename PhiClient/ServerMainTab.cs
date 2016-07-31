@@ -28,11 +28,15 @@ namespace PhiClient
             mainList.spaceBetween = ListContainer.SPACE;
             
             mainList.Add(new TextWidget("Realm", GameFont.Medium, TextAnchor.MiddleCenter));
-            mainList.Add(new ListContainer(new List<Displayable>()
+
+            ListContainer rowBodyContainer = new ListContainer(new List<Displayable>()
             {
                 DoChat(),
                 new WidthContainer(DoBodyRightBar(), STATUS_AREA_WIDTH)
-            }, ListFlow.ROW));
+            }, ListFlow.ROW);
+            rowBodyContainer.spaceBetween = ListContainer.SPACE;
+
+            mainList.Add(rowBodyContainer);
             mainList.Add(new HeightContainer(DoFooter(), 30f));
 
             mainList.Draw(inRect);

@@ -7,6 +7,7 @@ using Verse;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Collections;
 
 namespace PhiClient
 {
@@ -23,7 +24,7 @@ namespace PhiClient
         public RealmData realmData;
         public User currentUser;
         public Client client;
-        private Queue<byte[]> packetsToProcess = new Queue<byte[]>();
+        private Queue packetsToProcess = Queue.Synchronized(new Queue());
         public string serverAddress;
 
         public event Action OnUsable;
@@ -73,23 +74,20 @@ namespace PhiClient
 
         internal void OnUpdate()
         {
-            lock (packetsToProcess)
+            while (packetsToProcess.Count > 0)
             {
-                while (packetsToProcess.Count > 0)
+                try
                 {
-                    try
-                    {
-                        byte[] data = packetsToProcess.Dequeue();
+                    byte[] data = (byte[]) packetsToProcess.Dequeue();
 
-                        Packet packet = Packet.Deserialize(data, this.realmData);
-                        Log.Message("Received packet from server: " + packet);
+                    Packet packet = Packet.Deserialize(data, this.realmData);
+                    Log.Message("Received packet from server: " + packet);
 
-                        ProcessPacket(packet);
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Error(e.ToString());
-                    }
+                    ProcessPacket(packet);
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e.ToString());
                 }
             }
         }
@@ -139,10 +137,7 @@ namespace PhiClient
 
         private void MessageCallback(byte[] data)
         {
-            lock (packetsToProcess)
-            {
-                this.packetsToProcess.Enqueue(data);
-            }
+            this.packetsToProcess.Enqueue(data);
         }
 
         private string GetHashedAuthKey()
@@ -206,6 +201,7 @@ namespace PhiClient
         public void SetServerAddress(string address)
         {
             File.WriteAllLines(SERVER_FILE, new string[] { address });
+            this.serverAddress = address;
         }
 
         public void UpdatePreferences()

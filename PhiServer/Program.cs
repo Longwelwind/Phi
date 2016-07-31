@@ -94,18 +94,22 @@ namespace PhiServer
                 if (user == null)
                 {
                     user = this.realmData.ServerAddUser(authPacket.name, authPacket.hashedKey);
+                    user.connected = true;
 
                     Console.WriteLine("Creating user \"" + user.name + "\" with ID " + user.getID());
 
                     // We send a notify to all users connected about the new user
                     this.realmData.BroadcastPacketExcept(new NewUserPacket { user = user }, user);
                 }
+                else
+                {
+                    // We send a connect notification to all users
+                    user.connected = true;
+                    this.realmData.BroadcastPacketExcept(new UserConnectedPacket { user = user, connected = true }, user);
+                }
 
                 this.connectedUsers.Add(client, user);
 
-                // We send a connect notification to all users
-                user.connected = true;
-                this.realmData.BroadcastPacketExcept(new UserConnectedPacket { user = user, connected = true }, user);
 
                 // We respond with a StatePacket that contains all synchronisation data
                 this.SendPacket(client, new SynchronisationPacket { user = user, realmData = this.realmData });

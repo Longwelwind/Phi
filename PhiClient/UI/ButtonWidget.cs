@@ -33,7 +33,7 @@ namespace PhiClient.UI
 
         public override bool IsFluidHeight()
         {
-            return !drawBackground;
+            return drawBackground;
         }
 
         public override float CalcHeight(float width)
