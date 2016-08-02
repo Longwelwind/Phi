@@ -37,6 +37,7 @@ namespace PhiClient
             this.closeOnClickedOutside = true;
             this.doCloseX = true;
             this.closeOnEscapeKey = true;
+
         }
 
         public void CountItems()

@@ -15,12 +15,13 @@ namespace PhiClient
 
         public List<User> users = new List<User>();
         public List<ChatMessage> chat = new List<ChatMessage>();
+        public List<Transaction> transactions = new List<Transaction>();
 
         public int lastUserGivenId = 0;
-
+        
         public delegate void PacketHandler(User user, Packet packet);
         [field: NonSerialized]
-        public event PacketHandler Packet;
+        public event PacketHandler PacketToClient;
 
         public void AddUser(User user)
         {
@@ -33,13 +34,23 @@ namespace PhiClient
         }
 
         /**
+         * Client Method
+         */
+        public event Action<Packet> PacketToServer;
+
+        public void NotifyPacketToServer(Packet packet)
+        {
+            this.PacketToServer(packet);
+        }
+        
+        /**
          * Server Method
          */
         public void NotifyPacket(User user, Packet packet)
         {
             // We ask the "upper-level" to transmit this packet to the remote
             // locations
-            this.Packet(user, packet);
+            this.PacketToClient(user, packet);
         }
 
         public void BroadcastPacket(Packet packet)
@@ -306,6 +317,8 @@ namespace PhiClient
     [Serializable]
     public class RealmThing
     {
+        public int senderThingId;
+
         public string thingDefName;
         public string stuffDefName;
         public int compQuality;

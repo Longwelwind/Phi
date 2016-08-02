@@ -23,7 +23,7 @@ namespace PhiServer
             this.server.Disconnection += this.DisconnectionCallback;
 
             this.realmData = new RealmData();
-            this.realmData.Packet += this.RealmPacketCallback;
+            this.realmData.PacketToClient += this.RealmPacketCallback;
         }
 
         private void ConnectionCallback(ServerClient client)
