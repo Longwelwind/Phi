@@ -64,9 +64,14 @@ namespace PhiClient
 
         public void FilterInventory()
         {
-            this.filteredInventory = this.inventory.Where((t) => t.Label.Contains(filterTerm)).ToList();
+            this.filteredInventory = this.inventory.Where((t) => ContainsStringIgnoreCase(t.Label, this.filterTerm)).ToList();
             // To avoid problems with the scrolling bar if the new height is lower than the old height
             scrollPosition = Vector2.zero;
+        }
+
+        private Boolean ContainsStringIgnoreCase(string hay, string needle)
+        {
+            return hay.IndexOf(needle, StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         public override void PreOpen()
