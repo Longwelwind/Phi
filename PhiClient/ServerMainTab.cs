@@ -18,6 +18,11 @@ namespace PhiClient
 
         string enteredMessage = "";
 
+        public ServerMainTab()
+        {
+            this.absorbInputAroundWindow = true;
+        }
+
         public override void DoWindowContents(Rect inRect)
         {
             base.DoWindowContents(inRect);
