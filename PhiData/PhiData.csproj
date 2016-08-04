@@ -38,7 +38,12 @@
     <Compile Include="Packet.cs" />
     <Compile Include="RealmData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Transaction.cs" />
+    <Compile Include="TransactionSystem\ConfirmServerTransactionPacket.cs" />
+    <Compile Include="TransactionSystem\ConfirmTransactionPacket.cs" />
+    <Compile Include="TransactionSystem\ItemTransaction.cs" />
+    <Compile Include="TransactionSystem\ReceiveTransactionPacket.cs" />
+    <Compile Include="TransactionSystem\StartTransactionPacket.cs" />
+    <Compile Include="TransactionSystem\Transaction.cs" />
     <Compile Include="UserPreferences.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -56,6 +61,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.

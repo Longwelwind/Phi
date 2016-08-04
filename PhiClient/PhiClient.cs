@@ -8,6 +8,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Collections;
+using PhiClient.TransactionSystem;
 
 namespace PhiClient
 {
