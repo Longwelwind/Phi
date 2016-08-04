@@ -192,16 +192,25 @@ namespace PhiClient
     [Serializable]
     public class RealmPawn
     {
+        public string kindDefName;
         public string[] name;
+        public long ageBiologicalTicks;
+        public long ageChronologicalTicks;
         public float[] hairColor;
+        public CrownType crownType;
+        public string hairDefName;
+        public string childhoodKey;
+        public string adulthoodKey;
         public List<RealmSkillRecord> skills;
         public List<RealmTrait> traits;
         public Gender gender;
         public float skinWhiteness;
 
+
         public static RealmPawn ToRealmPawn(Pawn pawn, RealmData realmData)
         {
             List<RealmSkillRecord> skills = new List<RealmSkillRecord>();
+
             foreach (SkillRecord rec in pawn.skills.skills)
             {
                 skills.Add(new RealmSkillRecord
@@ -230,13 +239,19 @@ namespace PhiClient
             {
                 name[1] = name[1].Replace("'", "");
             }
-
             return new RealmPawn
             {
                 name = name,
+                kindDefName = pawn.kindDef.defName,
+                ageBiologicalTicks = pawn.ageTracker.AgeBiologicalTicks,
+                ageChronologicalTicks = pawn.ageTracker.AgeChronologicalTicks,
+                crownType = pawn.story.crownType,
+                hairDefName = pawn.story.hairDef.defName,
                 gender = pawn.gender,
                 skills = skills,
                 traits = traits,
+                childhoodKey = pawn.story.childhood.uniqueSaveKey,
+                adulthoodKey = pawn.story.adulthood.uniqueSaveKey,
                 skinWhiteness = pawn.story.skinWhiteness,
                 hairColor = new float[]
                 {
@@ -250,10 +265,28 @@ namespace PhiClient
 
         public Pawn FromRealmPawn(RealmData realmData)
         {
-            PawnKindDef pawnKindDef = PawnKindDefOf.Villager;
-            Pawn pawn = PawnGenerator.GeneratePawn(pawnKindDef, Faction.OfPlayer);
+            // This code is mainly a copy/paste of what happens in
+            // PawnGenerator.DoGenerateNakedPawn()
+            PawnKindDef kindDef = DefDatabase<PawnKindDef>.GetNamed(kindDefName);
+            Pawn pawn = (Pawn)ThingMaker.MakeThing(kindDef.race);
 
-            // Name, by default, we keep the default one
+            pawn.kindDef = kindDef;
+            pawn.gender = gender;
+
+            // What is done in GenerateRandomAge()
+            pawn.ageTracker.AgeBiologicalTicks = ageBiologicalTicks;
+            pawn.ageTracker.AgeChronologicalTicks = ageChronologicalTicks;
+
+            // Ignored SetInitialLevels()
+            // Ignored GenerateInitialHediffs()
+            // Ignored GeneratePawnRelations()
+
+            Pawn_StoryTracker story = pawn.story;
+            story.skinWhiteness = skinWhiteness;
+            story.crownType = crownType;
+            story.hairColor = new Color(hairColor[0], hairColor[1], hairColor[2], hairColor[3]);
+
+            // What is done in GiveAppropriateBio()
             Name nameObj = pawn.Name;
             switch (name.Count())
             {
@@ -267,25 +300,18 @@ namespace PhiClient
                     nameObj = new NameTriple(name[0], name[1], name[2]);
                     break;
             }
-
             pawn.Name = nameObj;
+            story.childhood = BackstoryDatabase.GetWithKey(childhoodKey);
+            story.adulthood = BackstoryDatabase.GetWithKey(adulthoodKey);
 
-            // # Story
-            Pawn_StoryTracker story = pawn.story;
-            story.skinWhiteness = skinWhiteness;
-            story.hairColor = new Color(hairColor[0], hairColor[1], hairColor[2], hairColor[3]);
+            story.hairDef = DefDatabase<HairDef>.GetNamed(hairDefName);
 
-            // Traits
-            TraitSet traitSet = story.traits;
-            traitSet.allTraits.Clear();
+            // Done in GiveRandomTraits()
             foreach (RealmTrait trait in traits)
             {
-                TraitDef traitDef = DefDatabase<TraitDef>.AllDefs.First((td) => td.defName == trait.traitDefName);
-                traitSet.allTraits.Add(new Trait(traitDef, trait.degree));
+                TraitDef traitDef = DefDatabase<TraitDef>.GetNamed(trait.traitDefName);
+                story.traits.GainTrait(new Trait(traitDef, trait.degree));
             }
-
-            // Gender
-            pawn.gender = gender;
 
             // We attribute the skills level
             foreach (RealmSkillRecord rec in skills.AsEnumerable())
@@ -296,6 +322,8 @@ namespace PhiClient
                 skill.level = rec.level;
                 skill.passion = rec.passion;
             }
+
+            pawn.workSettings.EnableAndInitialize();
 
             return pawn;
         }
