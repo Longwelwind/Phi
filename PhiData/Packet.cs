@@ -78,36 +78,6 @@ namespace PhiClient
     }
 
     [Serializable]
-    public class SendThingPacket : Packet
-    {
-        public RealmThing realmThing;
-        [NonSerialized]
-        public User userTo;
-        private int userToId;
-
-        public override void Apply(User user, RealmData realmData)
-        {
-            Console.WriteLine(user.name + " sending " + realmThing.stackCount + "x" + realmThing.thingDefName + " to " + userTo.name);
-            // We rewire the thing to the targeted user
-            realmData.NotifyPacket(userTo, new ThingReceivedPacket { userFrom = user, realmThing = realmThing });
-        }
-
-        [OnSerializing]
-        internal void OnSerializingCallback(StreamingContext c)
-        {
-            userToId = userTo.id;
-        }
-
-        [OnDeserialized]
-        internal void OnDeserializedCallback(StreamingContext c)
-        {
-            RealmData realmData = c.Context as RealmData;
-
-            userTo = ID.Find(realmData.users, userToId);
-        }
-    }
-
-    [Serializable]
     public class UpdatePreferencesPacket : Packet
     {
         public UserPreferences preferences;
@@ -341,46 +311,6 @@ namespace PhiClient
         public override void Apply(User user, RealmData realmData)
         {
             realmData.AddUser(this.user);
-        }
-    }
-
-    [Serializable]
-    public class ThingReceivedPacket : Packet
-    {
-        public RealmThing realmThing;
-        [NonSerialized]
-        public User userFrom;
-        private int userFromId;
-
-        public override void Apply(User user, RealmData realmData)
-        {
-            // We spawn the object with a DropPod
-            Log.Message("Drop pod to spawn !");
-            Thing thing = realmData.FromRealmThing(realmThing);
-
-            IntVec3 position = DropCellFinder.RandomDropSpot();
-            DropPodUtility.DropThingsNear(position, new Thing[] { thing });
-
-            Find.LetterStack.ReceiveLetter(
-                "Ship pod",
-                "A pod was sent from " + userFrom.name + " containing " + thing.Label,
-                LetterType.Good,
-                position
-            );
-        }
-
-        [OnSerializing]
-        internal void OnSerializingCallback(StreamingContext c)
-        {
-            userFromId = userFrom.id;
-        }
-
-        [OnDeserialized]
-        internal void OnDeserializedCallback(StreamingContext c)
-        {
-            RealmData realmData = c.Context as RealmData;
-
-            userFrom = ID.Find(realmData.users, userFromId);
         }
     }
 
