@@ -26,6 +26,7 @@ namespace PhiClient
         public Client client;
         private Queue packetsToProcess = Queue.Synchronized(new Queue());
         public string serverAddress;
+        internal int lastTransactionId = 0;
 
         public event Action OnUsable;
 
@@ -103,6 +104,8 @@ namespace PhiClient
                 this.realmData = syncPacket.realmData;
                 this.currentUser = syncPacket.user;
 
+                this.realmData.PacketToServer += PacketToServerCallback;
+
                 // The instance has now became usable
                 if (OnUsable != null)
                 {
@@ -113,6 +116,11 @@ namespace PhiClient
             {
                 packet.Apply(this.currentUser, this.realmData);
             }
+        }
+
+        private void PacketToServerCallback(Packet packet)
+        {
+            this.SendPacket(packet);
         }
 
         public bool IsConnected()
@@ -221,8 +229,17 @@ namespace PhiClient
 
         public void SendThing(User user, Thing thing)
         {
-            this.SendPacket(new SendThingPacket { userTo = user, realmThing = realmData.ToRealmThing(thing) });
-            thing.Destroy();
+            RealmThing realmThing = realmData.ToRealmThing(thing); 
+
+            // We begin a transaction with this user
+            this.lastTransactionId++;
+            ItemTransaction trans = new ItemTransaction(this.lastTransactionId, currentUser, user, thing, realmThing);
+            realmData.transactions.Add(trans);
+
+            this.SendPacket(new StartTransactionPacket { transaction = trans });
+
+            //this.SendPacket(new SendThingPacket { userTo = user, realmThing = realmData.ToRealmThing(thing) });
+            //thing.Destroy();
         }
         
         public void ChangeNickname(string newNickname)

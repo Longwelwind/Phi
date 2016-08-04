@@ -18,7 +18,8 @@ namespace PhiClient
         public List<Transaction> transactions = new List<Transaction>();
 
         public int lastUserGivenId = 0;
-        
+        internal int lastTransactionId = 0;
+
         public delegate void PacketHandler(User user, Packet packet);
         [field: NonSerialized]
         public event PacketHandler PacketToClient;
