@@ -162,23 +162,7 @@ namespace PhiClient
 
         public override void Apply(User user, RealmData realmData)
         {
-            Pawn pawn = realmPawn.FromRealmPawn(realmData);
-
-            // We drop it
-            IntVec3 position = DropCellFinder.RandomDropSpot();
-            DropPodUtility.MakeDropPodAt(position, new DropPodInfo
-            {
-                SingleContainedThing = pawn,
-                openDelay = 110,
-                leaveSlag = false
-            });
-
-            Find.LetterStack.ReceiveLetter(
-                "Colonist pod",
-                "A colonist was sent to you by " + userFrom.name,
-                LetterType.Good,
-                position
-            );
+            
         }
 
         [OnSerializing]

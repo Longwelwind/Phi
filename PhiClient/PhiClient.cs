@@ -242,6 +242,17 @@ namespace PhiClient
             //this.SendPacket(new SendThingPacket { userTo = user, realmThing = realmData.ToRealmThing(thing) });
             //thing.Destroy();
         }
+
+        public void SendPawn(User user, Pawn pawn)
+        {
+            RealmPawn realmPawn = RealmPawn.ToRealmPawn(pawn, realmData);
+
+            this.lastTransactionId++;
+            ColonistTransaction trans = new ColonistTransaction(this.lastTransactionId, currentUser, user, pawn, realmPawn);
+            realmData.transactions.Add(trans);
+
+            this.SendPacket(new StartTransactionPacket { transaction = trans });
+        }
         
         public void ChangeNickname(string newNickname)
         {
