@@ -206,6 +206,12 @@ namespace PhiClient
         public Gender gender;
         public float skinWhiteness;
 
+        /**
+         * Equipment
+         */
+        public List<RealmThing> equipments;
+        public List<RealmThing> apparels;
+        public List<RealmThing> inventory;
 
         public static RealmPawn ToRealmPawn(Pawn pawn, RealmData realmData)
         {
@@ -239,6 +245,25 @@ namespace PhiClient
             {
                 name[1] = name[1].Replace("'", "");
             }
+
+            List<RealmThing> equipments = new List<RealmThing>();
+            foreach (ThingWithComps thing in pawn.equipment.AllEquipment)
+            {
+                equipments.Add(realmData.ToRealmThing(thing));
+            }
+
+            List<RealmThing> apparels = new List<RealmThing>();
+            foreach (Apparel apparel in pawn.apparel.WornApparel)
+            {
+                apparels.Add(realmData.ToRealmThing(apparel));
+            }
+
+            List<RealmThing> inventory = new List<RealmThing>();
+            foreach (Thing thing in pawn.inventory.container)
+            {
+                inventory.Add(realmData.ToRealmThing(thing));
+            }
+
             return new RealmPawn
             {
                 name = name,
@@ -259,7 +284,10 @@ namespace PhiClient
                     hairColor.g,
                     hairColor.b,
                     hairColor.a
-                }
+                },
+                equipments = equipments,
+                apparels = apparels,
+                inventory = inventory
             };
         }
 
@@ -271,6 +299,8 @@ namespace PhiClient
             Pawn pawn = (Pawn)ThingMaker.MakeThing(kindDef.race);
 
             pawn.kindDef = kindDef;
+            pawn.SetFactionDirect(Faction.OfPlayer);
+            PawnComponentsUtility.CreateInitialComponents(pawn);
             pawn.gender = gender;
 
             // What is done in GenerateRandomAge()
@@ -324,6 +354,34 @@ namespace PhiClient
             }
 
             pawn.workSettings.EnableAndInitialize();
+
+            // Once we've generated a new solid pawn, we generate the gear of it
+            // GenerateStartingApparelFor()
+            Pawn_ApparelTracker apparelTracker = pawn.apparel;
+            foreach (RealmThing realmThing in apparels)
+            {
+                Apparel apparel = (Apparel)realmData.FromRealmThing(realmThing);
+
+                apparelTracker.Wear(apparel);
+            }
+
+            // TryGenerateWeaponFor()
+            Pawn_EquipmentTracker equipmentTracker = pawn.equipment;
+            foreach (RealmThing realmThing in equipments)
+            {
+                ThingWithComps thingWithComps = (ThingWithComps)realmData.FromRealmThing(realmThing);
+
+                equipmentTracker.AddEquipment(thingWithComps);
+            }
+
+            // GenerateInventoryFor()
+            Pawn_InventoryTracker inventoryTracker = pawn.inventory;
+            foreach (RealmThing realmThing in inventory)
+            {
+                Thing thing = realmData.FromRealmThing(realmThing);
+
+                inventoryTracker.container.TryAdd(thing);
+            }
 
             return pawn;
         }
