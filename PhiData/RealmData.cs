@@ -120,13 +120,23 @@ namespace PhiClient
                 compQualityRaw = (int)thing.TryGetComp<CompQuality>().Quality;
             }
 
+            // Minimified thing
+            RealmThing innerThing = null;
+            if (thing is MinifiedThing)
+            {
+                MinifiedThing minifiedThing = (MinifiedThing)thing;
+
+                innerThing = ToRealmThing(minifiedThing.InnerThing);
+            }
+
             return new RealmThing
             {
                 thingDefName = thing.def.defName,
                 stackCount = thing.stackCount,
                 stuffDefName = stuffDefLabel,
                 compQuality = compQualityRaw,
-                hitPoints = thing.HitPoints
+                hitPoints = thing.HitPoints,
+                innerThing = innerThing
             };
         }
 
@@ -149,6 +159,14 @@ namespace PhiClient
             }
 
             thing.HitPoints = realmThing.hitPoints;
+
+            // Minimified thing
+            if (thing is MinifiedThing)
+            {
+                MinifiedThing minifiedThing = (MinifiedThing)thing;
+
+                minifiedThing.InnerThing = FromRealmThing(realmThing.innerThing);
+            }
 
             return thing;
         }
@@ -418,5 +436,8 @@ namespace PhiClient
         public int compQuality;
         public int stackCount;
         public int hitPoints;
+
+        // Minimified thing
+        public RealmThing innerThing;
     }
 }
