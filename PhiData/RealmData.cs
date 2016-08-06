@@ -35,6 +35,12 @@ namespace PhiClient
             this.chat.Add(message);
         }
 
+        public bool CanStartTransaction(User sender, User receiver)
+        {
+            // A sender can only start a transaction if he currently has no transaction with this receiver
+            return !transactions.Exists((t) => !t.IsFinished() && t.sender == sender && t.receiver == receiver);
+        }
+
         /**
          * Client Method
          */

@@ -230,6 +230,11 @@ namespace PhiClient
 
         public void SendThing(User user, Thing thing)
         {
+            if (!CheckCanStartTransaction(user))
+            {
+                return;
+            }
+
             RealmThing realmThing = realmData.ToRealmThing(thing); 
 
             // We begin a transaction with this user
@@ -243,8 +248,27 @@ namespace PhiClient
             //thing.Destroy();
         }
 
+        public bool CheckCanStartTransaction(User receiver)
+        {
+            // Desactivated for now because of problems when a player isn't connected in a game
+            if (realmData.CanStartTransaction(currentUser, receiver) || true)
+            {
+                return true;
+            }
+            else
+            {
+                Messages.Message("You are already engaged in a transaction with " + receiver.name, MessageSound.RejectInput);
+                return false;
+            }
+        }
+
         public void SendPawn(User user, Pawn pawn)
         {
+            if (!CheckCanStartTransaction(user))
+            {
+                return;
+            }
+
             RealmPawn realmPawn = RealmPawn.ToRealmPawn(pawn, realmData);
 
             this.lastTransactionId++;
