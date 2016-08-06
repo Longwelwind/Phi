@@ -134,8 +134,13 @@ namespace PhiClient
 
         public void OnSendClick(Thing thing)
         {
+            if (thing.Destroyed)
+            {
+                CountItems();
+                return;
+            }
+
             PhiClient.instance.SendThing(this.user, thing);
-            CountItems();
         }
     }
 }
