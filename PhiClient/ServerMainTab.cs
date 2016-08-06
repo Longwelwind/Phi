@@ -107,6 +107,11 @@ namespace PhiClient
             ListContainer footerList = new ListContainer(ListFlow.ROW);
             footerList.spaceBetween = ListContainer.SPACE;
 
+            if (Input.GetKeyDown(KeyCode.Return))
+            {
+                OnSendClick();
+            }
+
             footerList.Add(new TextFieldWidget(enteredMessage, (s) => { enteredMessage = s; }));
             footerList.Add(new WidthContainer(new ButtonWidget("Send", OnSendClick), CHAT_INPUT_SEND_BUTTON_WIDTH));
             
@@ -115,6 +120,11 @@ namespace PhiClient
 
         public void OnSendClick()
         {
+            string trimmedMessage = this.enteredMessage.Trim();
+            if (trimmedMessage.IsNullOrEmpty())
+            {
+                return;
+            }
             PhiClient.instance.SendMessage(this.enteredMessage);
             this.enteredMessage = "";
         }
