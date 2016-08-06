@@ -28,7 +28,7 @@ namespace PhiClient.TransactionSystem
 
             Dialog_GeneralChoice choiceDialog = new Dialog_GeneralChoice(new DialogChoiceConfig
             {
-                text = receiver.name + " wants to ship you " + thing.Label,
+                text = sender.name + " wants to ship you " + thing.Label,
                 buttonAText = "Accept",
                 buttonAAction = () =>
                 {
@@ -65,7 +65,7 @@ namespace PhiClient.TransactionSystem
 
                 Find.LetterStack.ReceiveLetter(
                     "Ship pod",
-                    "A pod was sent from " + receiver.name + " containing " + thing.Label,
+                    "A pod was sent from " + sender.name + " containing " + thing.Label,
                     LetterType.Good,
                     position
                 );
