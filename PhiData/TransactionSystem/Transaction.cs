@@ -55,7 +55,7 @@ namespace PhiClient.TransactionSystem
         [OnDeserialized]
         internal void OnDeserializedCallback(StreamingContext c)
         {
-            RealmData realmData = c.Context as RealmData;
+            RealmData realmData = (RealmData) c.Context;
 
             if (realmData != null)
             {

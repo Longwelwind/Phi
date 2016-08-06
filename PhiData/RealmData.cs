@@ -42,7 +42,8 @@ namespace PhiClient
 
         public Transaction TryFindTransaction(int transactionId, int transactionSenderId)
         {
-            return transactions.FindLast((t) => t.getID() == transactionId && t.sender.getID() == transactionSenderId);
+            // Hacky hack, t.sender shouldn't be null, but some entries gets this value
+            return transactions.FindLast((t) => t != null && t.sender != null && t.getID() == transactionId && t.sender.getID() == transactionSenderId);
         }
 
         public Transaction FindTransaction(int transactionId, int transactionSenderId)
