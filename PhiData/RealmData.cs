@@ -12,7 +12,7 @@ namespace PhiClient
     [Serializable]
     public class RealmData
     {
-        public const string VERSION = "0.7.1";
+        public const string VERSION = "0.7.2";
 
         public List<User> users = new List<User>();
         public List<ChatMessage> chat = new List<ChatMessage>();
