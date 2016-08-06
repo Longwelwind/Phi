@@ -18,6 +18,9 @@ namespace PhiClient
 
         string enteredMessage = "";
 
+        string filterName = "";
+        List<Thing> filteredUsers;
+
         public ServerMainTab()
         {
         }
@@ -87,18 +90,33 @@ namespace PhiClient
                     break;
             }
             cont.Add(new TextWidget(status));
+            cont.Add(new Container(new TextFieldWidget(filterName, (s) => {
+                filterName = s;
+            }), 150f, 30f));
 
             if (phi.IsUsable())
             {
                 ListContainer usersList = new ListContainer();
                 foreach (User user in phi.realmData.users.Where((u) => u.connected))
                 {
-                    usersList.Add(new ButtonWidget(user.name, () => { OnUserClick(user); }, false));
+                    if (filterName != "")
+                    {
+                        if (ContainsStringIgnoreCase(user.name, filterName))
+                            usersList.Add(new ButtonWidget(user.name, () => { OnUserClick(user); }, false));
+                    } else
+                    {
+                        usersList.Add(new ButtonWidget(user.name, () => { OnUserClick(user); }, false));
+                    }
                 }
 
                 cont.Add(new ScrollContainer(usersList, userScrollPosition, (v) => { userScrollPosition = v; }));
             }
             return cont;
+        }
+
+        private System.Boolean ContainsStringIgnoreCase(string hay, string needle)
+        {
+            return hay.IndexOf(needle, System.StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private Displayable DoFooter()
