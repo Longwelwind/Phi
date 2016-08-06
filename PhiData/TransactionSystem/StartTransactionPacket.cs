@@ -16,6 +16,8 @@ namespace PhiClient.TransactionSystem
         public override void Apply(User user, RealmData realmData)
         {
             realmData.transactions.Add(transaction);
+            user.lastTransactionId = transaction.id;
+
             realmData.NotifyPacket(transaction.receiver, new ReceiveTransactionPacket { transaction = transaction });
         }
     }

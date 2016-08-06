@@ -27,7 +27,6 @@ namespace PhiClient
         public Client client;
         private Queue packetsToProcess = Queue.Synchronized(new Queue());
         public string serverAddress;
-        internal int lastTransactionId = 0;
 
         public event Action OnUsable;
 
@@ -235,11 +234,11 @@ namespace PhiClient
                 return;
             }
 
-            RealmThing realmThing = realmData.ToRealmThing(thing); 
+            RealmThing realmThing = realmData.ToRealmThing(thing);
 
             // We begin a transaction with this user
-            this.lastTransactionId++;
-            ItemTransaction trans = new ItemTransaction(this.lastTransactionId, currentUser, user, thing, realmThing);
+            int id = ++this.currentUser.lastTransactionId;
+            ItemTransaction trans = new ItemTransaction(id, currentUser, user, thing, realmThing);
             realmData.transactions.Add(trans);
 
             this.SendPacket(new StartTransactionPacket { transaction = trans });
@@ -271,8 +270,8 @@ namespace PhiClient
 
             RealmPawn realmPawn = RealmPawn.ToRealmPawn(pawn, realmData);
 
-            this.lastTransactionId++;
-            ColonistTransaction trans = new ColonistTransaction(this.lastTransactionId, currentUser, user, pawn, realmPawn);
+            int id = ++this.currentUser.lastTransactionId;
+            ColonistTransaction trans = new ColonistTransaction(id, currentUser, user, pawn, realmPawn);
             realmData.transactions.Add(trans);
 
             this.SendPacket(new StartTransactionPacket { transaction = trans });

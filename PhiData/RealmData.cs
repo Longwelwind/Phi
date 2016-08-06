@@ -19,7 +19,6 @@ namespace PhiClient
         public List<Transaction> transactions = new List<Transaction>();
 
         public int lastUserGivenId = 0;
-        internal int lastTransactionId = 0;
 
         public delegate void PacketHandler(User user, Packet packet);
         [field: NonSerialized]
@@ -39,6 +38,23 @@ namespace PhiClient
         {
             // A sender can only start a transaction if he currently has no transaction with this receiver
             return !transactions.Exists((t) => !t.IsFinished() && t.sender == sender && t.receiver == receiver);
+        }
+
+        public Transaction TryFindTransaction(int transactionId, int transactionSenderId)
+        {
+            return transactions.FindLast((t) => t.getID() == transactionId && t.sender.getID() == transactionSenderId);
+        }
+
+        public Transaction FindTransaction(int transactionId, int transactionSenderId)
+        {
+            Transaction trans = TryFindTransaction(transactionId, transactionSenderId);
+
+            if (trans == null)
+            {
+                throw new Exception("Couldn't find Transaction " + transactionId + " from sender " + transactionSenderId);
+            }
+
+            return trans;
         }
 
         /**
@@ -181,6 +197,8 @@ namespace PhiClient
         public bool connected;
         public bool inGame;
         public UserPreferences preferences = new UserPreferences();
+
+        public int lastTransactionId = 0;
 
         public int getID()
         {

@@ -14,6 +14,7 @@ namespace PhiClient.TransactionSystem
     {
         [NonSerialized]
         public Transaction transaction;
+        private int senderTransactionId;
         private int transactionId;
         public TransactionResponse response;
 
@@ -34,6 +35,7 @@ namespace PhiClient.TransactionSystem
         internal void OnSerializingCallback(StreamingContext c)
         {
             transactionId = transaction.id;
+            senderTransactionId = transaction.sender.id;
         }
 
         [OnDeserialized]
@@ -41,7 +43,7 @@ namespace PhiClient.TransactionSystem
         {
             RealmData realmData = c.Context as RealmData;
 
-            transaction = ID.Find(realmData.transactions, transactionId);
+            transaction = realmData.FindTransaction(transactionId, senderTransactionId);
         }
     }
 }

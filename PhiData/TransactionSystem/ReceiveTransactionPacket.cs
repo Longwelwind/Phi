@@ -15,7 +15,11 @@ namespace PhiClient.TransactionSystem
 
         public override void Apply(User user, RealmData realmData)
         {
-            realmData.transactions.Add(transaction);
+            // If the transaction is with itself, the transaction may already be there
+            if (realmData.TryFindTransaction(transaction.id, transaction.sender.id) == null)
+            {
+                realmData.transactions.Add(transaction);
+            }
 
             if (user == transaction.receiver)
             {

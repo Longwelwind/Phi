@@ -15,6 +15,7 @@ namespace PhiClient.TransactionSystem
         [NonSerialized]
         public Transaction transaction;
         private int transactionId;
+        private int senderTransactionId;
         public TransactionResponse response;
 
         // This is there so that this packet also works when sender == receiver
@@ -39,14 +40,15 @@ namespace PhiClient.TransactionSystem
         internal void OnSerializingCallback(StreamingContext c)
         {
             transactionId = transaction.id;
+            senderTransactionId = transaction.sender.id;
         }
 
         [OnDeserialized]
         internal void OnDeserializedCallback(StreamingContext c)
         {
             RealmData realmData = c.Context as RealmData;
-
-            transaction = ID.Find(realmData.transactions, transactionId);
+            
+            transaction = realmData.FindTransaction(transactionId, senderTransactionId);
         }
     }
 }
