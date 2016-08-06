@@ -20,7 +20,6 @@ namespace PhiClient
 
         public ServerMainTab()
         {
-            this.absorbInputAroundWindow = true;
         }
 
         public override void DoWindowContents(Rect inRect)
