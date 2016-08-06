@@ -243,6 +243,8 @@ namespace PhiClient
 
             this.SendPacket(new StartTransactionPacket { transaction = trans });
 
+            Messages.Message("Offer sent, waiting for confirmation", MessageSound.Silent);
+
             //this.SendPacket(new SendThingPacket { userTo = user, realmThing = realmData.ToRealmThing(thing) });
             //thing.Destroy();
         }
@@ -275,6 +277,8 @@ namespace PhiClient
             realmData.transactions.Add(trans);
 
             this.SendPacket(new StartTransactionPacket { transaction = trans });
+
+            Messages.Message("Offer sent, waiting for confirmation", MessageSound.Silent);
         }
         
         public void ChangeNickname(string newNickname)
