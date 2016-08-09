@@ -8,7 +8,6 @@ This is the mod for Rimworld. Rim-world specific files (like Defs) are located i
 PhiClient has multiples dependencies, and Rimworld Mod's Launcher unfortunately requires assemblies to be loaded in the order in which all dependencies are available.
 A good way to ensure that is that change the name of the assemblies to make sure that the alphabetical order respects the dependency order. For example:
 
-* 1-Newtonsoft.Json.dll
 * 1-websocket-sharp.dll
 * 2-SocketLibrary.dll
 * 3-PhiData.dll
