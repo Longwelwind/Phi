@@ -25,7 +25,7 @@ namespace PhiClient.TransactionSystem
             // We ask for confirmation
             Dialog_GeneralChoice choiceDialog = new Dialog_GeneralChoice(new DialogChoiceConfig
             {
-                text = receiver.name + " wants to send you a colonist",
+                text = sender.name + " wants to send you a colonist",
                 buttonAText = "Accept",
                 buttonAAction = () =>
                 {
