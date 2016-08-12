@@ -10,20 +10,24 @@ namespace PhiClient
     [Serializable]
     public abstract class Packet
     {
-        public abstract void Apply(User user, RealmData realmData);
+		public abstract void Apply(User user, RealmData realmData);
 
-        public static byte[] Serialize(Packet packet)
+		public static byte[] Serialize(Packet packet, RealmData realmData, User user)
         {
-            var bf = new BinaryFormatter();
+			var context = new RealmContext{ realmData = realmData, user = user };
+
+			var bf = new BinaryFormatter(null, new StreamingContext(StreamingContextStates.All, context));
             var ms = new MemoryStream();
             bf.Serialize(ms, packet);
 
             return ms.ToArray();
         }
 
-        public static Packet Deserialize(byte[] data, RealmData realmData)
+		public static Packet Deserialize(byte[] data, RealmData realmData, User user)
         {
-            var bf = new BinaryFormatter(null, new StreamingContext(StreamingContextStates.All, realmData));
+			var context = new RealmContext{ realmData = realmData, user = user };
+
+            var bf = new BinaryFormatter(null, new StreamingContext(StreamingContextStates.All, context));
             var ms = new MemoryStream(data);
 
             return (Packet) bf.Deserialize(ms);
@@ -116,10 +120,10 @@ namespace PhiClient
 
         [OnDeserialized]
         internal void OnDeserializedCallback(StreamingContext c)
-        {
-            RealmData realmData = c.Context as RealmData;
+		{
+			RealmContext realmContext = (RealmContext) c.Context;
 
-            userTo = ID.Find(realmData.users, userToId);
+			userTo = ID.Find(realmContext.realmData.users, userToId);
         }
     }
 
@@ -147,7 +151,7 @@ namespace PhiClient
 
         [OnDeserialized]
         internal void OnDeserializedCallback(StreamingContext c)
-        {
+		{
             user = ID.Find(realmData.users, userId);
         }
     }
@@ -173,10 +177,10 @@ namespace PhiClient
 
         [OnDeserialized]
         internal void OnDeserializedCallback(StreamingContext c)
-        {
-            RealmData realmData = c.Context as RealmData;
+		{
+			RealmContext realmContext = (RealmContext) c.Context;
 
-            userFrom = ID.Find(realmData.users, userFromId);
+			userFrom = ID.Find(realmContext.realmData.users, userFromId);
         }
 
     }
@@ -203,9 +207,9 @@ namespace PhiClient
         [OnDeserialized]
         internal void OnDeserializedCallback(StreamingContext c)
         {
-            RealmData realmData = c.Context as RealmData;
+			RealmContext realmContext = (RealmContext) c.Context;
 
-            user = ID.Find(realmData.users, userId);
+			user = ID.Find(realmContext.realmData.users, userId);
         }
     }
 
@@ -230,10 +234,10 @@ namespace PhiClient
 
         [OnDeserialized]
         internal void OnDeserializedCallback(StreamingContext c)
-        {
-            RealmData realmData = c.Context as RealmData;
+		{
+			RealmContext realmContext = (RealmContext) c.Context;
 
-            user = ID.Find(realmData.users, userId);
+			user = ID.Find(realmContext.realmData.users, userId);
         }
     }
 
@@ -280,10 +284,10 @@ namespace PhiClient
 
         [OnDeserialized]
         internal void OnDeserializedCallback(StreamingContext c)
-        {
-            RealmData realmData = c.Context as RealmData;
+		{
+			RealmContext realmContext = (RealmContext) c.Context;
 
-            user = ID.Find(realmData.users, userId);
+            user = ID.Find(realmContext.realmData.users, userId);
         }
     }
 

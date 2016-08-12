@@ -13,10 +13,15 @@ namespace PhiClient
     public class RealmData
     {
         public const string VERSION = "0.7.3";
+		public const int CHAT_MESSAGES_TO_SEND = 30;
 
         public List<User> users = new List<User>();
-        public List<ChatMessage> chat = new List<ChatMessage>();
+		[NonSerialized]
+		public List<ChatMessage> chat = new List<ChatMessage>();
+		private List<ChatMessage> serializeChat;
+		[NonSerialized]
         public List<Transaction> transactions = new List<Transaction>();
+		private List<Transaction> serializeTransactions;
 
         public int lastUserGivenId = 0;
 
@@ -186,7 +191,21 @@ namespace PhiClient
             }
 
             return thing;
-        }
+		}
+
+		[OnSerializing]
+		internal void OnSerializingCallback(StreamingContext c)
+		{
+			serializeChat = chat.GetRange(chat.Count - CHAT_MESSAGES_TO_SEND, CHAT_MESSAGES_TO_SEND);
+			serializeTransactions = transactions;
+		}
+
+		[OnDeserialized]
+		internal void OnDeserializedCallback(StreamingContext c)
+		{
+			chat = serializeChat;
+			transactions = serializeTransactions;
+		}
     }
 
     [Serializable]
@@ -223,11 +242,11 @@ namespace PhiClient
         [OnDeserialized]
         internal void OnDeserializedCallback(StreamingContext c)
         {
-            RealmData realmData = (RealmData) c.Context;
+			RealmContext realmContext = (RealmContext)c.Context;
 
-            if (realmData != null)
+            if (realmContext.realmData != null)
             {
-                user = ID.Find(realmData.users, userId);
+				user = ID.Find(realmContext.realmData.users, userId);
             }
         }
     }

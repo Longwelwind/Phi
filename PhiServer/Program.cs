@@ -44,15 +44,15 @@ namespace PhiServer
                 this.connectedUsers.TryGetValue(client, out u);
                 if (u == user)
                 {
-                    this.SendPacket(client, packet);
+                    this.SendPacket(client, user, packet);
                 }
             }
         }
 
-        private void SendPacket(ServerClient client, Packet packet)
-        {
+		private void SendPacket(ServerClient client, User user, Packet packet)
+		{
             Console.WriteLine("Sending packet " + packet);
-            client.Send(Packet.Serialize(packet));
+			client.Send(Packet.Serialize(packet, realmData, user));
         }
 
         private void DisconnectionCallback(ServerClient client)
@@ -71,12 +71,12 @@ namespace PhiServer
         private void MessageCallback(ServerClient client, byte[] data)
         {
             lock (lockProcessPacket)
-            {
-                Packet packet = Packet.Deserialize(data, this.realmData);
-                Console.WriteLine("Received packet " + packet);
+			{
+				User user;
+				this.connectedUsers.TryGetValue(client, out user);
 
-                User user;
-                this.connectedUsers.TryGetValue(client, out user);
+				Packet packet = Packet.Deserialize(data, realmData, user);
+                Console.WriteLine("Received packet " + packet);
 
                 if (packet is AuthentificationPacket)
                 {
