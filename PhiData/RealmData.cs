@@ -1,4 +1,5 @@
-﻿using PhiClient.TransactionSystem;
+﻿using PhiClient.AuctionHouseSystem;
+using PhiClient.TransactionSystem;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ namespace PhiClient
     {
         public const string VERSION = "0.7.3";
 
+        public AuctionHouse auctionHouse;
         public List<User> users = new List<User>();
         public List<ChatMessage> chat = new List<ChatMessage>();
         public List<Transaction> transactions = new List<Transaction>();
@@ -23,6 +25,11 @@ namespace PhiClient
         public delegate void PacketHandler(User user, Packet packet);
         [field: NonSerialized]
         public event PacketHandler PacketToClient;
+
+        public RealmData()
+        {
+            auctionHouse = new AuctionHouse(this);
+        }
 
         public void AddUser(User user)
         {

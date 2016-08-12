@@ -34,6 +34,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AuctionHouseSystem\AuctionHouse.cs" />
     <Compile Include="IDable.cs" />
     <Compile Include="Packet.cs" />
     <Compile Include="RealmData.cs" />
