@@ -86,7 +86,7 @@ namespace PhiServer
                     // We first check if the version corresponds
                     if (authPacket.version != RealmData.VERSION)
                     {
-                        this.SendPacket(client, new AuthentificationErrorPacket
+                        this.SendPacket(client, user, new AuthentificationErrorPacket
                         {
                             error = "Server is version " + RealmData.VERSION + " but client is version " + authPacket.version
                         }
@@ -117,7 +117,7 @@ namespace PhiServer
 
 
                     // We respond with a StatePacket that contains all synchronisation data
-                    this.SendPacket(client, new SynchronisationPacket { user = user, realmData = this.realmData });
+                    this.SendPacket(client, user, new SynchronisationPacket { user = user, realmData = this.realmData });
                 }
                 else
                 {
