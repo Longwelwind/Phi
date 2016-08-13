@@ -23,9 +23,9 @@ namespace PhiClient.TransactionSystem
         public override void OnStartReceiver(RealmData realmData)
         {
             // We generate a detailed list of what the pack contains
-            List<Thing> things = realmThings.Select((r) => realmData.FromRealmThing(r.Key)).ToList();
+            List<KeyValuePair<Thing, int>> things = realmThings.Select((r) => new KeyValuePair<Thing, int>(realmData.FromRealmThing(r.Key), r.Value)).ToList();
 
-            string thingLabels = string.Join(", ", things.Select((t) => t.LabelNoCount).ToArray());
+            string thingLabels = string.Join("\n", things.Select((t) => t.Value.ToString() + "x " + t.Key.LabelCapNoCount).ToArray());
 
             // We ask for confirmation
             Dialog_GeneralChoice choiceDialog = new Dialog_GeneralChoice(new DialogChoiceConfig
@@ -84,7 +84,7 @@ namespace PhiClient.TransactionSystem
 
                 Find.LetterStack.ReceiveLetter(
                     "Ship pod",
-                    "A pod was sent from " + sender.name + " contains items",
+                    "A pod was sent from " + sender.name + " containing items",
                     LetterType.Good,
                     position
                 );
