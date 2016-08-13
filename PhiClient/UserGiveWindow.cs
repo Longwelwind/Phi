@@ -14,7 +14,7 @@ namespace PhiClient
         const float TITLE_HEIGHT = 45f;
         
         const float ROW_HEIGHT = 30f;
-        const float CONTROLS_WIDTH = 250f;
+        const float CONTROLS_WIDTH = 300f;
 
         // This list contains a list of available stacks for a given type of object
         // Since canStackWith is transitive, to know if a thing is already counted,
@@ -120,6 +120,7 @@ namespace PhiClient
              * Drawing the inventory
              */
             ListContainer columnCont = new ListContainer();
+            columnCont.drawAlternateBackground = true;
             mainCont.Add(new ScrollContainer(columnCont, scrollPosition, (s) => { scrollPosition = s; }));
 
             foreach (List<Thing> entry in filteredInventory)
@@ -135,7 +136,8 @@ namespace PhiClient
                 columnCont.Add(new HeightContainer(rowCont, ROW_HEIGHT));
 
                 rowCont.Add(new Container(new ThingIconWidget(thing), ROW_HEIGHT, ROW_HEIGHT));
-                rowCont.Add(new TextWidget(thing.LabelNoCount, GameFont.Small, TextAnchor.MiddleLeft));
+                rowCont.Add(new TextWidget(thing.LabelCapNoCount, GameFont.Small, TextAnchor.MiddleLeft));
+                rowCont.Add(new TextWidget(stackCount.ToString(), GameFont.Small, TextAnchor.MiddleRight));
 
                 // We add the controls for changing the quantity sent
                 ListContainer controlsCont = new ListContainer(ListFlow.ROW);
