@@ -180,7 +180,12 @@ namespace PhiClient
 
         public void OnSendClick()
         {
-            PhiClient.instance.SendThings(this.user, chosenThings);
+            bool success = PhiClient.instance.SendThings(this.user, chosenThings);
+
+            if (success)
+            {
+                Close();
+            }
         }
     }
 }

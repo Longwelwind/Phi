@@ -227,11 +227,11 @@ namespace PhiClient
             this.SendPacket(new PostMessagePacket { message = message });
         }
 
-        internal void SendThings(User user, Dictionary<List<Thing>, int> chosenThings)
+        public bool SendThings(User user, Dictionary<List<Thing>, int> chosenThings)
         {
             if (!CheckCanStartTransaction(user))
             {
-                return;
+                return false;
             }
 
             List<KeyValuePair<RealmThing, int>> realmThings = new List<KeyValuePair<RealmThing, int>>();
@@ -249,6 +249,8 @@ namespace PhiClient
             this.SendPacket(new StartTransactionPacket { transaction = transaction });
 
             Messages.Message("Offer sent, waiting for confirmation", MessageSound.Silent);
+
+            return true;
         }
 
         public bool CheckCanStartTransaction(User receiver)
