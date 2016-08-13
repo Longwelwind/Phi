@@ -21,12 +21,6 @@ namespace PhiClient
         string filterName = "";
         List<Thing> filteredUsers;
 
-        public override void PreOpen()
-        {
-            base.PreOpen();
-            this.absorbInputAroundWindow = true;
-        }
-
         public override void DoWindowContents(Rect inRect)
         {
             base.DoWindowContents(inRect);
@@ -130,6 +124,7 @@ namespace PhiClient
             if(Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.KeypadEnter || Event.current.keyCode == KeyCode.Return))
             {
                 OnSendClick();
+                Event.current.Use();
             }
 
             footerList.Add(new TextFieldWidget(enteredMessage, (s) => { enteredMessage = s; }));
