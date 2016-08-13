@@ -196,8 +196,11 @@ namespace PhiClient
 		[OnSerializing]
 		internal void OnSerializingCallback(StreamingContext c)
 		{
-			serializeChat = chat.GetRange(chat.Count - CHAT_MESSAGES_TO_SEND, CHAT_MESSAGES_TO_SEND);
-			serializeTransactions = transactions;
+            int indexStart = Math.Max(0, chat.Count - CHAT_MESSAGES_TO_SEND);
+            int count = Math.Min(chat.Count, CHAT_MESSAGES_TO_SEND);
+			serializeChat = chat.GetRange(indexStart, count);
+            // For the moment, we transmit no transactions to the user when he is connecting
+			serializeTransactions = new List<Transaction>();
 		}
 
 		[OnDeserialized]
