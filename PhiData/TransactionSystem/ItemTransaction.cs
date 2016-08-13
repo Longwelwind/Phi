@@ -11,24 +11,26 @@ namespace PhiClient.TransactionSystem
     public class ItemTransaction : Transaction
     {
         [NonSerialized]
-        public Thing thing; // Only sender-side
-        public RealmThing realmThing;
+        public Dictionary<List<Thing>, int> things; // Only sender-side, used to destroy the items once the transaction has been confirmed
+        public List<KeyValuePair<RealmThing, int>> realmThings;
 
-        public ItemTransaction(int id, User sender, User receiver, Thing thing, RealmThing realmThing) : base(id, sender, receiver)
+        public ItemTransaction(int id, User sender, User receiver, Dictionary<List<Thing>, int> things, List<KeyValuePair<RealmThing, int>> realmThings) : base(id, sender, receiver)
         {
-            this.thing = thing;
-            this.realmThing = realmThing;
+            this.things = things;
+            this.realmThings = realmThings;
         }
 
         public override void OnStartReceiver(RealmData realmData)
         {
+            // We generate a detailed list of what the pack contains
+            List<Thing> things = realmThings.Select((r) => realmData.FromRealmThing(r.Key)).ToList();
+
+            string thingLabels = string.Join(", ", things.Select((t) => t.LabelNoCount).ToArray());
+
             // We ask for confirmation
-
-            Thing thing = realmData.FromRealmThing(realmThing);
-
             Dialog_GeneralChoice choiceDialog = new Dialog_GeneralChoice(new DialogChoiceConfig
             {
-                text = sender.name + " wants to ship you " + thing.Label,
+                text = sender.name + " wants to ship you:\n" + thingLabels,
                 buttonAText = "Accept",
                 buttonAAction = () =>
                 {
@@ -54,18 +56,35 @@ namespace PhiClient.TransactionSystem
 
         public override void OnEndReceiver(RealmData realmData)
         {
-            // Nothing
             if (state == TransactionResponse.ACCEPTED)
             {
-                Thing thing = realmData.FromRealmThing(realmThing);
+                // We spawn the new items !
+                List<Thing> thingsToSpawn = new List<Thing>();
+                foreach (KeyValuePair<RealmThing, int> entry in realmThings)
+                {
+                    RealmThing realmThing = entry.Key;
+                    Thing thing = realmData.FromRealmThing(realmThing);
+                    int leftToSpawn = entry.Value;
+                    // We make new things until we create everything
+                    // For example, if 180 granites blocks are sent (can be stacked by 75), we
+                    // will create 3 Thing (2 full and 1 semi-full)
+                    while (leftToSpawn > 0)
+                    {
+                        realmThing.stackCount = Math.Min(leftToSpawn, thing.def.stackLimit);
+
+                        thingsToSpawn.Add(realmData.FromRealmThing(realmThing));
+
+                        leftToSpawn -= realmThing.stackCount;
+                    }
+                }
 
                 // We spawn the said item
                 IntVec3 position = DropCellFinder.RandomDropSpot();
-                DropPodUtility.DropThingsNear(position, new Thing[] { thing });
+                DropPodUtility.DropThingsNear(position, thingsToSpawn);
 
                 Find.LetterStack.ReceiveLetter(
                     "Ship pod",
-                    "A pod was sent from " + sender.name + " containing " + thing.Label,
+                    "A pod was sent from " + sender.name + " contains items",
                     LetterType.Good,
                     position
                 );
@@ -80,7 +99,39 @@ namespace PhiClient.TransactionSystem
         {
             if (state == TransactionResponse.ACCEPTED)
             {
-                thing.Destroy();
+                foreach (KeyValuePair<List<Thing>, int> entry in things)
+                {
+                    int leftToDestroy = entry.Value;
+                    foreach (Thing thing in entry.Key)
+                    {
+                        if (thing.Destroyed)
+                        {
+                            continue;
+                        }
+
+                        int toRemove = Math.Min(leftToDestroy, thing.stackCount);
+
+                        if (toRemove == thing.stackCount)
+                        {
+                            thing.Destroy();
+                        }
+                        else
+                        {
+                            thing.stackCount -= toRemove;
+                        }
+
+                        leftToDestroy -= toRemove;
+                    }
+
+                    // This can happen if during the transaction, pawns have used some of the resources
+                    // that we thought were available.
+                    // This could open up cheating, but since there's no way to prevent that, we let it go.
+                    if (leftToDestroy > 0)
+                    {
+                        Log.Warning("Trying to destroy " + entry.Key[0].LabelShort + " but couldn't destroy the " + leftToDestroy + " remaining");
+                    }
+                }
+                
                 Messages.Message(receiver.name + " accepted your items", MessageSound.Standard);
             }
             else if (state == TransactionResponse.DECLINED)

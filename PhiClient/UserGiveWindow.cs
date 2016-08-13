@@ -16,13 +16,16 @@ namespace PhiClient
         const float ROW_HEIGHT = 30f;
         const float CONTROLS_WIDTH = 250f;
 
-        Dictionary<Thing, int> inventory = new Dictionary<Thing, int>();
-        Dictionary<Thing, int> chosenThings = new Dictionary<Thing, int>();
+        // This list contains a list of available stacks for a given type of object
+        // Since canStackWith is transitive, to know if a thing is already counted,
+        // we simply need the check canStackWith the first element of a sub-list
+        List<List<Thing>> inventory = new List<List<Thing>>();
+        Dictionary<List<Thing>, int> chosenThings = new Dictionary<List<Thing>, int>();
         User user;
         Vector2 scrollPosition = Vector2.zero;
 
         string filterTerm = "";
-        Dictionary<Thing, int> filteredInventory;
+        List<List<Thing>> filteredInventory;
 
         public override Vector2 InitialSize
         {
@@ -55,21 +58,22 @@ namespace PhiClient
                 {
                     if (thing.def.category == ThingCategory.Item && !thing.def.IsCorpse)
                     {
-                        Thing keyThing = null;
-                        foreach (KeyValuePair<Thing, int> entry in inventory)
+                        bool found = false;
+                        foreach (List<Thing> things in inventory)
                         {
-                            if (entry.Key.CanStackWith(thing))
+                            // We assume CanStackWith is transitive (i.e. if a thing A stacks with
+                            // a thing B, and the thing B stacks with a thing C, then A stacks with C)
+                            if (things[0].CanStackWith(thing))
                             {
-                                keyThing = entry.Key;
+                                things.Add(thing);
+                                found = true;
                             }
                         }
-                        if (keyThing != null)
+                        if (!found)
                         {
-                            inventory[keyThing] += thing.stackCount;
-                        }
-                        else
-                        {
-                            inventory.Add(thing, thing.stackCount);
+                            List<Thing> list = new List<Thing>();
+                            list.Add(thing);
+                            inventory.Add(list);
                         }
                     }
                 }
@@ -80,7 +84,7 @@ namespace PhiClient
 
         public void FilterInventory()
         {
-            this.filteredInventory = this.inventory.Where((e) => ContainsStringIgnoreCase(e.Key.Label, this.filterTerm)).ToDictionary(p => p.Key, p => p.Value);
+            this.filteredInventory = this.inventory.Where((e) => ContainsStringIgnoreCase(e[0].Label, this.filterTerm)).ToList();
             // To avoid problems with the scrolling bar if the new height is lower than the old height
             scrollPosition = Vector2.zero;
         }
@@ -118,13 +122,13 @@ namespace PhiClient
             ListContainer columnCont = new ListContainer();
             mainCont.Add(new ScrollContainer(columnCont, scrollPosition, (s) => { scrollPosition = s; }));
 
-            foreach (KeyValuePair<Thing, int> entry in filteredInventory)
+            foreach (List<Thing> entry in filteredInventory)
             {
-                Thing thing = entry.Key;
-                int stackCount = entry.Value;
+                Thing thing = entry[0];
+                int stackCount = entry.Sum((e) => e.stackCount);
 
                 int chosenCount = 0;
-                chosenThings.TryGetValue(thing, out chosenCount);
+                chosenThings.TryGetValue(entry, out chosenCount);
 
                 ListContainer rowCont = new ListContainer(ListFlow.ROW);
                 rowCont.spaceBetween = ListContainer.SPACE;
@@ -137,41 +141,46 @@ namespace PhiClient
                 ListContainer controlsCont = new ListContainer(ListFlow.ROW);
                 rowCont.Add(new WidthContainer(controlsCont, CONTROLS_WIDTH));
 
-                controlsCont.Add(new ButtonWidget("-10", () => ChangeChosenCount(thing, -10) ));
-                controlsCont.Add(new ButtonWidget("-1", () => ChangeChosenCount(thing, -1) ));
+                controlsCont.Add(new ButtonWidget("-100", () => ChangeChosenCount(entry, -100)));
+                controlsCont.Add(new ButtonWidget("-10", () => ChangeChosenCount(entry, -10) ));
+                controlsCont.Add(new ButtonWidget("-1", () => ChangeChosenCount(entry, -1) ));
                 controlsCont.Add(new TextWidget(chosenCount.ToString(), GameFont.Small, TextAnchor.MiddleCenter));
-                controlsCont.Add(new ButtonWidget("+1", () => ChangeChosenCount(thing, 1) ));
-                controlsCont.Add(new ButtonWidget("+10", () => ChangeChosenCount(thing, 10) ));
-
-                rowCont.Add(new WidthContainer(new ButtonWidget("Send", () => { OnSendClick(thing); }), 50f));
+                controlsCont.Add(new ButtonWidget("+1", () => ChangeChosenCount(entry, 1) ));
+                controlsCont.Add(new ButtonWidget("+10", () => ChangeChosenCount(entry, 10) ));
+                controlsCont.Add(new ButtonWidget("+100", () => ChangeChosenCount(entry, 100)));
             }
+
+            // We add the send button
+            mainCont.Add(new HeightContainer(new ButtonWidget("Send", OnSendClick), ROW_HEIGHT));
 
             mainCont.Draw(inRect);
         }
 
-        public void ChangeChosenCount(Thing thing, int count)
+        public void ChangeChosenCount(List<Thing> things, int count)
         {
-            if (chosenThings.ContainsKey(thing))
+            if (chosenThings.ContainsKey(things))
             {
-                chosenThings[thing] += count;
+                chosenThings[things] += count;
             }
             else
             {
-                chosenThings.Add(thing, count);
+                chosenThings.Add(things, count);
             }
 
-            chosenThings[thing] = Math.Min(Math.Max(chosenThings[thing], 0), inventory[thing]);
+            if (chosenThings[things] > 0)
+            {
+                chosenThings[things] = Math.Min(chosenThings[things], things.Sum((t) => t.stackCount));
+            }
+            else
+            {
+                chosenThings.Remove(things);
+            }
+            
         }
 
-        public void OnSendClick(Thing thing)
+        public void OnSendClick()
         {
-            if (thing.Destroyed)
-            {
-                CountItems();
-                return;
-            }
-
-            PhiClient.instance.SendThing(this.user, thing);
+            PhiClient.instance.SendThings(this.user, chosenThings);
         }
     }
 }

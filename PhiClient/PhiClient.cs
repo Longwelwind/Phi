@@ -227,26 +227,28 @@ namespace PhiClient
             this.SendPacket(new PostMessagePacket { message = message });
         }
 
-        public void SendThing(User user, Thing thing)
+        internal void SendThings(User user, Dictionary<List<Thing>, int> chosenThings)
         {
             if (!CheckCanStartTransaction(user))
             {
                 return;
             }
 
-            RealmThing realmThing = realmData.ToRealmThing(thing);
+            List<KeyValuePair<RealmThing, int>> realmThings = new List<KeyValuePair<RealmThing, int>>();
+            foreach (KeyValuePair<List<Thing>, int> entry in chosenThings)
+            {
+                RealmThing realmThing = realmData.ToRealmThing(entry.Key[0]);
 
-            // We begin a transaction with this user
+                realmThings.Add(new KeyValuePair<RealmThing, int>(realmThing, entry.Value));
+            }
+
             int id = ++this.currentUser.lastTransactionId;
-            ItemTransaction trans = new ItemTransaction(id, currentUser, user, thing, realmThing);
-            realmData.transactions.Add(trans);
+            ItemTransaction transaction = new ItemTransaction(id, currentUser, user, chosenThings, realmThings);
+            realmData.transactions.Add(transaction);
 
-            this.SendPacket(new StartTransactionPacket { transaction = trans });
+            this.SendPacket(new StartTransactionPacket { transaction = transaction });
 
             Messages.Message("Offer sent, waiting for confirmation", MessageSound.Silent);
-
-            //this.SendPacket(new SendThingPacket { userTo = user, realmThing = realmData.ToRealmThing(thing) });
-            //thing.Destroy();
         }
 
         public bool CheckCanStartTransaction(User receiver)
