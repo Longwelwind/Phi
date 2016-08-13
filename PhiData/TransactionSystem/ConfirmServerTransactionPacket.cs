@@ -40,10 +40,10 @@ namespace PhiClient.TransactionSystem
 
         [OnDeserialized]
         internal void OnDeserializedCallback(StreamingContext c)
-        {
-            RealmData realmData = c.Context as RealmData;
+		{
+			RealmContext realmContext = (RealmContext) c.Context;
 
-            transaction = realmData.FindTransaction(transactionId, senderTransactionId);
+			transaction = realmContext.realmData.FindTransaction(transactionId, senderTransactionId);
         }
     }
 }

@@ -50,6 +50,7 @@
     <Compile Include="ServerMainTab.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\ScrollContainer.cs" />
+    <Compile Include="UI\TabsContainer.cs" />
     <Compile Include="UI\TextFieldWidget.cs" />
     <Compile Include="UI\TextWidget.cs" />
     <Compile Include="UI\ThingIconWidget.cs" />
