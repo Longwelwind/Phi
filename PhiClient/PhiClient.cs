@@ -64,7 +64,7 @@ namespace PhiClient
         {
             try
             {
-                byte[] data = Packet.Serialize(packet);
+				byte[] data = Packet.Serialize(packet, realmData, currentUser);
                 this.client.Send(data);
             }
             catch (Exception e)
@@ -81,7 +81,7 @@ namespace PhiClient
                 {
                     byte[] data = (byte[]) packetsToProcess.Dequeue();
 
-                    Packet packet = Packet.Deserialize(data, this.realmData);
+					Packet packet = Packet.Deserialize(data, this.realmData, currentUser);
                     Log.Message("Received packet from server: " + packet);
 
                     ProcessPacket(packet);
