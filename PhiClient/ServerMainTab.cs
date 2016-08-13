@@ -21,8 +21,10 @@ namespace PhiClient
         string filterName = "";
         List<Thing> filteredUsers;
 
-        public ServerMainTab()
+        public override void PreOpen()
         {
+            base.PreOpen();
+            this.absorbInputAroundWindow = true;
         }
 
         public override void DoWindowContents(Rect inRect)
@@ -124,7 +126,8 @@ namespace PhiClient
             ListContainer footerList = new ListContainer(ListFlow.ROW);
             footerList.spaceBetween = ListContainer.SPACE;
 
-            if (Input.GetKeyDown(KeyCode.Return))
+            // Enter shorcut
+            if(Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.KeypadEnter || Event.current.keyCode == KeyCode.Return))
             {
                 OnSendClick();
             }
