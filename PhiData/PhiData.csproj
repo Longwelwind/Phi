@@ -48,6 +48,7 @@
     <Compile Include="TransactionSystem\Transaction.cs" />
     <Compile Include="UserPreferences.cs" />
     <Compile Include="RealmContext.cs" />
+    <Compile Include="AuctionHouseSystem\AuctionHousePacket.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
