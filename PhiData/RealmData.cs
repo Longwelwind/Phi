@@ -13,7 +13,7 @@ namespace PhiClient
     [Serializable]
     public class RealmData
     {
-        public const string VERSION = "0.7.3";
+        public const string VERSION = "0.8";
 		public const int CHAT_MESSAGES_TO_SEND = 30;
 
         public AuctionHouse auctionHouse;

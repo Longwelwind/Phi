@@ -1,19 +1,23 @@
-﻿using System;
+﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using Verse;
 
 namespace PhiClient.UI
 {
     class ListContainer : Displayable
     {
+        public static readonly Texture2D alternateBackground = SolidColorMaterials.NewSolidColorTexture(new Color(1f, 1f, 1f, 0.04f));
         public const float SPACE = 10f;
 
         List<Displayable> children;
         ListFlow flow;
         ListDirection direction;
         public float spaceBetween = 0f;
+        public bool drawAlternateBackground = false;
 
         public ListContainer(List<Displayable> children, ListFlow flow = ListFlow.COLUMN, ListDirection direction = ListDirection.NORMAL)
         {
@@ -119,6 +123,7 @@ namespace PhiClient.UI
                 beginX += inRect.width;
             }
 
+            int i = 0;
             foreach (Displayable child in children)
             {
                 float width = child.CalcWidth(height);
@@ -137,7 +142,13 @@ namespace PhiClient.UI
                 Rect childArea = new Rect(beginX, 0, width, height);
                 GUI.BeginGroup(childArea);
                 childArea.x = 0;
-                
+
+                // Must we draw the background
+                if (drawAlternateBackground && i % 2 == 1)
+                {
+                    GUI.DrawTexture(childArea, alternateBackground);
+                }
+
                 child.Draw(childArea);
 
                 GUI.EndGroup();
@@ -148,6 +159,8 @@ namespace PhiClient.UI
                 {
                     beginX += width + spaceBetween;
                 }
+
+                i++;
             }
         }
 
@@ -193,8 +206,10 @@ namespace PhiClient.UI
                 beginY += inRect.height;
             }
 
+            int i = 0;
             foreach (Displayable child in children)
             {
+
                 float height = child.CalcHeight(width);
                 if (height == -1)
                 {
@@ -212,6 +227,12 @@ namespace PhiClient.UI
                 GUI.BeginGroup(childArea);
                 childArea.y = 0;
 
+                // Must we draw the background
+                if (drawAlternateBackground && i % 2 == 1)
+                {
+                    GUI.DrawTexture(childArea, alternateBackground);
+                }
+
                 child.Draw(childArea);
 
                 GUI.EndGroup();
@@ -222,6 +243,8 @@ namespace PhiClient.UI
                 {
                     beginY += height + spaceBetween;
                 }
+
+                i++;
             }
         }
 

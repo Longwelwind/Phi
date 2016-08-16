@@ -13,15 +13,19 @@ namespace PhiClient
     {
         const float TITLE_HEIGHT = 45f;
         
-        const float CELL_HEIGHT = 30f;
-        const float CELL_WIDTH = 250f;
+        const float ROW_HEIGHT = 30f;
+        const float CONTROLS_WIDTH = 300f;
 
-        List<Thing> inventory = new List<Thing>();
+        // This list contains a list of available stacks for a given type of object
+        // Since canStackWith is transitive, to know if a thing is already counted,
+        // we simply need the check canStackWith the first element of a sub-list
+        List<List<Thing>> inventory = new List<List<Thing>>();
+        Dictionary<List<Thing>, int> chosenThings = new Dictionary<List<Thing>, int>();
         User user;
         Vector2 scrollPosition = Vector2.zero;
 
         string filterTerm = "";
-        List<Thing> filteredInventory;
+        List<List<Thing>> filteredInventory;
 
         public override Vector2 InitialSize
         {
@@ -37,7 +41,6 @@ namespace PhiClient
             this.closeOnClickedOutside = true;
             this.doCloseX = true;
             this.closeOnEscapeKey = true;
-
         }
 
         public void CountItems()
@@ -47,7 +50,6 @@ namespace PhiClient
             // To find all the items of the colony
             // We basically find all StockPile zones, take what they contains
             // And count that
-            
             foreach (Zone zone in Find.ZoneManager.AllZones.FindAll((Zone zone) => zone is Zone_Stockpile))
             {
                 Zone_Stockpile stockpile = (Zone_Stockpile)zone;
@@ -56,7 +58,23 @@ namespace PhiClient
                 {
                     if (thing.def.category == ThingCategory.Item && !thing.def.IsCorpse)
                     {
-                        this.inventory.Add(thing);
+                        bool found = false;
+                        foreach (List<Thing> things in inventory)
+                        {
+                            // We assume CanStackWith is transitive (i.e. if a thing A stacks with
+                            // a thing B, and the thing B stacks with a thing C, then A stacks with C)
+                            if (things[0].CanStackWith(thing))
+                            {
+                                things.Add(thing);
+                                found = true;
+                            }
+                        }
+                        if (!found)
+                        {
+                            List<Thing> list = new List<Thing>();
+                            list.Add(thing);
+                            inventory.Add(list);
+                        }
                     }
                 }
             }
@@ -66,7 +84,7 @@ namespace PhiClient
 
         public void FilterInventory()
         {
-            this.filteredInventory = this.inventory.Where((t) => ContainsStringIgnoreCase(t.Label, this.filterTerm)).ToList();
+            this.filteredInventory = this.inventory.Where((e) => ContainsStringIgnoreCase(e[0].Label, this.filterTerm)).ToList();
             // To avoid problems with the scrolling bar if the new height is lower than the old height
             scrollPosition = Vector2.zero;
         }
@@ -102,45 +120,74 @@ namespace PhiClient
              * Drawing the inventory
              */
             ListContainer columnCont = new ListContainer();
-            columnCont.spaceBetween = ListContainer.SPACE;
+            columnCont.drawAlternateBackground = true;
             mainCont.Add(new ScrollContainer(columnCont, scrollPosition, (s) => { scrollPosition = s; }));
 
-            int countColumns = (int) (inRect.width / CELL_WIDTH);
-            int countRows = Mathf.CeilToInt((float)this.filteredInventory.Count / countColumns);
-            int index = 0;
-            for (int rowIndex = 0;rowIndex < countRows; rowIndex++)
+            foreach (List<Thing> entry in filteredInventory)
             {
+                Thing thing = entry[0];
+                int stackCount = entry.Sum((e) => e.stackCount);
+
+                int chosenCount = 0;
+                chosenThings.TryGetValue(entry, out chosenCount);
+
                 ListContainer rowCont = new ListContainer(ListFlow.ROW);
                 rowCont.spaceBetween = ListContainer.SPACE;
-                columnCont.Add(new HeightContainer(rowCont, CELL_HEIGHT));
+                columnCont.Add(new HeightContainer(rowCont, ROW_HEIGHT));
 
-                for (int columnIndex = 0;columnIndex < countColumns && index < this.filteredInventory.Count;columnIndex++)
-                {
-                    Thing thing = this.filteredInventory[index];
+                rowCont.Add(new Container(new ThingIconWidget(thing), ROW_HEIGHT, ROW_HEIGHT));
+                rowCont.Add(new TextWidget(thing.LabelCapNoCount, GameFont.Small, TextAnchor.MiddleLeft));
+                rowCont.Add(new TextWidget(stackCount.ToString(), GameFont.Small, TextAnchor.MiddleRight));
 
-                    ListContainer cellCont = new ListContainer(ListFlow.ROW);
-                    rowCont.Add(new Container(cellCont, CELL_WIDTH, CELL_HEIGHT));
-                    
-                    cellCont.Add(new Container(new ThingIconWidget(thing), CELL_HEIGHT, CELL_HEIGHT));
-                    cellCont.Add(new TextWidget(thing.Label, GameFont.Small, TextAnchor.MiddleLeft));
-                    cellCont.Add(new WidthContainer(new ButtonWidget("Send", () => { OnSendClick(thing); }), 50f));
-                    
-                    index++;
-                }
+                // We add the controls for changing the quantity sent
+                ListContainer controlsCont = new ListContainer(ListFlow.ROW);
+                rowCont.Add(new WidthContainer(controlsCont, CONTROLS_WIDTH));
+
+                controlsCont.Add(new ButtonWidget("-100", () => ChangeChosenCount(entry, -100)));
+                controlsCont.Add(new ButtonWidget("-10", () => ChangeChosenCount(entry, -10) ));
+                controlsCont.Add(new ButtonWidget("-1", () => ChangeChosenCount(entry, -1) ));
+                controlsCont.Add(new TextWidget(chosenCount.ToString(), GameFont.Small, TextAnchor.MiddleCenter));
+                controlsCont.Add(new ButtonWidget("+1", () => ChangeChosenCount(entry, 1) ));
+                controlsCont.Add(new ButtonWidget("+10", () => ChangeChosenCount(entry, 10) ));
+                controlsCont.Add(new ButtonWidget("+100", () => ChangeChosenCount(entry, 100)));
             }
+
+            // We add the send button
+            mainCont.Add(new HeightContainer(new ButtonWidget("Send", OnSendClick), ROW_HEIGHT));
 
             mainCont.Draw(inRect);
         }
 
-        public void OnSendClick(Thing thing)
+        public void ChangeChosenCount(List<Thing> things, int count)
         {
-            if (thing.Destroyed)
+            if (chosenThings.ContainsKey(things))
             {
-                CountItems();
-                return;
+                chosenThings[things] += count;
+            }
+            else
+            {
+                chosenThings.Add(things, count);
             }
 
-            PhiClient.instance.SendThing(this.user, thing);
+            if (chosenThings[things] > 0)
+            {
+                chosenThings[things] = Math.Min(chosenThings[things], things.Sum((t) => t.stackCount));
+            }
+            else
+            {
+                chosenThings.Remove(things);
+            }
+            
+        }
+
+        public void OnSendClick()
+        {
+            bool success = PhiClient.instance.SendThings(this.user, chosenThings);
+
+            if (success)
+            {
+                Close();
+            }
         }
     }
 }
