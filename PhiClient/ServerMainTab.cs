@@ -29,7 +29,7 @@ namespace PhiClient
 
             ListContainer mainList = new ListContainer();
             mainList.spaceBetween = ListContainer.SPACE;
-            
+
             mainList.Add(new TextWidget("Realm", GameFont.Medium, TextAnchor.MiddleCenter));
 
             ListContainer rowBodyContainer = new ListContainer(new List<Displayable>()
@@ -55,7 +55,8 @@ namespace PhiClient
 
             foreach (ChatMessage c in phi.realmData.chat.Reverse<ChatMessage>().Take(30))
             {
-                cont.Add(new TextWidget(c.user.name + ": " + c.message));
+            	int idx = phi.realmData.users.LastIndexOf(c.user);
+            	cont.Add(new ButtonWidget(phi.realmData.users[idx].name + ": " + c.message, () => { OnUserClick(phi.realmData.users[idx]); }, false));
             }
 
             return new ScrollContainer(cont, chatScroll, (v) => { chatScroll = v; });
