@@ -19,7 +19,6 @@ namespace PhiClient
         // This list contains a list of available stacks for a given type of object
         // Since canStackWith is transitive, to know if a thing is already counted,
         // we simply need the check canStackWith the first element of a sub-list
-        List<List<Thing>> inventory = new List<List<Thing>>();
         Dictionary<List<Thing>, int> chosenThings = new Dictionary<List<Thing>, int>();
         User user;
         Vector2 scrollPosition = Vector2.zero;
@@ -45,46 +44,13 @@ namespace PhiClient
 
         public void CountItems()
         {
-            this.inventory.Clear();
-
-            // To find all the items of the colony
-            // We basically find all StockPile zones, take what they contains
-            // And count that
-            foreach (Zone zone in Find.ZoneManager.AllZones.FindAll((Zone zone) => zone is Zone_Stockpile))
-            {
-                Zone_Stockpile stockpile = (Zone_Stockpile)zone;
-
-                foreach (Thing thing in stockpile.AllContainedThings)
-                {
-                    if (thing.def.category == ThingCategory.Item && !thing.def.IsCorpse)
-                    {
-                        bool found = false;
-                        foreach (List<Thing> things in inventory)
-                        {
-                            // We assume CanStackWith is transitive (i.e. if a thing A stacks with
-                            // a thing B, and the thing B stacks with a thing C, then A stacks with C)
-                            if (things[0].CanStackWith(thing))
-                            {
-                                things.Add(thing);
-                                found = true;
-                            }
-                        }
-                        if (!found)
-                        {
-                            List<Thing> list = new List<Thing>();
-                            list.Add(thing);
-                            inventory.Add(list);
-                        }
-                    }
-                }
-            }
-
+            Inventory.Count();
             FilterInventory();
         }
 
         public void FilterInventory()
         {
-            this.filteredInventory = this.inventory.Where((e) => ContainsStringIgnoreCase(e[0].Label, this.filterTerm)).ToList();
+            this.filteredInventory = Inventory.inventory.Where((e) => ContainsStringIgnoreCase(e[0].Label, this.filterTerm)).ToList();
             // To avoid problems with the scrolling bar if the new height is lower than the old height
             scrollPosition = Vector2.zero;
         }

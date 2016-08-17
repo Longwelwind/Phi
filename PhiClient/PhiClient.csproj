@@ -37,6 +37,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AuctionHouse\AuctionHouseWindow.cs" />
+    <Compile Include="Inventory.cs" />
     <Compile Include="UI\ButtonWidget.cs" />
     <Compile Include="UI\CheckboxLabeledWidget.cs" />
     <Compile Include="UI\Container.cs" />

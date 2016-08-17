@@ -1,5 +1,9 @@
 ﻿using System;
 using PhiClient;
+using System.Runtime.Serialization;
+using System.Linq;
+using System.Collections.Generic;
+using Verse;
 
 namespace PhiData.AuctionHouseSystem
 {
@@ -10,10 +14,12 @@ namespace PhiData.AuctionHouseSystem
 	class SendOfferPacket : Packet
 	{
 		public RealmThing realmThing;
+        public int quantity;
+        public int price;
 	
 		public override void Apply(User user, RealmData realmData)
 		{
-			Offer offer = realmData.auctionHouse.ServerCreateOffer(user, realmThing);
+			Offer offer = realmData.auctionHouse.ServerCreateOffer(user, price, realmThing, quantity);
 		}
 	}
 
@@ -34,7 +40,7 @@ namespace PhiData.AuctionHouseSystem
 			offer.state = OfferState.SOLD_TO_BE_CLAIMED;
 
 			if (offer.sender.connected) {
-				realmData.NotifyPacket(offer.sender, new NotifyOfferSoldPacket{ offer });
+				realmData.NotifyPacket(offer.sender, new NotifyOfferSoldPacket{ offer = offer });
 			}
 		}
 
@@ -53,17 +59,17 @@ namespace PhiData.AuctionHouseSystem
 	}
 
 	[Serializable]
-	class RequestOffersPacket : Packet
+	public class RequestOffersPacket : Packet
 	{
 		public override void Apply(User user, RealmData realmData)
 		{
 			// We include all open offers, and offers that can be reclaimed by the user who
 			// asked the offers.
-			Offer[] offers = realmData.auctionHouse.offers.Where(o =>
+			List<Offer> offers = realmData.auctionHouse.offers.Where(o =>
 				o.state == OfferState.OPEN || (o.sender == user && o.state == OfferState.SOLD_TO_BE_CLAIMED)
-			).ToArray();
+			).ToList();
 
-			realmData.NotifyPacket(new OffersPacket { offers = offers });
+			realmData.NotifyPacket(user, new OffersPacket { offers = offers });
 		}
 	}
 
@@ -71,9 +77,9 @@ namespace PhiData.AuctionHouseSystem
 	     * Received by the client
 	     */
 	[Serializable]
-	class OffersPacket : Packet
+    public class OffersPacket : Packet
 	{
-		public Offer[] offers;
+		public List<Offer> offers;
 
 		public override void Apply(User user, RealmData realmData)
 		{
@@ -98,13 +104,13 @@ namespace PhiData.AuctionHouseSystem
 		}
 
 		[OnSerializing]
-		internal void OnSerializingCallback(StreamingContext c)
+        private void OnSerializingCallback(StreamingContext c)
 		{
 			serializeOffer = offer.id;
 		}
 
 		[OnDeserialized]
-		internal void OnDeserializedCallback(StreamingContext c)
+		private void OnDeserializedCallback(StreamingContext c)
 		{
 			RealmContext realmContext = (RealmContext)c.Context;
 			// We only TryFind because the offer may not have been downloaded by the user

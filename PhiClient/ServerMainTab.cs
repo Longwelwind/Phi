@@ -68,6 +68,7 @@ namespace PhiClient
             PhiClient phi = PhiClient.instance;
 
             ListContainer cont = new ListContainer();
+            cont.spaceBetween = ListContainer.SPACE;
 
             string status = "Status: ";
             switch (phi.client.state)
@@ -107,6 +108,9 @@ namespace PhiClient
 
                 cont.Add(new ScrollContainer(usersList, userScrollPosition, (v) => { userScrollPosition = v; }));
             }
+
+            cont.Add(new ButtonWidget("Auction house", OnAuctionHouseClick));
+
             return cont;
         }
 
@@ -142,6 +146,11 @@ namespace PhiClient
             }
             PhiClient.instance.SendMessage(this.enteredMessage);
             this.enteredMessage = "";
+        }
+
+        public void OnAuctionHouseClick()
+        {
+            Find.WindowStack.Add(new AuctionHouseWindow());
         }
 
         public void OnReconnectClick()
