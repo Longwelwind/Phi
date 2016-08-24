@@ -11,6 +11,7 @@ namespace PhiClient
     class UserSendColonistWindow : Window
     {
         User user;
+        Vector2 scrollPosition = Vector2.zero;
 
         public UserSendColonistWindow(User user)
         {
@@ -22,14 +23,23 @@ namespace PhiClient
 
         public override void DoWindowContents(Rect inRect)
         {
-            ListContainer cont = new ListContainer();
+            ListContainer mainCont = new ListContainer();
+            mainCont.spaceBetween = ListContainer.SPACE;
 
-            cont.Add(new TextWidget("ATTENTION: This feature is highly experimental. Only use it if you're playing with a save you could potentially corrupt."));
+            mainCont.Add(new TextWidget("ATTENTION: This feature is highly experimental. Only use it if you're playing with a save you could potentially corrupt."));
 
-            float beginY = 0f;
+            //Adds a scrollable container for trading colonists.
+            ListContainer columnCont = new ListContainer();
+            columnCont.drawAlternateBackground = true;
+            mainCont.Add(new ScrollContainer(columnCont, scrollPosition, (s) => { scrollPosition = s; }));
+
+            float beginY = 0f; //Unused
             foreach (Pawn colonist in Find.MapPawns.FreeColonists)
             {
-                cont.Add(new ButtonWidget(colonist.Label, () => OnColonistClick(colonist), false));
+                ListContainer rowCont = new ListContainer(ListFlow.ROW);
+                rowCont.spaceBetween = ListContainer.SPACE;
+                columnCont.Add(new HeightContainer(rowCont, ROW_HEIGHT));
+                rowCont.Add(new ButtonWidget(colonist.Label, () => OnColonistClick(colonist), false));
             }
 
             cont.Draw(inRect);
