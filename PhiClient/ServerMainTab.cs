@@ -1,4 +1,5 @@
-﻿using PhiClient.UI;
+﻿using PhiClient.AuctionHouse;
+using PhiClient.UI;
 using RimWorld;
 using System.Collections.Generic;
 using System.Linq;
@@ -110,7 +111,7 @@ namespace PhiClient
                 cont.Add(new ScrollContainer(usersList, userScrollPosition, (v) => { userScrollPosition = v; }));
             }
 
-            cont.Add(new ButtonWidget("Auction house", OnAuctionHouseClick));
+            cont.Add(new HeightContainer(new ButtonWidget("Auction house", OnAuctionHouseClick), 40f));
 
             return cont;
         }

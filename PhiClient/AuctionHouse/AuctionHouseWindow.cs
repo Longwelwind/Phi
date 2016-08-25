@@ -7,7 +7,7 @@ using System.Text;
 using UnityEngine;
 using Verse;
 
-namespace PhiClient
+namespace PhiClient.AuctionHouse
 {
     class AuctionHouseWindow : Window
     {
@@ -24,6 +24,8 @@ namespace PhiClient
         public override void PreOpen()
         {
             base.PreOpen();
+
+            Inventory.Count();
 
             // We send a request to get the offer.
             // They won't be directly available, but they will at some time
@@ -42,7 +44,7 @@ namespace PhiClient
 
             tabs.AddTab("Offers", DrawOffers());
             tabs.AddTab("Current offers", DrawOffers());
-            tabs.AddTab("Make an offer", DrawOffers());
+            tabs.AddTab("Make an offer", DrawCreateOffer());
 
             cont.Draw(inRect);
         }
@@ -70,20 +72,47 @@ namespace PhiClient
 
                 row.Add(new WidthContainer(new TextWidget(offer.price.ToString() + " silver"), 80f));
 
-                cont.Add(row);
+                cont.Add(new HeightContainer(row, ROW_HEIGHT));
             }
 
             return cont;
         }
 
         public const float CREATE_OFFER_HEIGHT = 200f;
+        public const float MAKE_OFFER_BUTTON_WIDTH = 100f;
+
+        public Vector2 makeOfferScrollPosition = Vector2.zero;
 
         public Displayable DrawCreateOffer()
         {
-            ListContainer list = new ListContainer();
-            list.spaceBetween = ListContainer.SPACE;
+            List<List<Thing>> inventory = Inventory.inventory;
+            
+            ListContainer rowCont = new ListContainer();
+            rowCont.drawAlternateBackground = true;
 
-            return list;
+            foreach (List<Thing> things in inventory)
+            {
+                ListContainer row = new ListContainer(ListFlow.ROW);
+                row.spaceBetween = ListContainer.SPACE;
+
+                int quantity = Inventory.GetQuantity(things);
+                Thing thing = things[0];
+
+                row.Add(new Container(new ThingIconWidget(thing), ROW_HEIGHT, ROW_HEIGHT));
+                row.Add(new TextWidget(thing.LabelCapNoCount, GameFont.Small, TextAnchor.MiddleLeft));
+                row.Add(new TextWidget(quantity.ToString(), GameFont.Small, TextAnchor.MiddleRight));
+
+                row.Add(new WidthContainer(new ButtonWidget("Sell", () => { OnSellItemButton(things); }), MAKE_OFFER_BUTTON_WIDTH));
+
+                rowCont.Add(new HeightContainer(row, ROW_HEIGHT));
+            }
+
+            return new ScrollContainer(rowCont, makeOfferScrollPosition, (s) => makeOfferScrollPosition = s);
+        }
+
+        public void OnSellItemButton(List<Thing> things)
+        {
+            Find.WindowStack.Add(new SellItemWindow(things));
         }
     }
 }
