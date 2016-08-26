@@ -10,7 +10,7 @@ namespace PhiClient
 		public const string I = "i";
 		public const string COLOR = "color";
 
-		public static string StripRichText(string input, params string strippedTags)
+		public static string StripRichText(string input, params string[] strippedTags)
 		{
 			foreach (string tag in strippedTags) {
 				// Maybe a better way than a Regex to parse RichText ?
@@ -25,7 +25,7 @@ namespace PhiClient
 
 		public static string StripRichText()
 		{
-			StripRichText(SIZE, B, I, COLOR);
+			return StripRichText(SIZE, B, I, COLOR);
 		}
 	}
 }

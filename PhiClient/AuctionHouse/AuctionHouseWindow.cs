@@ -33,7 +33,9 @@ namespace PhiClient.AuctionHouse
         }
 
         public override void DoWindowContents(Rect inRect)
-        {
+		{
+			PhiClient phi = PhiClient.instance;
+
             ListContainer cont = new ListContainer(ListFlow.COLUMN);
             cont.spaceBetween = ListContainer.SPACE;
 
@@ -42,8 +44,11 @@ namespace PhiClient.AuctionHouse
             TabsContainer tabs = new TabsContainer(openedTab, (t) => openedTab = t);
             cont.Add(tabs);
 
-            tabs.AddTab("Offers", DrawOffers());
-            tabs.AddTab("Current offers", DrawOffers());
+			Offer[] shownOffers = phi.realmData.auctionHouse.offers.Where((o) => o.state == OfferState.OPEN).ToArray();
+			Offer[] shownCurrentOffers = phi.realmData.auctionHouse.offers.Where((o) => o.sender == phi.currentUser).ToArray();
+
+			tabs.AddTab("Offers", DrawOffers(shownOffers));
+			tabs.AddTab("Current offers", DrawOffers(shownCurrentOffers));
             tabs.AddTab("Make an offer", DrawCreateOffer());
 
             cont.Draw(inRect);
@@ -51,14 +56,13 @@ namespace PhiClient.AuctionHouse
 
         public const float ROW_HEIGHT = 40f;
 
-        public Displayable DrawOffers()
-        {
-            PhiClient phi = PhiClient.instance;
+		public Displayable DrawOffers(Offer[] offers)
+		{
+			PhiClient phi = PhiClient.instance;
 
             ListContainer cont = new ListContainer(ListFlow.COLUMN);
             cont.drawAlternateBackground = true;
 
-            Offer[] offers = phi.realmData.auctionHouse.offers.Where((o) => o.state == OfferState.OPEN).ToArray();
             foreach (Offer offer in offers)
             {
                 Thing thing = phi.realmData.FromRealmThing(offer.realmThing);

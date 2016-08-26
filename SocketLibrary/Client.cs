@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Verse;
 using WebSocketSharp;
 
 namespace SocketLibrary
@@ -65,15 +64,7 @@ namespace SocketLibrary
         private void MessageCallback(object sender, MessageEventArgs e)
         {
             byte[] rawData = e.RawData;
-            try
-            {
-                this.Message(e.RawData);
-            }
-            catch (Exception ex)
-            {
-                Log.Notify_Exception(ex);
-                Log.Error(ex.ToString());
-            }
+            this.Message(e.RawData);
         }
     }
 }

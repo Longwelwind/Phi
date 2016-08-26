@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
-using Verse;
 using System.Xml;
 using WebSocketSharp;
 using WebSocketSharp.Server;
