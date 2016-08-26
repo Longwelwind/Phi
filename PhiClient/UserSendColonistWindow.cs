@@ -38,11 +38,11 @@ namespace PhiClient
             {
                 ListContainer rowCont = new ListContainer(ListFlow.ROW);
                 rowCont.spaceBetween = ListContainer.SPACE;
-                columnCont.Add(new HeightContainer(rowCont, ROW_HEIGHT));
+                columnCont.Add(new HeightContainer(rowCont, 40f));
                 rowCont.Add(new ButtonWidget(colonist.Label, () => OnColonistClick(colonist), false));
             }
 
-            cont.Draw(inRect);
+			mainCont.Draw(inRect);
         }
 
         public void OnColonistClick(Pawn pawn)
