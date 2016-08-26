@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using UnityEngine;
 using Verse;
+using PhiClient.RaidSystem;
 
 namespace PhiClient
 {
@@ -22,8 +23,12 @@ namespace PhiClient
 		[NonSerialized]
         public List<Transaction> transactions = new List<Transaction>();
 		private List<Transaction> serializeTransactions;
+		[NonSerialized]
+		public List<Raid> raids = new List<Raid>();
+		private List<Raid> serializeRaids;
 
         public int lastUserGivenId = 0;
+		public int lastRaidId = 0;
 
         public delegate void PacketHandler(User user, Packet packet);
         [field: NonSerialized]
@@ -121,6 +126,13 @@ namespace PhiClient
             return user;
         }
 
+		public void ServerAddRaid(Raid raid)
+		{
+			raids.Add(raid);
+
+
+		}
+
         public void ServerPostMessage(User user, string message)
         {
             ChatMessage chatMessage = new ChatMessage { user = user, message = message };
@@ -196,11 +208,16 @@ namespace PhiClient
 		[OnSerializing]
 		internal void OnSerializingCallback(StreamingContext c)
 		{
+			RealmContext context = (RealmContext)c.Context;
+			User user = context.user;
+
             int indexStart = Math.Max(0, chat.Count - CHAT_MESSAGES_TO_SEND);
             int count = Math.Min(chat.Count, CHAT_MESSAGES_TO_SEND);
 			serializeChat = chat.GetRange(indexStart, count);
             // For the moment, we transmit no transactions to the user when he is connecting
 			serializeTransactions = new List<Transaction>();
+
+			serializeRaids = raids.Where((r) => (r.sender == user || r.target == user) && r.state != RaidState.FINISHED).ToList();
 		}
 
 		[OnDeserialized]
@@ -208,6 +225,7 @@ namespace PhiClient
 		{
 			chat = serializeChat;
 			transactions = serializeTransactions;
+			raids = serializeRaids;
 		}
     }
 

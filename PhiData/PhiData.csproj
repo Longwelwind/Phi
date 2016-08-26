@@ -48,6 +48,7 @@
     <Compile Include="UserPreferences.cs" />
     <Compile Include="RealmContext.cs" />
     <Compile Include="TextHelper.cs" />
+    <Compile Include="RaidSystem\Raid.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -71,4 +72,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <Folder Include="RaidSystem\" />
+  </ItemGroup>
 </Project>
