@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Collections;
 using PhiClient.TransactionSystem;
+using PhiData.AuctionHouseSystem;
 
 namespace PhiClient
 {
@@ -288,6 +289,15 @@ namespace PhiClient
         public void ChangeNickname(string newNickname)
         {
             this.SendPacket(new ChangeNicknamePacket { name = newNickname });
+        }
+
+        public void CreateOffer(List<Thing> things, int quantity, int price)
+        {
+            Inventory.Remove(things, quantity);
+
+            RealmThing realmThing = realmData.ToRealmThing(things[0]);
+
+            SendPacket(new SendOfferPacket { realmThing = realmThing, quantity = quantity, price = price });
         }
     }
 }

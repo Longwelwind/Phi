@@ -11,7 +11,7 @@ namespace PhiData.AuctionHouseSystem
      * Received by the server
      */
 	[Serializable]
-	class SendOfferPacket : Packet
+	public class SendOfferPacket : Packet
 	{
 		public RealmThing realmThing;
         public int quantity;
@@ -24,7 +24,7 @@ namespace PhiData.AuctionHouseSystem
 	}
 
 	[Serializable]
-	class BuyOfferPacket : Packet
+    public class BuyOfferPacket : Packet
 	{
 		[NonSerialized]
 		public Offer offer;
@@ -88,7 +88,7 @@ namespace PhiData.AuctionHouseSystem
 	}
 
 	[Serializable]
-	class NotifyOfferSoldPacket : Packet
+    public class NotifyOfferSoldPacket : Packet
 	{
 		[NonSerialized]
 		public Offer offer;
@@ -119,7 +119,7 @@ namespace PhiData.AuctionHouseSystem
 	}
 
 	[Serializable]
-	class ConfirmBuyPacket : Packet
+    public class ConfirmBuyPacket : Packet
 	{
 		[NonSerialized]
 		public Offer offer;

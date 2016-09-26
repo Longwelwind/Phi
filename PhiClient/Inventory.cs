@@ -58,6 +58,25 @@ namespace PhiClient
             return GetQuantity(GetAll(thing));
         }
 
+        public static int Remove(List<Thing> things, int quantity)
+        {
+            foreach (Thing thing in things)
+            {
+                if (quantity < thing.stackCount)
+                {
+                    thing.stackCount -= quantity;
+                    quantity = 0;
+                }
+                else
+                {
+                    quantity -= thing.stackCount;
+                    thing.Destroy();
+                }
+            }
+
+            return quantity;
+        }
+
         public static List<Thing> GetAll(Thing thing)
         {
             return inventory.Find((t) => t[0].CanStackWith(thing)).ToList();

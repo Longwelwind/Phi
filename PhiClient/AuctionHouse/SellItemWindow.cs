@@ -28,7 +28,7 @@ namespace PhiClient.AuctionHouse
         {
             get
             {
-                return new Vector2(600, 500);
+                return new Vector2(700, 300);
             }
         }
 
@@ -58,10 +58,10 @@ namespace PhiClient.AuctionHouse
 			 */
 			ListContainer controlsCont = new ListContainer(ListFlow.ROW);
 
-			controlsCont.Add(new TextWidget("Quantity", GameFont.Small, TextAnchor.MiddleCenter));
+			controlsCont.Add(new WidthContainer(new TextWidget("Quantity", GameFont.Small, TextAnchor.MiddleCenter), 100f));
 			controlsCont.Add(new NumberInput(quantity, (q) => quantity = q));
 
-			controlsCont.Add(new TextWidget("Price", GameFont.Small, TextAnchor.MiddleCenter));
+			controlsCont.Add(new WidthContainer(new TextWidget("Price", GameFont.Small, TextAnchor.MiddleCenter), 100f));
 			controlsCont.Add(new NumberInput(price, (p) => price = p));
 
 			cont.Add(new HeightContainer(controlsCont, 40f));
@@ -73,7 +73,8 @@ namespace PhiClient.AuctionHouse
 
         private void OnSellClick()
         {
-
+            PhiClient.instance.CreateOffer(things, quantity, price);
+            Close();
         }
     }
 }
