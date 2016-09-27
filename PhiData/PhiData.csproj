@@ -47,13 +47,14 @@
     <Compile Include="TransactionSystem\Transaction.cs" />
     <Compile Include="UserPreferences.cs" />
     <Compile Include="RealmContext.cs" />
+    <Compile Include="TextHelper.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
     <Reference Include="Assembly-CSharp">
       <HintPath>..\ExternPackages\Assembly-CSharp.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
       <HintPath>..\ExternPackages\UnityEngine.dll</HintPath>
     </Reference>

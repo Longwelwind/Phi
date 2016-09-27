@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -54,9 +54,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="websocket-sharp, Version=1.0.2.59611, Culture=neutral, PublicKeyToken=5660b08a1845a91e, processorArchitecture=MSIL">
+    <Reference Include="websocket-sharp, Version=1.0.2.59611, Culture=neutral, PublicKeyToken=5660b08a1845a91e">
       <HintPath>..\packages\WebSocketSharp.1.0.3-rc11\lib\websocket-sharp.dll</HintPath>
-      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -65,11 +64,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PhiData\PhiData.csproj">
-      <Project>{a4b9d7a7-21fa-44cc-8e27-07f4f0286e86}</Project>
+      <Project>{A4B9D7A7-21FA-44CC-8E27-07F4F0286E86}</Project>
       <Name>PhiData</Name>
     </ProjectReference>
     <ProjectReference Include="..\SocketLibrary\SocketLibrary.csproj">
-      <Project>{3ea9fa43-01fc-4af5-bda8-81bac9df7900}</Project>
+      <Project>{3EA9FA43-01FC-4AF5-BDA8-81BAC9DF7900}</Project>
       <Name>SocketLibrary</Name>
     </ProjectReference>
   </ItemGroup>
