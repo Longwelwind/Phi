@@ -157,6 +157,17 @@ namespace PhiClient
     }
 
     [Serializable]
+    public class AuthentificationErrorPacket : Packet
+    {
+        public string error;
+
+        public override void Apply(User user, RealmData realmData)
+        {
+            // Handled by PhiClient
+        }
+    }
+
+    [Serializable]
     public class ReceiveColonistPacket : Packet
     {
         [NonSerialized]
@@ -238,17 +249,6 @@ namespace PhiClient
 			RealmContext realmContext = (RealmContext) c.Context;
 
 			user = ID.Find(realmContext.realmData.users, userId);
-        }
-    }
-
-    [Serializable]
-    public class AuthentificationErrorPacket : Packet
-    {
-        public string error;
-
-        public override void Apply(User user, RealmData realmData)
-        {
-            Log.Error(error);
         }
     }
 

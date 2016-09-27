@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEngine;
 using Verse;
 using WebSocketSharp;
+using System;
 
 namespace PhiClient
 {
@@ -53,10 +54,12 @@ namespace PhiClient
 
             var cont = new ListContainer(ListFlow.COLUMN, ListDirection.OPPOSITE);
 
-            foreach (ChatMessage c in phi.realmData.chat.Reverse<ChatMessage>().Take(30))
-            {
-            	int idx = phi.realmData.users.LastIndexOf(c.user);
-            	cont.Add(new ButtonWidget(phi.realmData.users[idx].name + ": " + c.message, () => { OnUserClick(phi.realmData.users[idx]); }, false));
+            if (phi.IsUsable()) {
+                foreach (ChatMessage c in phi.realmData.chat.Reverse<ChatMessage>().Take(30))
+                {
+                    int idx = phi.realmData.users.LastIndexOf(c.user);
+                    cont.Add(new ButtonWidget(phi.realmData.users[idx].name + ": " + c.message, () => { OnUserClick(phi.realmData.users[idx]); }, false));
+                }
             }
 
             return new ScrollContainer(cont, chatScroll, (v) => { chatScroll = v; });
@@ -69,6 +72,7 @@ namespace PhiClient
             PhiClient phi = PhiClient.instance;
 
             ListContainer cont = new ListContainer();
+            cont.spaceBetween = ListContainer.SPACE;
 
             string status = "Status: ";
             switch (phi.client.state)
@@ -87,6 +91,9 @@ namespace PhiClient
                     break;
             }
             cont.Add(new TextWidget(status));
+
+            cont.Add(new HeightContainer(new ButtonWidget("Configuration", () => { OnConfigurationClick(); }), 30f));
+
             cont.Add(new Container(new TextFieldWidget(filterName, (s) => {
                 filterName = s;
             }), 150f, 30f));
@@ -109,6 +116,11 @@ namespace PhiClient
                 cont.Add(new ScrollContainer(usersList, userScrollPosition, (v) => { userScrollPosition = v; }));
             }
             return cont;
+        }
+
+        private void OnConfigurationClick()
+        {
+            Find.WindowStack.Add(new ServerMainMenuWindow());
         }
 
         private System.Boolean ContainsStringIgnoreCase(string hay, string needle)
