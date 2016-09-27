@@ -45,7 +45,6 @@
     <Compile Include="PhiClient.cs" />
     <Compile Include="PhiInitializer.cs" />
     <Compile Include="ServerMainMenuWindow.cs" />
-    <Compile Include="ServerMainMenuButton.cs" />
     <Compile Include="ServerMainTab.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\ScrollContainer.cs" />
