@@ -8,6 +8,7 @@ using Verse;
 
 namespace PhiClient.UI
 {
+    [StaticConstructorOnStartup]
     class ListContainer : Displayable
     {
         public static readonly Texture2D alternateBackground = SolidColorMaterials.NewSolidColorTexture(new Color(1f, 1f, 1f, 0.04f));
