@@ -35,6 +35,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="IDable.cs" />
+    <Compile Include="Legacy\DialogChoiceConfig.cs" />
+    <Compile Include="Legacy\DialogConfirm.cs" />
+    <Compile Include="Legacy\Dialog_GeneralChoice.cs" />
     <Compile Include="Packet.cs" />
     <Compile Include="RealmData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

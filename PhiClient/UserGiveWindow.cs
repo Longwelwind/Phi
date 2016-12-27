@@ -50,7 +50,7 @@ namespace PhiClient
             // To find all the items of the colony
             // We basically find all StockPile zones, take what they contains
             // And count that
-            foreach (Zone zone in Find.ZoneManager.AllZones.FindAll((Zone zone) => zone is Zone_Stockpile))
+            foreach (Zone zone in Find.VisibleMap.zoneManager.AllZones.FindAll((Zone zone) => zone is Zone_Stockpile))
             {
                 Zone_Stockpile stockpile = (Zone_Stockpile)zone;
 

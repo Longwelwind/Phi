@@ -4,6 +4,7 @@ using RimWorld;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
 using System.IO;
+using PhiClient.Legacy;
 
 namespace PhiClient
 {

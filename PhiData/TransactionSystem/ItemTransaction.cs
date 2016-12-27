@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using PhiClient.Legacy;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -79,14 +80,14 @@ namespace PhiClient.TransactionSystem
                 }
 
                 // We spawn the said item
-                IntVec3 position = DropCellFinder.RandomDropSpot();
-                DropPodUtility.DropThingsNear(position, thingsToSpawn);
+                IntVec3 position = DropCellFinder.RandomDropSpot(Find.VisibleMap);
+                DropPodUtility.DropThingsNear(position, Find.VisibleMap, thingsToSpawn);
 
                 Find.LetterStack.ReceiveLetter(
                     "Ship pod",
                     "A pod was sent from " + sender.name + " containing items",
                     LetterType.Good,
-                    position
+                    new RimWorld.Planet.GlobalTargetInfo(position, Find.VisibleMap)
                 );
             }
             else if (state == TransactionResponse.INTERRUPTED)

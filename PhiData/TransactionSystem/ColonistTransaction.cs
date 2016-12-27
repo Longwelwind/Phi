@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using PhiClient.Legacy;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,7 @@ namespace PhiClient.TransactionSystem
         public override void OnStartReceiver(RealmData realmData)
         {
             // We ask for confirmation
+            
             Dialog_GeneralChoice choiceDialog = new Dialog_GeneralChoice(new DialogChoiceConfig
             {
                 text = sender.name + " wants to send you a colonist",
@@ -55,10 +57,10 @@ namespace PhiClient.TransactionSystem
             if (state == TransactionResponse.ACCEPTED)
             {
                 Pawn pawn = realmPawn.FromRealmPawn(realmData);
-
+                
                 // We drop it
-                IntVec3 position = DropCellFinder.RandomDropSpot();
-                DropPodUtility.MakeDropPodAt(position, new DropPodInfo
+                IntVec3 position = DropCellFinder.RandomDropSpot(Find.VisibleMap);
+                DropPodUtility.MakeDropPodAt(position, Find.VisibleMap, new ActiveDropPodInfo
                 {
                     SingleContainedThing = pawn,
                     openDelay = 110,
@@ -69,7 +71,7 @@ namespace PhiClient.TransactionSystem
                     "Colonist pod",
                     "A colonist was sent to you by " + sender.name,
                     LetterType.Good,
-                    position
+                    new RimWorld.Planet.GlobalTargetInfo(position, Find.VisibleMap)
                 );
             }
             else if (state == TransactionResponse.INTERRUPTED)

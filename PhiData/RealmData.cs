@@ -269,7 +269,7 @@ namespace PhiClient
         public List<RealmSkillRecord> skills;
         public List<RealmTrait> traits;
         public Gender gender;
-        public float skinWhiteness;
+        public float melanin;
 
         /**
          * Equipment
@@ -287,7 +287,7 @@ namespace PhiClient
                 skills.Add(new RealmSkillRecord
                 {
                     skillDefLabel = rec.def.label,
-                    level = rec.level,
+                    level = rec.Level,
                     passion = rec.passion
                 });
             }
@@ -324,7 +324,7 @@ namespace PhiClient
             }
 
             List<RealmThing> inventory = new List<RealmThing>();
-            foreach (Thing thing in pawn.inventory.container)
+            foreach (Thing thing in pawn.inventory.innerContainer)
             {
                 inventory.Add(realmData.ToRealmThing(thing));
             }
@@ -340,9 +340,9 @@ namespace PhiClient
                 gender = pawn.gender,
                 skills = skills,
                 traits = traits,
-                childhoodKey = pawn.story.childhood.uniqueSaveKey,
-                adulthoodKey = pawn.story.adulthood.uniqueSaveKey,
-                skinWhiteness = pawn.story.skinWhiteness,
+                childhoodKey = pawn.story.childhood.identifier,
+                adulthoodKey = pawn.story.adulthood.identifier,
+                melanin = pawn.story.melanin,
                 hairColor = new float[]
                 {
                     hairColor.r,
@@ -377,7 +377,7 @@ namespace PhiClient
             // Ignored GeneratePawnRelations()
 
             Pawn_StoryTracker story = pawn.story;
-            story.skinWhiteness = skinWhiteness;
+            story.melanin = melanin;
             story.crownType = crownType;
             story.hairColor = new Color(hairColor[0], hairColor[1], hairColor[2], hairColor[3]);
 
@@ -396,8 +396,15 @@ namespace PhiClient
                     break;
             }
             pawn.Name = nameObj;
-            story.childhood = BackstoryDatabase.GetWithKey(childhoodKey);
-            story.adulthood = BackstoryDatabase.GetWithKey(adulthoodKey);
+
+            if (!BackstoryDatabase.TryGetWithIdentifier(childhoodKey, out story.childhood))
+            {
+                throw new Exception(string.Format("Couldn't find backstory '{0}'", childhoodKey));
+            }
+            if (!BackstoryDatabase.TryGetWithIdentifier(adulthoodKey, out story.adulthood))
+            {
+                throw new Exception(string.Format("Couldn't find backstory '{0}'", adulthoodKey));
+            }
 
             story.hairDef = DefDatabase<HairDef>.GetNamed(hairDefName);
 
@@ -414,7 +421,7 @@ namespace PhiClient
                 SkillDef skillDef = DefDatabase<SkillDef>.AllDefs.First((def) => def.label == rec.skillDefLabel);
 
                 SkillRecord skill = pawn.skills.GetSkill(skillDef);
-                skill.level = rec.level;
+                skill.Level = rec.level;
                 skill.passion = rec.passion;
             }
 
@@ -445,7 +452,7 @@ namespace PhiClient
             {
                 Thing thing = realmData.FromRealmThing(realmThing);
 
-                inventoryTracker.container.TryAdd(thing);
+                inventoryTracker.innerContainer.TryAdd(thing);
             }
 
             return pawn;
