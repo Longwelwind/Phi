@@ -23,10 +23,24 @@ namespace PhiClient
 			return input;
 		}
 
-		public static string StripRichText()
+		public static string StripRichText(string input)
 		{
-			return StripRichText(SIZE, B, I, COLOR);
+			return StripRichText(input, SIZE, B, I, COLOR);
 		}
+
+        public static string Clamp(string input, int min, int max, char filler = '-')
+        {
+            if (input.Length < min)
+            {
+                input += new string(filler, min);
+            }
+            else if (input.Length > max)
+            {
+                input = input.Substring(0, max);
+            }
+
+            return input;
+        }
 	}
 }
 

@@ -58,15 +58,18 @@ namespace PhiClient
 
         public override void Apply(User user, RealmData realmData)
         {
+            string filteredName = TextHelper.StripRichText(name, TextHelper.SIZE);
+            filteredName = TextHelper.Clamp(filteredName, User.MIN_NAME_LENGTH, User.MAX_NAME_LENGTH);
+
             // Is this nick available ?
-            if (realmData.users.Any((u) => u.name == name))
+            if (realmData.users.Any((u) => u.name == filteredName))
             {
-                realmData.NotifyPacket(user, new ErrorPacket { error = "Nickname " + name + " is already taken"});
+                realmData.NotifyPacket(user, new ErrorPacket { error = "Nickname " + filteredName + " is already taken"});
                 return;
             }
 
-            user.name = name;
-            realmData.BroadcastPacket(new ChangeNicknameNotifyPacket { user = user, name = name });
+            user.name = filteredName;
+            realmData.BroadcastPacket(new ChangeNicknameNotifyPacket { user = user, name = user.name });
         }
 
     }

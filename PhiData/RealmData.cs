@@ -14,6 +14,7 @@ namespace PhiClient
     {
         public const string VERSION = "0.9";
 		public const int CHAT_MESSAGES_TO_SEND = 30;
+        public const int CHAT_MESSAGE_MAX_LENGTH = 250;
 
         public List<User> users = new List<User>();
 		[NonSerialized]
@@ -123,7 +124,14 @@ namespace PhiClient
 
         public void ServerPostMessage(User user, string message)
         {
-            ChatMessage chatMessage = new ChatMessage { user = user, message = message };
+            if (message.Length < 1)
+            {
+                return;
+            }
+            string filteredMessage = TextHelper.StripRichText(message, TextHelper.SIZE);
+            filteredMessage = TextHelper.Clamp(filteredMessage, 1, CHAT_MESSAGE_MAX_LENGTH);
+
+            ChatMessage chatMessage = new ChatMessage { user = user, message = filteredMessage };
 
             this.AddChatMessage(chatMessage);
 
@@ -214,6 +222,9 @@ namespace PhiClient
     [Serializable]
     public class User : IDable
     {
+        public const int MIN_NAME_LENGTH = 4;
+        public const int MAX_NAME_LENGTH = 32;
+
         public int id;
         public string name;
         public string hashedKey;

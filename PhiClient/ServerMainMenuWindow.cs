@@ -108,7 +108,7 @@ namespace PhiClient
             changeNickCont.spaceBetween = ListContainer.SPACE;
             mainCont.Add(new HeightContainer(changeNickCont, 30f));
             
-            changeNickCont.Add(new TextFieldWidget(wantedNickname, (s) => wantedNickname = s));
+            changeNickCont.Add(new TextFieldWidget(wantedNickname, (s) => wantedNickname = OnWantedNicknameChange(s)));
             changeNickCont.Add(new WidthContainer(new ButtonWidget("Change nickname", OnChangeNicknameClick), 140f));
 
             /**
@@ -139,6 +139,11 @@ namespace PhiClient
             twoColumn.Add(secondColumn);
 
             return mainCont;
+        }
+
+        public string OnWantedNicknameChange(string newNickname)
+        {
+            return TextHelper.Clamp(newNickname, 0, User.MAX_NAME_LENGTH);
         }
 
         public void OnConnectButtonClick()

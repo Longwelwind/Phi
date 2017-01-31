@@ -140,7 +140,7 @@ namespace PhiClient
                 Event.current.Use();
             }
 
-            footerList.Add(new TextFieldWidget(enteredMessage, (s) => { enteredMessage = s; }));
+            footerList.Add(new TextFieldWidget(enteredMessage, (s) => { enteredMessage = OnEnteredMessageChange(s); }));
             footerList.Add(new WidthContainer(new ButtonWidget("Send", OnSendClick), CHAT_INPUT_SEND_BUTTON_WIDTH));
             
             return footerList;
@@ -155,6 +155,11 @@ namespace PhiClient
             }
             PhiClient.instance.SendMessage(this.enteredMessage);
             this.enteredMessage = "";
+        }
+
+        public string OnEnteredMessageChange(string newMessage)
+        {
+            return TextHelper.Clamp(newMessage, 0, RealmData.CHAT_MESSAGE_MAX_LENGTH);
         }
 
         public void OnReconnectClick()
