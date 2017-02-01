@@ -159,7 +159,8 @@ namespace PhiClient
 
         public string OnEnteredMessageChange(string newMessage)
         {
-            return TextHelper.Clamp(newMessage, 0, RealmData.CHAT_MESSAGE_MAX_LENGTH);
+            // TODO: Limit the length of the message right in the interface
+            return newMessage;
         }
 
         public void OnReconnectClick()

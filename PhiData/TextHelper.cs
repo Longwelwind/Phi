@@ -30,11 +30,13 @@ namespace PhiClient
 
         public static string Clamp(string input, int min, int max, char filler = '-')
         {
-            if (input.Length < min)
+            int strippedLength = StripRichText(input).Length;
+
+            if (strippedLength < min)
             {
                 input += new string(filler, min);
             }
-            else if (input.Length > max)
+            else if (strippedLength > max)
             {
                 input = input.Substring(0, max);
             }

@@ -143,7 +143,8 @@ namespace PhiClient
 
         public string OnWantedNicknameChange(string newNickname)
         {
-            return TextHelper.Clamp(newNickname, 0, User.MAX_NAME_LENGTH);
+            // TODO: Limit the length of the nickname right in the interface
+            return newNickname;
         }
 
         public void OnConnectButtonClick()
