@@ -49,7 +49,7 @@ namespace PhiClient
             this.client.Message += this.MessageCallback;
             this.client.Disconnection += this.DisconnectCallback;
 
-            Log.Message("Try connecting to " + serverAddress);
+            Log(LogLevel.INFO, "Try connecting to " + serverAddress);
             client.Connect();
         }
 
@@ -69,7 +69,7 @@ namespace PhiClient
             }
             catch (Exception e)
             {
-                Log.Error(e.ToString());
+                Log(LogLevel.ERROR, e.ToString());
             }
         }
 
@@ -82,13 +82,13 @@ namespace PhiClient
                     byte[] data = (byte[]) packetsToProcess.Dequeue();
 
 					Packet packet = Packet.Deserialize(data, this.realmData, currentUser);
-                    Log.Message("Received packet from server: " + packet);
+                    Log(LogLevel.DEBUG, "Received packet from server: " + packet);
 
                     ProcessPacket(packet);
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e.ToString());
+                    Log(LogLevel.ERROR, e.ToString());
                 }
             }
         }
@@ -105,8 +105,8 @@ namespace PhiClient
                 this.currentUser = syncPacket.user;
 
                 this.realmData.PacketToServer += PacketToServerCallback;
+                this.realmData.Log += Log;
 
-                // The instance has now became usable
                 if (OnUsable != null)
                 {
                     OnUsable();
@@ -115,6 +115,23 @@ namespace PhiClient
             else
             {
                 packet.Apply(this.currentUser, this.realmData);
+            }
+        }
+
+        private void Log(LogLevel level, string message)
+        {
+            if (level == LogLevel.ERROR)
+            {
+                Verse.Log.Error(message);
+            }
+            else if (level == LogLevel.INFO)
+            {
+                Verse.Log.Message(message);
+            }
+            else if (level == LogLevel.DEBUG)
+            {
+                // We don't display Debug logs to the user, at the moment
+                //Verse.Log.Message(message);
             }
         }
 
@@ -135,12 +152,12 @@ namespace PhiClient
 
         private void ConnectionCallback()
         {
-            Log.Message("Connected to the server");
+            Log(LogLevel.INFO, "Connected to the server");
 
             string nickname = SteamUtility.SteamPersonaName;
             string hashedKey = GetHashedAuthKey();
             this.SendPacket(new AuthentificationPacket { name = nickname, hashedKey = hashedKey, version = RealmData.VERSION });
-            Log.Message("Trying to authenticate as " + nickname);
+            Log(LogLevel.INFO, "Trying to authenticate as " + nickname);
         }
 
         private void MessageCallback(byte[] data)
@@ -187,7 +204,7 @@ namespace PhiClient
         
         private void DisconnectCallback()
         {
-            Log.Message("Disconnected from the server");
+            Verse.Log.Message("Disconnected from the server");
         }
 
         private string GetServerAddress()

@@ -12,14 +12,17 @@ namespace PhiServer
         private Server server;
         private RealmData realmData;
         private Dictionary<ServerClient, User> connectedUsers = new Dictionary<ServerClient, User>();
+        private LogLevel logLevel;
 
         private object lockProcessPacket = new object();
 
-        public void Start(IPAddress ipAddress, int port)
+        public void Start(IPAddress ipAddress, int port, LogLevel logLevel)
         {
+            this.logLevel = logLevel;
+
             this.server = new Server(ipAddress, port);
             this.server.Start();
-            Console.WriteLine("Launching server for " + ipAddress + " on port " + port);
+            Log(LogLevel.INFO, string.Format("Server launched on port {0}", port));
 
             this.server.Connection += this.ConnectionCallback;
             this.server.Message += this.MessageCallback;
@@ -27,11 +30,36 @@ namespace PhiServer
 
             this.realmData = new RealmData();
             this.realmData.PacketToClient += this.RealmPacketCallback;
+            this.realmData.Log += Log;
         }
 
         private void ConnectionCallback(ServerClient client)
         {
-            Console.WriteLine("Connection from " + client);
+            Log(LogLevel.INFO, "Connection from " + client.ID);
+        }
+
+        private void Log(LogLevel level, string message)
+        {
+            if (level < this.logLevel)
+            {
+                return;
+            }
+
+            string tag = "";
+            if (level == LogLevel.DEBUG)
+            {
+                tag = "DEBUG";
+            }
+            else if (level == LogLevel.ERROR)
+            {
+                tag = "DEBUG";
+            }
+            else if (level == LogLevel.INFO)
+            {
+                tag = "INFO";
+            }
+
+            Console.WriteLine(string.Format("[{0}] [{1}] {2}", DateTime.Now, tag, message));
         }
 
         private void RealmPacketCallback(User user, Packet packet)
@@ -51,7 +79,7 @@ namespace PhiServer
 
 		private void SendPacket(ServerClient client, User user, Packet packet)
 		{
-            Console.WriteLine("Sending packet " + packet);
+            Log(LogLevel.DEBUG, string.Format("Server -> {0}: {1}", user.name, packet));
 			client.Send(Packet.Serialize(packet, realmData, user));
         }
 
@@ -61,7 +89,7 @@ namespace PhiServer
             this.connectedUsers.TryGetValue(client, out user);
             if (user != null)
             {
-                Console.WriteLine("Disconnection of " + user.name);
+                Log(LogLevel.INFO, string.Format("{0} disconnected", user.name));
                 this.connectedUsers.Remove(client);
                 user.connected = false;
                 this.realmData.BroadcastPacket(new UserConnectedPacket { user = user, connected = false });
@@ -76,7 +104,7 @@ namespace PhiServer
 				this.connectedUsers.TryGetValue(client, out user);
 
 				Packet packet = Packet.Deserialize(data, realmData, user);
-                Console.WriteLine("Received packet " + packet);
+                Log(LogLevel.DEBUG, string.Format("{0} -> Server: {1}", user != null ? user.name : client.ID, packet));
 
                 if (packet is AuthentificationPacket)
                 {
@@ -101,8 +129,6 @@ namespace PhiServer
                         user = this.realmData.ServerAddUser(authPacket.name, authPacket.hashedKey);
                         user.connected = true;
 
-                        Console.WriteLine("Creating user \"" + user.name + "\" with ID " + user.getID());
-
                         // We send a notify to all users connected about the new user
                         this.realmData.BroadcastPacketExcept(new NewUserPacket { user = user }, user);
                     }
@@ -114,7 +140,7 @@ namespace PhiServer
                     }
 
                     this.connectedUsers.Add(client, user);
-
+                    Log(LogLevel.INFO, string.Format("Client {0} connected as {1} ({2})", client.ID, user.name, user.hashedKey));
 
                     // We respond with a StatePacket that contains all synchronisation data
                     this.SendPacket(client, user, new SynchronisationPacket { user = user, realmData = this.realmData });
@@ -124,7 +150,7 @@ namespace PhiServer
                     if (user == null)
                     {
                         // We ignore this package
-                        Console.WriteLine("Ignore packet because unknown user");
+                        Log(LogLevel.ERROR, string.Format("{0} ignored because unknown user {1}", packet, client.ID));
                         return;
                     }
 
@@ -138,7 +164,16 @@ namespace PhiServer
         {
             Program program = new Program();
 
-            program.Start(IPAddress.Any, 16180);
+            LogLevel logLevel = LogLevel.ERROR;
+            if (args.Length > 0)
+            {
+                if (args[0].Equals("debug"))
+                {
+                    logLevel = LogLevel.DEBUG;
+                }
+            }
+
+            program.Start(IPAddress.Any, 16180, logLevel);
 
             Console.Read();
         }

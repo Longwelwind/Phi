@@ -29,6 +29,9 @@ namespace PhiClient
         public delegate void PacketHandler(User user, Packet packet);
         [field: NonSerialized]
         public event PacketHandler PacketToClient;
+        public delegate void LogHandler(LogLevel level, string message);
+        [field: NonSerialized]
+        public event LogHandler Log;
 
         public void AddUser(User user)
         {
@@ -50,6 +53,11 @@ namespace PhiClient
         {
             // Hacky hack, t.sender shouldn't be null, but some entries gets this value
             return transactions.FindLast((t) => t != null && t.sender != null && t.getID() == transactionId && t.sender.getID() == transactionSenderId);
+        }
+
+        public void EmitLog(LogLevel level, string message)
+        {
+            Log(level, message);
         }
 
         public Transaction FindTransaction(int transactionId, int transactionSenderId)
@@ -117,7 +125,8 @@ namespace PhiClient
                 hashedKey= hashKey
             };
 
-            this.AddUser(user);
+            AddUser(user);
+            EmitLog(LogLevel.INFO, string.Format("Created user {0} ({1})", name, hashKey));
 
             return user;
         }
@@ -134,6 +143,7 @@ namespace PhiClient
             ChatMessage chatMessage = new ChatMessage { user = user, message = filteredMessage };
 
             this.AddChatMessage(chatMessage);
+            EmitLog(LogLevel.INFO, string.Format("{0}: {1}", user.name, message));
 
             // We broadcast the message
             this.BroadcastPacket(new ChatMessagePacket { message = chatMessage });
@@ -217,6 +227,13 @@ namespace PhiClient
 			chat = serializeChat;
 			transactions = serializeTransactions;
 		}
+    }
+
+    public enum LogLevel
+    {
+        DEBUG = 0,
+        ERROR = 1,
+        INFO = 2
     }
 
     [Serializable]
