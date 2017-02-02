@@ -34,6 +34,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ChatMessage.cs" />
     <Compile Include="IDable.cs" />
     <Compile Include="Legacy\DialogChoiceConfig.cs" />
     <Compile Include="Legacy\DialogConfirm.cs" />
@@ -41,6 +42,8 @@
     <Compile Include="Packet.cs" />
     <Compile Include="RealmData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RealmPawn.cs" />
+    <Compile Include="RealmThing.cs" />
     <Compile Include="TransactionSystem\ColonistTransaction.cs" />
     <Compile Include="TransactionSystem\ConfirmServerTransactionPacket.cs" />
     <Compile Include="TransactionSystem\ConfirmTransactionPacket.cs" />
@@ -48,6 +51,7 @@
     <Compile Include="TransactionSystem\ReceiveTransactionPacket.cs" />
     <Compile Include="TransactionSystem\StartTransactionPacket.cs" />
     <Compile Include="TransactionSystem\Transaction.cs" />
+    <Compile Include="User.cs" />
     <Compile Include="UserPreferences.cs" />
     <Compile Include="RealmContext.cs" />
     <Compile Include="TextHelper.cs" />
