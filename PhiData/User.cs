@@ -15,6 +15,7 @@ namespace PhiClient
         public string name;
         public string hashedKey;
         public bool connected;
+        public bool admin;
         public bool inGame;
         public UserPreferences preferences = new UserPreferences();
 

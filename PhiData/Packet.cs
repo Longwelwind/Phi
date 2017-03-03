@@ -131,6 +131,22 @@ namespace PhiClient
         }
     }
 
+    [Serializable]
+    public class ShadowbanPacket : Packet
+    {
+        public User user;
+
+        public override void Apply(User user, RealmData realmData)
+        {
+            if (!user.admin)
+            {
+                return;
+            }
+
+
+        }
+    }
+
     /**
      * Packet sent to client
      */

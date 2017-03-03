@@ -4,6 +4,7 @@ using SocketLibrary;
 using PhiClient;
 using System.Collections.Generic;
 using System.Collections;
+using System.Linq;
 
 namespace PhiServer
 {
@@ -13,12 +14,14 @@ namespace PhiServer
         private RealmData realmData;
         private Dictionary<ServerClient, User> connectedUsers = new Dictionary<ServerClient, User>();
         private LogLevel logLevel;
+        private string[] adminKeys;
 
         private object lockProcessPacket = new object();
 
-        public void Start(IPAddress ipAddress, int port, LogLevel logLevel)
+        public void Start(IPAddress ipAddress, int port, string[] adminKeys, LogLevel logLevel)
         {
             this.logLevel = logLevel;
+            this.adminKeys = adminKeys;
 
             this.server = new Server(ipAddress, port);
             this.server.Start();
@@ -126,7 +129,9 @@ namespace PhiServer
                     user = this.realmData.users.FindLast(delegate (User u) { return u.hashedKey == authPacket.hashedKey; });
                     if (user == null)
                     {
-                        user = this.realmData.ServerAddUser(authPacket.name, authPacket.hashedKey);
+                        bool admin = adminKeys.Any((k) => k.Equals(authPacket.hashedKey));
+
+                        user = this.realmData.ServerAddUser(authPacket.name, authPacket.hashedKey, admin);
                         user.connected = true;
 
                         // We send a notify to all users connected about the new user
@@ -173,7 +178,11 @@ namespace PhiServer
                 }
             }
 
-            program.Start(IPAddress.Any, 16180, logLevel);
+            // All the following arguments are administrator keys
+            string[] adminKeys = args.Skip(1).ToArray();
+
+
+            program.Start(IPAddress.Any, 16180, adminKeys, logLevel);
 
             Console.Read();
         }
