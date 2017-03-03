@@ -22,7 +22,7 @@ namespace PhiClient.UI
         {
             string newText = Widgets.TextField(inRect, text);
             if (newText != text) {
-                onChange(text);
+                onChange(newText);
             }
         }
     }
