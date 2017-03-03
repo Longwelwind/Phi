@@ -20,8 +20,10 @@ namespace PhiClient.UI
 
         public override void Draw(Rect inRect)
         {
-            text = Widgets.TextField(inRect, text);
-            onChange(text);
+            string newText = Widgets.TextField(inRect, text);
+            if (newText != text) {
+                onChange(text);
+            }
         }
     }
 }

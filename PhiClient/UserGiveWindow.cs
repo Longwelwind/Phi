@@ -144,18 +144,36 @@ namespace PhiClient
                 rowCont.Add(new WidthContainer(controlsCont, CONTROLS_WIDTH));
 
                 controlsCont.Add(new ButtonWidget("-100", () => ChangeChosenCount(entry, -100)));
-                controlsCont.Add(new ButtonWidget("-10", () => ChangeChosenCount(entry, -10) ));
-                controlsCont.Add(new ButtonWidget("-1", () => ChangeChosenCount(entry, -1) ));
-                controlsCont.Add(new TextWidget(chosenCount.ToString(), GameFont.Small, TextAnchor.MiddleCenter));
-                controlsCont.Add(new ButtonWidget("+1", () => ChangeChosenCount(entry, 1) ));
-                controlsCont.Add(new ButtonWidget("+10", () => ChangeChosenCount(entry, 10) ));
+                controlsCont.Add(new ButtonWidget("-10", () => ChangeChosenCount(entry, -10)));
+                controlsCont.Add(new ButtonWidget("-1", () => ChangeChosenCount(entry, -1)));
+                controlsCont.Add(new TextFieldWidget(chosenCount.ToString(), (str) => ChangeChosenCount(entry, str)));
+                controlsCont.Add(new ButtonWidget("+1", () => ChangeChosenCount(entry, 1)));
+                controlsCont.Add(new ButtonWidget("+10", () => ChangeChosenCount(entry, 10)));
                 controlsCont.Add(new ButtonWidget("+100", () => ChangeChosenCount(entry, 100)));
             }
 
-            // We add the send button
             mainCont.Add(new HeightContainer(new ButtonWidget("Send", OnSendClick), ROW_HEIGHT));
 
             mainCont.Draw(inRect);
+        }
+
+        public void ChangeChosenCount(List<Thing> things, string count)
+        {
+            int currentCount = 0;
+            chosenThings.TryGetValue(things, out currentCount);
+
+            if (count.Length == 0)
+            {
+                this.ChangeChosenCount(things, -currentCount);
+            }
+            else
+            {
+                int newCount = 0;
+                if (Int32.TryParse(count, out newCount))
+                {
+                    this.ChangeChosenCount(things, newCount - currentCount);
+                }
+            }
         }
 
         public void ChangeChosenCount(List<Thing> things, int count)
@@ -177,7 +195,6 @@ namespace PhiClient
             {
                 chosenThings.Remove(things);
             }
-            
         }
 
         public void OnSendClick()
