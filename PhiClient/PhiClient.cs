@@ -1,4 +1,4 @@
-﻿using PhiClient;
+using PhiClient;
 using SocketLibrary;
 using System;
 using System.Linq;
@@ -225,6 +225,7 @@ namespace PhiClient
 
         public void SetServerAddress(string address)
         {
+            address = string.Join("", address.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries)); //Remove Whitespaces
             File.WriteAllLines(SERVER_FILE, new string[] { address });
             this.serverAddress = address;
         }
