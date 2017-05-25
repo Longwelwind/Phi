@@ -219,7 +219,7 @@ namespace PhiClient
             }
             else
             {
-                return File.ReadAllLines(SERVER_FILE)[0];
+                return File.ReadAllLines(SERVER_FILE)[0].Trim();
             }
         }
 
