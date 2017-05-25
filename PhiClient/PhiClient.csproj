@@ -89,7 +89,7 @@
     <Content Include="PhiClient\About\About.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="PhiClient\Defs\MainTabDefs\PhiClient.xml" />
+    <Content Include="PhiClient\Defs\MainButtonDefs\PhiClient.xml" />
     <Content Include="PhiClient\Defs\ThingDefs\PhiClient.xml" />
   </ItemGroup>
   <ItemGroup>

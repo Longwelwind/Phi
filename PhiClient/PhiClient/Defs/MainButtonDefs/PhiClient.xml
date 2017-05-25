@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<MainButtonDefs>
+  <MainButtonDef>
+    <defName>Server</defName>
+    <label>server</label>
+    <description>Check the status of the </description>
+    <tabWindowClass>PhiClient.ServerMainTab</tabWindowClass>
+    <order>100</order>
+    <defaultHotKey>F12</defaultHotKey>
+  </MainButtonDef>
+</MainButtonDefs>

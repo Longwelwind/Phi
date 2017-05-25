@@ -70,7 +70,7 @@ namespace PhiClient
             }
 
             List<RealmThing> equipments = new List<RealmThing>();
-            foreach (ThingWithComps thing in pawn.equipment.AllEquipment)
+            foreach (ThingWithComps thing in pawn.equipment.AllEquipmentListForReading)
             {
                 equipments.Add(realmData.ToRealmThing(thing));
             }
