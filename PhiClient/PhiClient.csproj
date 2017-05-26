@@ -89,7 +89,7 @@
     <Content Include="PhiClient\About\About.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="PhiClient\Defs\MainTabDefs\PhiClient.xml" />
+    <Content Include="PhiClient\Defs\MainButtonDefs\PhiClient.xml" />
     <Content Include="PhiClient\Defs\ThingDefs\PhiClient.xml" />
   </ItemGroup>
   <ItemGroup>
@@ -97,17 +97,15 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /Y "$(TargetDir)PhiClient.dll" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\PhiClient\Assemblies\PhiClient.dll"
-copy /Y "$(TargetDir)PhiClient.dll" "D:\Documents\IGG-RimWorld.Alpha.14\Mods\PhiClient\Assemblies\PhiClient.dll"
+    <PostBuildEvent>For /F "Tokens=1,2*" %25%25A In ('Reg Query HKCU\SOFTWARE\Valve\Steam') Do ( If "%25%25A" Equ "SteamPath" Set "SPth=%25%25C" )
 
-copy /Y "$(TargetDir)websocket-sharp.dll" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\PhiClient\Assemblies\1-websocket-sharp.dll"
-copy /Y "$(TargetDir)websocket-sharp.dll" "D:\Documents\IGG-RimWorld.Alpha.14\Mods\PhiClient\Assemblies\1-websocket-sharp.dll"
-
-copy /Y "$(TargetDir)SocketLibrary.dll" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\PhiClient\Assemblies\2-SocketLibrary.dll"
-copy /Y "$(TargetDir)SocketLibrary.dll" "D:\Documents\IGG-RimWorld.Alpha.14\Mods\PhiClient\Assemblies\2-SocketLibrary.dll"
-
-copy /Y "$(TargetDir)PhiData.dll" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\PhiClient\Assemblies\3-PhiData.dll"
-copy /Y "$(TargetDir)PhiData.dll" "D:\Documents\IGG-RimWorld.Alpha.14\Mods\PhiClient\Assemblies\3-PhiData.dll"</PostBuildEvent>
+mkdir "%25SPth%25\steamapps\common\RimWorld\Mods\PhiClient\Assemblies"
+xcopy /Y /E "$(ProjectDir)PhiClient" "%25SPth%25\steamapps\common\RimWorld\Mods\PhiClient"
+copy /Y "$(TargetDir)PhiClient.dll" "%25SPth%25\steamapps\common\RimWorld\Mods\PhiClient\Assemblies\PhiClient.dll"
+copy /Y "$(TargetDir)websocket-sharp.dll" "%25SPth%25\steamapps\common\RimWorld\Mods\PhiClient\Assemblies\1-websocket-sharp.dll"
+copy /Y "$(TargetDir)SocketLibrary.dll" "%25SPth%25\steamapps\common\RimWorld\Mods\PhiClient\Assemblies\2-SocketLibrary.dll"
+copy /Y "$(TargetDir)PhiData.dll" "%25SPth%25\steamapps\common\RimWorld\Mods\PhiClient\Assemblies\3-PhiData.dll"
+</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.

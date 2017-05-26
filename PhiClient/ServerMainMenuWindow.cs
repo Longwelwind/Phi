@@ -151,7 +151,7 @@ namespace PhiClient
         {
             PhiClient client = PhiClient.instance;
 
-            client.SetServerAddress(enteredAddress);
+            client.SetServerAddress(enteredAddress.Trim());
             client.TryConnect();
         }
 

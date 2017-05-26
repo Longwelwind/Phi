@@ -70,7 +70,7 @@ namespace PhiClient.TransactionSystem
                 Find.LetterStack.ReceiveLetter(
                     "Colonist pod",
                     "A colonist was sent to you by " + sender.name,
-                    LetterType.Good,
+                    LetterDefOf.Good,
                     new RimWorld.Planet.GlobalTargetInfo(position, Find.VisibleMap)
                 );
             }

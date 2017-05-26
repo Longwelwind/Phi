@@ -86,7 +86,7 @@ namespace PhiClient.TransactionSystem
                 Find.LetterStack.ReceiveLetter(
                     "Ship pod",
                     "A pod was sent from " + sender.name + " containing items",
-                    LetterType.Good,
+                    LetterDefOf.Good,
                     new RimWorld.Planet.GlobalTargetInfo(position, Find.VisibleMap)
                 );
             }
