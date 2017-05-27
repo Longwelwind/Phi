@@ -1,4 +1,4 @@
-﻿using PhiClient;
+using PhiClient;
 using SocketLibrary;
 using System;
 using System.Linq;
@@ -304,6 +304,7 @@ namespace PhiClient
         
         public void ChangeNickname(string newNickname)
         {
+            newNickname = string.Join("", newNickname.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries)); //Remove Whitespaces
             this.SendPacket(new ChangeNicknamePacket { name = newNickname });
         }
     }
