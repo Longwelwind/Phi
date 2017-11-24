@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Verse;
+using RimWorld;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -265,7 +266,7 @@ namespace PhiClient
 
             this.SendPacket(new StartTransactionPacket { transaction = transaction });
 
-            Messages.Message("Offer sent, waiting for confirmation", MessageSound.Silent);
+            Messages.Message("Offer sent, waiting for confirmation", MessageTypeDefOf.SilentInput);
 
             return true;
         }
@@ -279,7 +280,7 @@ namespace PhiClient
             }
             else
             {
-                Messages.Message("You are already engaged in a transaction with " + receiver.name, MessageSound.RejectInput);
+                Messages.Message("You are already engaged in a transaction with " + receiver.name, RimWorld.MessageTypeDefOf.RejectInput);
                 return false;
             }
         }
@@ -299,7 +300,7 @@ namespace PhiClient
 
             this.SendPacket(new StartTransactionPacket { transaction = trans });
 
-            Messages.Message("Offer sent, waiting for confirmation", MessageSound.Silent);
+            Messages.Message("Offer sent, waiting for confirmation", MessageTypeDefOf.SilentInput);
         }
         
         public void ChangeNickname(string newNickname)
