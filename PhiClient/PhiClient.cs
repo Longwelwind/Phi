@@ -273,14 +273,14 @@ namespace PhiClient
 
         public bool CheckCanStartTransaction(User receiver)
         {
-            // Desactivated for now because of problems when a player isn't connected in a game
+            // Deactivated for now because of problems when a player isn't connected in a game
             if (realmData.CanStartTransaction(currentUser, receiver) || true)
             {
                 return true;
             }
             else
             {
-                Messages.Message("You are already engaged in a transaction with " + receiver.name, RimWorld.MessageTypeDefOf.RejectInput);
+                Messages.Message("You are already engaged in a transaction with " + receiver.name, MessageTypeDefOf.RejectInput);
                 return false;
             }
         }
