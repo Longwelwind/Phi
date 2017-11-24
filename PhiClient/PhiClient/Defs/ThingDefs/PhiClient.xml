@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<ThingDefs>
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
   <ThingDef>
     <defName>PhiClient</defName>
     <category>Building</category>
@@ -10,4 +10,4 @@
       <li>PhiClient.PhiInitializer</li>
     </inspectorTabs>
   </ThingDef>
-</ThingDefs>
+</Defs>
