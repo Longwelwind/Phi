@@ -192,7 +192,7 @@ namespace PhiClient
             }
             else
             {
-                Messages.Message(user.name + " does not accept colonists", MessageSound.RejectInput);
+                Messages.Message(user.name + " does not accept colonists", MessageTypeDefOf.RejectInput);
             }
         }
 
@@ -206,7 +206,7 @@ namespace PhiClient
             }
             else
             {
-                Messages.Message(user.name + " does not accept items", MessageSound.RejectInput);
+                Messages.Message(user.name + " does not accept items", MessageTypeDefOf.RejectInput);
             }
         }
     }

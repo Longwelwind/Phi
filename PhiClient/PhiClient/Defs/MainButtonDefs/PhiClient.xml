@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<MainButtonDefs>
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
   <MainButtonDef>
     <defName>Server</defName>
     <label>server</label>
@@ -8,4 +8,4 @@
     <order>100</order>
     <defaultHotKey>F12</defaultHotKey>
   </MainButtonDef>
-</MainButtonDefs>
+</Defs>

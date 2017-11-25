@@ -70,13 +70,13 @@ namespace PhiClient.TransactionSystem
                 Find.LetterStack.ReceiveLetter(
                     "Colonist pod",
                     "A colonist was sent to you by " + sender.name,
-                    LetterDefOf.Good,
+                    LetterDefOf.PositiveEvent,
                     new RimWorld.Planet.GlobalTargetInfo(position, Find.VisibleMap)
                 );
             }
             else if (state == TransactionResponse.INTERRUPTED)
             {
-                Messages.Message("Unexpected interruption during item transaction with " + sender.name, MessageSound.RejectInput);
+                Messages.Message("Unexpected interruption during item transaction with " + sender.name, MessageTypeDefOf.RejectInput);
             }
         }
 
@@ -85,15 +85,15 @@ namespace PhiClient.TransactionSystem
             if (state == TransactionResponse.ACCEPTED)
             {
                 pawn.Destroy();
-                Messages.Message(receiver.name + " accepted your items", MessageSound.Standard);
+                Messages.Message(receiver.name + " accepted your items", MessageTypeDefOf.NeutralEvent);
             }
             else if (state == TransactionResponse.DECLINED)
             {
-                Messages.Message(receiver.name + " declined your items", MessageSound.RejectInput);
+                Messages.Message(receiver.name + " declined your items", MessageTypeDefOf.RejectInput);
             }
             else if (state == TransactionResponse.INTERRUPTED)
             {
-                Messages.Message("Unexpected interruption during item transaction with " + receiver.name, MessageSound.RejectInput);
+                Messages.Message("Unexpected interruption during item transaction with " + receiver.name, MessageTypeDefOf.RejectInput);
             }
         }
     }

@@ -86,13 +86,13 @@ namespace PhiClient.TransactionSystem
                 Find.LetterStack.ReceiveLetter(
                     "Ship pod",
                     "A pod was sent from " + sender.name + " containing items",
-                    LetterDefOf.Good,
+                    LetterDefOf.PositiveEvent,
                     new RimWorld.Planet.GlobalTargetInfo(position, Find.VisibleMap)
                 );
             }
             else if (state == TransactionResponse.INTERRUPTED)
             {
-                Messages.Message("Unexpected interruption during item transaction with " + sender.name, MessageSound.RejectInput);
+                Messages.Message("Unexpected interruption during item transaction with " + sender.name, MessageTypeDefOf.RejectInput);
             }
         }
 
@@ -133,15 +133,15 @@ namespace PhiClient.TransactionSystem
                     }
                 }
                 
-                Messages.Message(receiver.name + " accepted your items", MessageSound.Standard);
+                Messages.Message(receiver.name + " accepted your items", MessageTypeDefOf.NeutralEvent);
             }
             else if (state == TransactionResponse.DECLINED)
             {
-                Messages.Message(receiver.name + " declined your items", MessageSound.RejectInput);
+                Messages.Message(receiver.name + " declined your items", MessageTypeDefOf.RejectInput);
             }
             else if (state == TransactionResponse.INTERRUPTED)
             {
-                Messages.Message("Unexpected interruption during item transaction with " + receiver.name, MessageSound.RejectInput);
+                Messages.Message("Unexpected interruption during item transaction with " + receiver.name, MessageTypeDefOf.RejectInput);
             }
         }
     }
