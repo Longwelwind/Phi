@@ -318,7 +318,7 @@ namespace PhiClient
 
             this.SendPacket(new StartTransactionPacket { transaction = trans });
 
-            Messages.Message("Offer sent, waiting for confirmation", MessageSound.Silent);
+            Messages.Message("Offer sent, waiting for confirmation", MessageTypeDefOf.SilentInput);
         }
 
         public void ChangeNickname(string newNickname)

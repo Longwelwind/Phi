@@ -205,7 +205,7 @@ namespace PhiClient
             }
             else
             {
-                Messages.Message(user.name + " does not accept animals", MessageSound.RejectInput);
+                Messages.Message(user.name + " does not accept animals", MessageTypeDefOf.RejectInput);
             }
         }
 
