@@ -27,7 +27,7 @@ namespace PhiClient.TransactionSystem
             
             Dialog_GeneralChoice choiceDialog = new Dialog_GeneralChoice(new DialogChoiceConfig
             {
-                text = sender.name + " wants to send you a animal",
+                text = sender.name + " wants to send you a " + realmAnimal.FromRealmAnimal(realmData).kindDef.label,
                 buttonAText = "Accept",
                 buttonAAction = () =>
                 {
