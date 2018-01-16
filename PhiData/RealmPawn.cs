@@ -99,7 +99,7 @@ namespace PhiClient
                 skills = skills,
                 traits = traits,
                 childhoodKey = pawn.story.childhood.identifier,
-                adulthoodKey = pawn.story.adulthood.identifier,
+                adulthoodKey = pawn.story.adulthood?.identifier,
                 melanin = pawn.story.melanin,
                 hairColor = new float[]
                 {
@@ -159,7 +159,7 @@ namespace PhiClient
             {
                 throw new Exception(string.Format("Couldn't find backstory '{0}'", childhoodKey));
             }
-            if (!BackstoryDatabase.TryGetWithIdentifier(adulthoodKey, out story.adulthood))
+            if (!string.IsNullOrEmpty(adulthoodKey) && !BackstoryDatabase.TryGetWithIdentifier(adulthoodKey, out story.adulthood))
             {
                 throw new Exception(string.Format("Couldn't find backstory '{0}'", adulthoodKey));
             }
