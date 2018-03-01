@@ -35,6 +35,7 @@ namespace PhiClient
         public List<RealmThing> equipments;
         public List<RealmThing> apparels;
         public List<RealmThing> inventory;
+        public List<RealmHediff> hediffs;
 
         public static RealmPawn ToRealmPawn(Pawn pawn, RealmData realmData)
         {
@@ -87,6 +88,18 @@ namespace PhiClient
                 inventory.Add(realmData.ToRealmThing(thing));
             }
 
+            List<RealmHediff> hediffs = new List<RealmHediff>();
+            foreach (Hediff hediff in pawn.health.hediffSet.hediffs) {
+
+                var immunity = pawn.health.immunity.GetImmunityRecord(hediff.def);
+
+                hediffs.Add(new RealmHediff(){
+                    hediffDefName = hediff.def.defName,
+                    bodyPartIndex = pawn.RaceProps.body.GetIndexOfPart(hediff.Part),
+                    immunity = (immunity == null ? float.NaN : immunity.immunity),
+                });
+            }
+
             return new RealmPawn
             {
                 name = name,
@@ -110,7 +123,8 @@ namespace PhiClient
                 },
                 equipments = equipments,
                 apparels = apparels,
-                inventory = inventory
+                inventory = inventory,
+                hediffs = hediffs
             };
         }
 
@@ -213,6 +227,23 @@ namespace PhiClient
                 inventoryTracker.innerContainer.TryAdd(thing);
             }
 
+            // GenerateHediffsFor()
+            foreach (RealmHediff hediff in hediffs)
+            {
+                var definition = DefDatabase<HediffDef>.GetNamed(hediff.hediffDefName);
+                var bodypart = pawn.RaceProps.body.GetPartAtIndex(hediff.bodyPartIndex);
+
+                pawn.health.AddHediff(definition, bodypart);
+
+                if (!pawn.health.immunity.ImmunityRecordExists(definition))
+                {
+                    var handler = pawn.health.immunity;
+                    handler.GetType().GetMethod("TryAddImmunityRecord").Invoke(handler, new object[] { definition });
+                    var record = handler.GetImmunityRecord(definition);
+                    record.immunity = hediff.immunity;
+                }
+            }
+
             return pawn;
         }
     }
@@ -230,5 +261,13 @@ namespace PhiClient
     {
         public string traitDefName;
         public int degree;
+    }
+
+    [Serializable]
+    public class RealmHediff
+    {
+        public string hediffDefName;
+        public int bodyPartIndex;
+        public float immunity = float.NaN;
     }
 }
