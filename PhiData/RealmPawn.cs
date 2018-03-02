@@ -274,7 +274,7 @@ namespace PhiClient
                 if (!float.IsNaN(hediff.immunity) && !pawn.health.immunity.ImmunityRecordExists(definition))
                 {
                     var handler = pawn.health.immunity;
-                    handler.GetType().GetMethod("TryAddImmunityRecord").Invoke(handler, new object[] { definition });
+                    handler.GetType().GetMethod("TryAddImmunityRecord", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).Invoke(handler, new object[] { definition });
                     var record = handler.GetImmunityRecord(definition);
                     record.immunity = hediff.immunity;
                 }
