@@ -38,6 +38,8 @@ namespace PhiClient
         public List<RealmHediff> hediffs;
         public byte healthState = 2; // Default to Mobile
 
+        public Dictionary<string, int> workPriorities;
+
         public static RealmPawn ToRealmPawn(Pawn pawn, RealmData realmData)
         {
             List<RealmSkillRecord> skills = new List<RealmSkillRecord>();
@@ -117,6 +119,10 @@ namespace PhiClient
             }
             var healthState = (byte)pawn.health.State;
 
+            var workPriorities = new Dictionary<string, int>();
+            foreach (var def in DefDatabase<WorkTypeDef>.AllDefs)
+                workPriorities.Add(def.defName, pawn.workSettings.GetPriority(def));
+
             return new RealmPawn
             {
                 name = name,
@@ -143,6 +149,7 @@ namespace PhiClient
                 inventory = inventory,
                 hediffs = hediffs,
                 healthState = healthState,
+                workPriorities = workPriorities,
             };
         }
 
@@ -278,6 +285,21 @@ namespace PhiClient
                 Log.Error("Unable to find healthState field");
             else
                 healthStateField.SetValue(pawn.health, healthState);
+
+            // GenerateHediffsFor()
+            if (workPriorities == null)
+                Log.Warning("WorkPriorities is null in received colonist");
+
+            foreach (KeyValuePair<string, int> priority in workPriorities ?? new Dictionary<string, int>())
+            {
+                var def = DefDatabase<WorkTypeDef>.GetNamedSilentFail(priority.Key);
+                if (def == null)
+                {
+                    Log.Warning(String.Format("Ignoring unknown workType: {0}", priority.Key));
+                    continue;
+                }
+                pawn.workSettings.SetPriority(def, priority.Value);
+            }
 
             return pawn;
         }
