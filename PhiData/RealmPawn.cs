@@ -36,6 +36,7 @@ namespace PhiClient
         public List<RealmThing> apparels;
         public List<RealmThing> inventory;
         public List<RealmHediff> hediffs;
+        public byte healthState = 2; // Default to Mobile
 
         public static RealmPawn ToRealmPawn(Pawn pawn, RealmData realmData)
         {
@@ -89,21 +90,32 @@ namespace PhiClient
             }
 
             List<RealmHediff> hediffs = new List<RealmHediff>();
-            foreach (Hediff hediff in pawn.health.hediffSet.hediffs) {
+            foreach (Hediff hediff in pawn.health.hediffSet.hediffs)
+            {
 
                 var immunity = pawn.health.immunity.GetImmunityRecord(hediff.def);
 
-                Debug.Log(String.Format("Bodypart: {0}", hediff.Part.def.defName));
-                if (!pawn.RaceProps.body.AllParts.Contains(hediff.Part)) {
-                    continue;
+                var partId = -1;
+                if (hediff.Part?.def != null)
+                {
+                    if (!pawn.RaceProps.body.AllParts.Contains(hediff.Part))
+                    {
+                        Log.Error(String.Format("Skipping bodypart {0}, not found in body.", hediff.Part?.def?.defName));
+                        continue;
+                    }
+                    partId = pawn.RaceProps.body.GetIndexOfPart(hediff.Part);
                 }
-
-                hediffs.Add(new RealmHediff(){
+                
+                hediffs.Add(new RealmHediff() {
                     hediffDefName = hediff.def.defName,
-                    bodyPartIndex = pawn.RaceProps.body.GetIndexOfPart(hediff.Part),
+                    bodyPartIndex = partId,
                     immunity = (immunity == null ? float.NaN : immunity.immunity),
+                    sourceDefName = hediff.source?.defName,
+                    ageTicks = hediff.ageTicks,
+                    severity = hediff.Severity
                 });
             }
+            var healthState = (byte)pawn.health.State;
 
             return new RealmPawn
             {
@@ -129,7 +141,8 @@ namespace PhiClient
                 equipments = equipments,
                 apparels = apparels,
                 inventory = inventory,
-                hediffs = hediffs
+                hediffs = hediffs,
+                healthState = healthState,
             };
         }
 
@@ -233,12 +246,23 @@ namespace PhiClient
             }
 
             // GenerateHediffsFor()
-            foreach (RealmHediff hediff in hediffs)
+            if (hediffs == null)
+                Log.Warning("RealmHediffs is null in received colonist");
+
+            foreach (RealmHediff hediff in hediffs ?? new List<RealmHediff>())
             {
                 var definition = DefDatabase<HediffDef>.GetNamed(hediff.hediffDefName);
-                var bodypart = pawn.RaceProps.body.GetPartAtIndex(hediff.bodyPartIndex);
+                BodyPartRecord bodypart = null;
+                if (hediff.bodyPartIndex != -1)
+                {
+                    bodypart = pawn.RaceProps.body.GetPartAtIndex(hediff.bodyPartIndex);
+                }
 
                 pawn.health.AddHediff(definition, bodypart);
+                var newdiff = pawn.health.hediffSet.hediffs.Last();
+                newdiff.source = (hediff.sourceDefName == null ? null : DefDatabase<ThingDef>.GetNamedSilentFail(hediff.sourceDefName));
+                newdiff.ageTicks = hediff.ageTicks;
+                newdiff.Severity = hediff.severity;
 
                 if (!float.IsNaN(hediff.immunity) && !pawn.health.immunity.ImmunityRecordExists(definition))
                 {
@@ -248,6 +272,12 @@ namespace PhiClient
                     record.immunity = hediff.immunity;
                 }
             }
+
+            var healthStateField = pawn.health.GetType().GetField("healthState", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (healthStateField == null)
+                Log.Error("Unable to find healthState field");
+            else
+                healthStateField.SetValue(pawn.health, healthState);
 
             return pawn;
         }
@@ -274,5 +304,8 @@ namespace PhiClient
         public string hediffDefName;
         public int bodyPartIndex;
         public float immunity = float.NaN;
+        public string sourceDefName;
+        public int ageTicks;
+        public float severity;
     }
 }
