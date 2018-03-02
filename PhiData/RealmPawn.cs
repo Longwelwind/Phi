@@ -93,6 +93,11 @@ namespace PhiClient
 
                 var immunity = pawn.health.immunity.GetImmunityRecord(hediff.def);
 
+                Debug.Log(String.Format("Bodypart: {0}", hediff.Part.def.defName));
+                if (!pawn.RaceProps.body.AllParts.Contains(hediff.Part)) {
+                    continue;
+                }
+
                 hediffs.Add(new RealmHediff(){
                     hediffDefName = hediff.def.defName,
                     bodyPartIndex = pawn.RaceProps.body.GetIndexOfPart(hediff.Part),
@@ -235,7 +240,7 @@ namespace PhiClient
 
                 pawn.health.AddHediff(definition, bodypart);
 
-                if (!pawn.health.immunity.ImmunityRecordExists(definition))
+                if (!float.IsNaN(hediff.immunity) && !pawn.health.immunity.ImmunityRecordExists(definition))
                 {
                     var handler = pawn.health.immunity;
                     handler.GetType().GetMethod("TryAddImmunityRecord").Invoke(handler, new object[] { definition });
