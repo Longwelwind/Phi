@@ -19,6 +19,7 @@ namespace PhiClient
         public UserPreferences preferences = new UserPreferences();
 
         public int lastTransactionId = 0;
+        public DateTime lastTransactionTime = DateTime.MinValue;
 
         public int getID()
         {

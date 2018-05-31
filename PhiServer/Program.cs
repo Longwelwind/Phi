@@ -4,6 +4,7 @@ using SocketLibrary;
 using PhiClient;
 using System.Collections.Generic;
 using System.Collections;
+using PhiClient.TransactionSystem;
 
 namespace PhiServer
 {
@@ -73,6 +74,7 @@ namespace PhiServer
                 if (u == user)
                 {
                     this.SendPacket(client, user, packet);
+                    return; // No need to continue iterating once we've found the right user
                 }
             }
         }
@@ -144,6 +146,33 @@ namespace PhiServer
 
                     // We respond with a StatePacket that contains all synchronisation data
                     this.SendPacket(client, user, new SynchronisationPacket { user = user, realmData = this.realmData });
+                }
+                else if (packet is StartTransactionPacket)
+                {
+                    if (user == null)
+                    {
+                        // We ignore this packet
+                        Log(LogLevel.ERROR, string.Format("{0} ignored because unknown user {1}", packet, client.ID));
+                        return;
+                    }
+
+                    // Check whether the packet was sent too quickly
+                    TimeSpan timeSinceLastTransaction = DateTime.Now - user.lastTransactionTime;
+                    if (timeSinceLastTransaction > TimeSpan.FromSeconds(3))
+                    {
+                        // Apply the packet as normal
+                        packet.Apply(user, this.realmData);
+                    }
+                    else
+                    {
+                        // Intercept the packet, returning it to sender
+                        StartTransactionPacket transactionPacket = packet as StartTransactionPacket;
+                        transactionPacket.transaction.state = TransactionResponse.INTERCEPTED;
+                        this.SendPacket(client, user, new ConfirmTransactionPacket { response = transactionPacket.transaction.state, toSender = true, transaction = transactionPacket.transaction});
+
+                        // Report the packet to the log
+                        Log(LogLevel.ERROR, string.Format("{0} ignored because user {1} sent a packet less than 3 seconds ago", packet, client.ID));
+                    }
                 }
                 else
                 {

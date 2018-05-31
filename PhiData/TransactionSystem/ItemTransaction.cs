@@ -94,6 +94,10 @@ namespace PhiClient.TransactionSystem
             {
                 Messages.Message("Unexpected interruption during item transaction with " + sender.name, MessageTypeDefOf.RejectInput);
             }
+            else if (state == TransactionResponse.INTERCEPTED)
+            {
+                // This should never happen as the server rejects intercepted packets
+            }
         }
 
         public override void OnEndSender(RealmData realmData)
@@ -142,6 +146,10 @@ namespace PhiClient.TransactionSystem
             else if (state == TransactionResponse.INTERRUPTED)
             {
                 Messages.Message("Unexpected interruption during item transaction with " + receiver.name, MessageTypeDefOf.RejectInput);
+            }
+            else if (state == TransactionResponse.INTERCEPTED)
+            {
+                Messages.Message("Transaction with " + receiver.name + " was declined by the server. Are you sending items too quickly?", MessageTypeDefOf.RejectInput);
             }
         }
     }

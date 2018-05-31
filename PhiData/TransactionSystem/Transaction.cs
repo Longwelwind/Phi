@@ -42,7 +42,8 @@ namespace PhiClient.TransactionSystem
         {
             return state == TransactionResponse.ACCEPTED
                 || state == TransactionResponse.DECLINED
-                || state == TransactionResponse.INTERRUPTED;
+                || state == TransactionResponse.INTERRUPTED
+                || state == TransactionResponse.INTERCEPTED;
         }
 
         [OnSerializing]
@@ -71,6 +72,7 @@ namespace PhiClient.TransactionSystem
         WAITING,
         ACCEPTED,
         DECLINED,
-        INTERRUPTED
+        INTERRUPTED,
+        INTERCEPTED
     }
 }
