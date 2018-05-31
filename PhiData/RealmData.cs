@@ -122,7 +122,7 @@ namespace PhiClient
                 name = name,
                 connected = true,
                 inGame = false,
-                hashedKey= hashKey
+                hashedKey = hashKey
             };
 
             AddUser(user);
