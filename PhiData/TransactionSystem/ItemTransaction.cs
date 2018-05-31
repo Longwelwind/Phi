@@ -23,6 +23,16 @@ namespace PhiClient.TransactionSystem
 
         public override void OnStartReceiver(RealmData realmData)
         {
+            // Double check to ensure it wasn't bypassed by the sender
+            if (!receiver.preferences.receiveItems)
+            {
+                realmData.NotifyPacketToServer(new ConfirmServerTransactionPacket
+                {
+                    transaction = this,
+                    response = TransactionResponse.DECLINED
+                });
+            }
+
             // We generate a detailed list of what the pack contains
             List<KeyValuePair<Thing, int>> things = realmThings.Select((r) => new KeyValuePair<Thing, int>(realmData.FromRealmThing(r.Key), r.Value)).ToList();
 

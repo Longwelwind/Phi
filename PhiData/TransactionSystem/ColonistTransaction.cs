@@ -23,8 +23,18 @@ namespace PhiClient.TransactionSystem
 
         public override void OnStartReceiver(RealmData realmData)
         {
+            // Double check to ensure it wasn't bypassed by the sender
+            if (!receiver.preferences.receiveColonists)
+            {
+                realmData.NotifyPacketToServer(new ConfirmServerTransactionPacket
+                {
+                    transaction = this,
+                    response = TransactionResponse.DECLINED
+                });
+            }
+
             // We ask for confirmation
-            
+
             Dialog_GeneralChoice choiceDialog = new Dialog_GeneralChoice(new DialogChoiceConfig
             {
                 text = sender.name + " wants to send you a colonist",
