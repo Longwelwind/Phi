@@ -7,7 +7,7 @@ using System.Text;
 namespace PhiClient.TransactionSystem
 {
     /// <summary>
-    /// Received by the server
+    /// Received by the server from the recipient
     /// </summary>
     [Serializable]
     public class ConfirmServerTransactionPacket : Packet
@@ -26,9 +26,16 @@ namespace PhiClient.TransactionSystem
             }
             transaction.state = response;
 
-            // We signal to the 2 users that the transaction is now confirmed
-            realmData.NotifyPacket(transaction.sender, new ConfirmTransactionPacket { transaction = transaction, response = response, toSender = true });
-            realmData.NotifyPacket(transaction.receiver, new ConfirmTransactionPacket { transaction = transaction, response = response });
+            if (user == transaction.receiver)
+            {
+                // We signal to the 2 users that the transaction is now confirmed
+                realmData.NotifyPacket(transaction.sender, new ConfirmTransactionPacket { transaction = transaction, response = response, toSender = true });
+                realmData.NotifyPacket(transaction.receiver, new ConfirmTransactionPacket { transaction = transaction, response = response });
+            }
+            else
+            {
+                // Fraudulent confirmation, take no action
+            }
         }
 
         [OnSerializing]
