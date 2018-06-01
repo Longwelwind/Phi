@@ -31,6 +31,7 @@ namespace PhiClient.TransactionSystem
                     transaction = this,
                     response = TransactionResponse.DECLINED
                 });
+                return;
             }
 
             // We ask for confirmation
@@ -63,6 +64,12 @@ namespace PhiClient.TransactionSystem
 
         public override void OnEndReceiver(RealmData realmData)
         {
+            // Double check to ensure it wasn't bypassed by the sender
+            if (!receiver.preferences.receiveItems)
+            {
+                state = TransactionResponse.DECLINED;
+            }
+
             // Nothing
             if (state == TransactionResponse.ACCEPTED)
             {
@@ -96,6 +103,12 @@ namespace PhiClient.TransactionSystem
 
         public override void OnEndSender(RealmData realmData)
         {
+            // Double check to ensure it wasn't bypassed by the sender
+            if (!receiver.preferences.receiveItems)
+            {
+                state = TransactionResponse.DECLINED;
+            }
+
             if (state == TransactionResponse.ACCEPTED)
             {
                 pawn.Destroy();

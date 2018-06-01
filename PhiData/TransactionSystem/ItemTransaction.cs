@@ -31,6 +31,7 @@ namespace PhiClient.TransactionSystem
                     transaction = this,
                     response = TransactionResponse.DECLINED
                 });
+                return;
             }
 
             // We generate a detailed list of what the pack contains
@@ -67,6 +68,12 @@ namespace PhiClient.TransactionSystem
 
         public override void OnEndReceiver(RealmData realmData)
         {
+            // Double check to ensure it wasn't bypassed by the sender
+            if (!receiver.preferences.receiveItems)
+            {
+                state = TransactionResponse.DECLINED;
+            }
+
             if (state == TransactionResponse.ACCEPTED)
             {
                 // We spawn the new items !
@@ -112,6 +119,12 @@ namespace PhiClient.TransactionSystem
 
         public override void OnEndSender(RealmData realmData)
         {
+            // Double check to ensure it wasn't bypassed by the sender
+            if (!receiver.preferences.receiveItems)
+            {
+                state = TransactionResponse.DECLINED;
+            }
+
             if (state == TransactionResponse.ACCEPTED)
             {
                 foreach (KeyValuePair<List<Thing>, int> entry in things)
