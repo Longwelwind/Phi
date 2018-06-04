@@ -35,6 +35,10 @@ namespace PhiClient
         public List<RealmThing> equipments;
         public List<RealmThing> apparels;
         public List<RealmThing> inventory;
+        public List<RealmHediff> hediffs;
+        public byte healthState = 2; // Default to Mobile
+
+        public Dictionary<string, int> workPriorities;
 
         public static RealmPawn ToRealmPawn(Pawn pawn, RealmData realmData)
         {
@@ -87,6 +91,38 @@ namespace PhiClient
                 inventory.Add(realmData.ToRealmThing(thing));
             }
 
+            List<RealmHediff> hediffs = new List<RealmHediff>();
+            foreach (Hediff hediff in pawn.health.hediffSet.hediffs)
+            {
+
+                var immunity = pawn.health.immunity.GetImmunityRecord(hediff.def);
+
+                var partId = -1;
+                if (hediff.Part?.def != null)
+                {
+                    if (!pawn.RaceProps.body.AllParts.Contains(hediff.Part))
+                    {
+                        Log.Error(String.Format("Skipping bodypart {0}, not found in body.", hediff.Part?.def?.defName));
+                        continue;
+                    }
+                    partId = pawn.RaceProps.body.GetIndexOfPart(hediff.Part);
+                }
+                
+                hediffs.Add(new RealmHediff() {
+                    hediffDefName = hediff.def.defName,
+                    bodyPartIndex = partId,
+                    immunity = (immunity == null ? float.NaN : immunity.immunity),
+                    sourceDefName = hediff.source?.defName,
+                    ageTicks = hediff.ageTicks,
+                    severity = hediff.Severity
+                });
+            }
+            var healthState = (byte)pawn.health.State;
+
+            var workPriorities = new Dictionary<string, int>();
+            foreach (var def in DefDatabase<WorkTypeDef>.AllDefs)
+                workPriorities.Add(def.defName, pawn.workSettings.GetPriority(def));
+
             return new RealmPawn
             {
                 name = name,
@@ -110,7 +146,10 @@ namespace PhiClient
                 },
                 equipments = equipments,
                 apparels = apparels,
-                inventory = inventory
+                inventory = inventory,
+                hediffs = hediffs,
+                healthState = healthState,
+                workPriorities = workPriorities,
             };
         }
 
@@ -213,6 +252,55 @@ namespace PhiClient
                 inventoryTracker.innerContainer.TryAdd(thing);
             }
 
+            // GenerateHediffsFor()
+            if (hediffs == null)
+                Log.Warning("RealmHediffs is null in received colonist");
+
+            foreach (RealmHediff hediff in hediffs ?? new List<RealmHediff>())
+            {
+                var definition = DefDatabase<HediffDef>.GetNamed(hediff.hediffDefName);
+                BodyPartRecord bodypart = null;
+                if (hediff.bodyPartIndex != -1)
+                {
+                    bodypart = pawn.RaceProps.body.GetPartAtIndex(hediff.bodyPartIndex);
+                }
+
+                pawn.health.AddHediff(definition, bodypart);
+                var newdiff = pawn.health.hediffSet.hediffs.Last();
+                newdiff.source = (hediff.sourceDefName == null ? null : DefDatabase<ThingDef>.GetNamedSilentFail(hediff.sourceDefName));
+                newdiff.ageTicks = hediff.ageTicks;
+                newdiff.Severity = hediff.severity;
+
+                if (!float.IsNaN(hediff.immunity) && !pawn.health.immunity.ImmunityRecordExists(definition))
+                {
+                    var handler = pawn.health.immunity;
+                    handler.GetType().GetMethod("TryAddImmunityRecord", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).Invoke(handler, new object[] { definition });
+                    var record = handler.GetImmunityRecord(definition);
+                    record.immunity = hediff.immunity;
+                }
+            }
+
+            var healthStateField = pawn.health.GetType().GetField("healthState", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (healthStateField == null)
+                Log.Error("Unable to find healthState field");
+            else
+                healthStateField.SetValue(pawn.health, healthState);
+
+            // GenerateHediffsFor()
+            if (workPriorities == null)
+                Log.Warning("WorkPriorities is null in received colonist");
+
+            foreach (KeyValuePair<string, int> priority in workPriorities ?? new Dictionary<string, int>())
+            {
+                var def = DefDatabase<WorkTypeDef>.GetNamedSilentFail(priority.Key);
+                if (def == null)
+                {
+                    Log.Warning(String.Format("Ignoring unknown workType: {0}", priority.Key));
+                    continue;
+                }
+                pawn.workSettings.SetPriority(def, priority.Value);
+            }
+
             return pawn;
         }
     }
@@ -230,5 +318,16 @@ namespace PhiClient
     {
         public string traitDefName;
         public int degree;
+    }
+
+    [Serializable]
+    public class RealmHediff
+    {
+        public string hediffDefName;
+        public int bodyPartIndex;
+        public float immunity = float.NaN;
+        public string sourceDefName;
+        public int ageTicks;
+        public float severity;
     }
 }
