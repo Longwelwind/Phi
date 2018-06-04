@@ -196,6 +196,7 @@ namespace PhiClient
         public override void Apply(User user, RealmData realmData)
         {
             // Handled by PhiClient
+            Verse.Log.Warning("Couldn't authenticate:" + error);
         }
     }
 
