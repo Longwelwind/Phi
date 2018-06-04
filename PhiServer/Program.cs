@@ -79,7 +79,7 @@ namespace PhiServer
 
 		private void SendPacket(ServerClient client, User user, Packet packet)
 		{
-            Log(LogLevel.DEBUG, string.Format("Server -> {0}: {1}", user.name, packet));
+            Log(LogLevel.DEBUG, string.Format("Server -> {0}: {1}", user != null ?  user.name : "No", packet));
 			client.Send(Packet.Serialize(packet, realmData, user));
         }
 
@@ -123,7 +123,7 @@ namespace PhiServer
                     }
 
                     // We check if an user already uses this key
-                    user = this.realmData.users.FindLast(delegate (User u) { return u.hashedKey == authPacket.hashedKey; });
+                    user = this.realmData.users.FindLast(delegate (User u) { return authPacket.name == u.name;  });
                     if (user == null)
                     {
                         user = this.realmData.ServerAddUser(authPacket.name, authPacket.hashedKey);
@@ -134,9 +134,22 @@ namespace PhiServer
                     }
                     else
                     {
-                        // We send a connect notification to all users
-                        user.connected = true;
-                        this.realmData.BroadcastPacketExcept(new UserConnectedPacket { user = user, connected = true }, user);
+                        // Checks if he has the right key
+                        if (user.hashedKey == authPacket.hashedKey)
+                        {
+                            // We send a connect notification to all users
+                            user.connected = true;
+                            this.realmData.BroadcastPacketExcept(new UserConnectedPacket { user = user, connected = true }, user);
+                        } else
+                        {
+                            this.SendPacket(client, user, new AuthentificationErrorPacket
+                                {
+                                    error = "Wrong hash key"
+                                }
+                            );
+                            Log(LogLevel.INFO, "Wrong hash key");
+                            return;
+                        }
                     }
 
                     this.connectedUsers.Add(client, user);
