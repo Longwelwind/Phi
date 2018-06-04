@@ -131,6 +131,34 @@ namespace PhiClient
         }
     }
 
+    [Serializable]
+    public class SendAnimalPacket : Packet
+    {
+        public RealmAnimal realmAnimal;
+        [NonSerialized]
+        public User userTo;
+        private int userToId;
+
+        public override void Apply(User user, RealmData realmData)
+        {
+            realmData.NotifyPacket(userTo, new ReceiveAnimalPacket { userFrom = user, realmAnimal = realmAnimal });
+        }
+
+        [OnSerializing]
+        internal void OnSerializingCallback(StreamingContext c)
+        {
+            userToId = userTo.id;
+        }
+
+        [OnDeserialized]
+        internal void OnDeserializedCallback(StreamingContext c)
+        {
+            RealmContext realmContext = (RealmContext)c.Context;
+
+            userTo = ID.Find(realmContext.realmData.users, userToId);
+        }
+    }
+
     /**
      * Packet sent to client
      */
@@ -196,6 +224,35 @@ namespace PhiClient
 			RealmContext realmContext = (RealmContext) c.Context;
 
 			userFrom = ID.Find(realmContext.realmData.users, userFromId);
+        }
+
+    }
+
+    [Serializable]
+    public class ReceiveAnimalPacket : Packet
+    {
+        [NonSerialized]
+        public User userFrom;
+        private int userFromId;
+        public RealmAnimal realmAnimal;
+
+        public override void Apply(User user, RealmData realmData)
+        {
+
+        }
+
+        [OnSerializing]
+        internal void OnSerializingCallback(StreamingContext c)
+        {
+            userFromId = userFrom.id;
+        }
+
+        [OnDeserialized]
+        internal void OnDeserializedCallback(StreamingContext c)
+        {
+            RealmContext realmContext = (RealmContext)c.Context;
+
+            userFrom = ID.Find(realmContext.realmData.users, userFromId);
         }
 
     }

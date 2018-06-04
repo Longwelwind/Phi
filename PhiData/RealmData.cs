@@ -12,7 +12,7 @@ namespace PhiClient
     [Serializable]
     public class RealmData
     {
-        public const string VERSION = "0.11";
+        public const string VERSION = "0.12";
 		public const int CHAT_MESSAGES_TO_SEND = 30;
         public const int CHAT_MESSAGE_MAX_LENGTH = 250;
 

@@ -134,6 +134,12 @@ namespace PhiClient
                 client.UpdatePreferences();
             }));
 
+            firstColumn.Add(new CheckboxLabeledWidget("Allow receiving animals (EXPERIMENTAL)", pref.receiveAnimals, (b) =>
+            {
+                pref.receiveAnimals = b;
+                client.UpdatePreferences();
+            }));
+
             // Just to take spaces while the column is empty
             ListContainer secondColumn = new ListContainer();
             twoColumn.Add(secondColumn);

@@ -1,4 +1,4 @@
-﻿using PhiClient;
+using PhiClient;
 using SocketLibrary;
 using System;
 using System.Linq;
@@ -226,6 +226,7 @@ namespace PhiClient
 
         public void SetServerAddress(string address)
         {
+            address = string.Join("", address.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries)); //Remove Whitespaces
             File.WriteAllLines(SERVER_FILE, new string[] { address });
             this.serverAddress = address;
         }
@@ -302,7 +303,25 @@ namespace PhiClient
 
             Messages.Message("Offer sent, waiting for confirmation", MessageTypeDefOf.SilentInput);
         }
-        
+
+        public void SendAnimal(User user, Pawn pawn)
+        {
+            if (!CheckCanStartTransaction(user))
+            {
+                return;
+            }
+
+            RealmAnimal realmAnimal = RealmAnimal.ToRealmAnimal(pawn, realmData);
+
+            int id = ++this.currentUser.lastTransactionId;
+            AnimalTransaction trans = new AnimalTransaction(id, currentUser, user, pawn, realmAnimal);
+            realmData.transactions.Add(trans);
+
+            this.SendPacket(new StartTransactionPacket { transaction = trans });
+
+            Messages.Message("Offer sent, waiting for confirmation", MessageTypeDefOf.SilentInput);
+        }
+
         public void ChangeNickname(string newNickname)
         {
             this.SendPacket(new ChangeNicknamePacket { name = newNickname });

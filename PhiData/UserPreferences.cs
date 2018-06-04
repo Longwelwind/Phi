@@ -7,5 +7,6 @@ namespace PhiClient
     {
         public bool receiveItems = true;
         public bool receiveColonists = false;
+        public bool receiveAnimals = false;
     }
 }
