@@ -23,8 +23,19 @@ namespace PhiClient.TransactionSystem
 
         public override void OnStartReceiver(RealmData realmData)
         {
+            // Double check to ensure it wasn't bypassed by the sender
+            if (!receiver.preferences.receiveAnimals)
+            {
+                realmData.NotifyPacketToServer(new ConfirmServerTransactionPacket
+                {
+                    transaction = this,
+                    response = TransactionResponse.DECLINED
+                });
+                return;
+            }
+
             // We ask for confirmation
-            
+
             Dialog_GeneralChoice choiceDialog = new Dialog_GeneralChoice(new DialogChoiceConfig
             {
                 text = sender.name + " wants to send you a " + realmAnimal.FromRealmAnimal(realmData).kindDef.label,
@@ -53,6 +64,17 @@ namespace PhiClient.TransactionSystem
 
         public override void OnEndReceiver(RealmData realmData)
         {
+            // Double check to ensure it wasn't bypassed by the sender
+            if (!receiver.preferences.receiveAnimals)
+            {
+                realmData.NotifyPacketToServer(new ConfirmServerTransactionPacket
+                {
+                    transaction = this,
+                    response = TransactionResponse.DECLINED
+                });
+                return;
+            }
+
             // Nothing
             if (state == TransactionResponse.ACCEPTED)
             {
