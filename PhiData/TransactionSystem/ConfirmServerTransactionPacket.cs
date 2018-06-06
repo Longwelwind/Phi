@@ -24,22 +24,16 @@ namespace PhiClient.TransactionSystem
             {
                 return;
             }
+
             if (transaction.state != TransactionResponse.WAITING)
             {
                 return;
             }
             transaction.state = response;
 
-            if (user == transaction.receiver)
-            {
-                // We signal to the 2 users that the transaction is now confirmed
-                realmData.NotifyPacket(transaction.sender, new ConfirmTransactionPacket { transaction = transaction, response = response, toSender = true });
-                realmData.NotifyPacket(transaction.receiver, new ConfirmTransactionPacket { transaction = transaction, response = response });
-            }
-            else
-            {
-                // Fraudulent confirmation, take no action
-            }
+            // We signal to the 2 users that the transaction is now confirmed
+            realmData.NotifyPacket(transaction.sender, new ConfirmTransactionPacket { transaction = transaction, response = response, toSender = true });
+            realmData.NotifyPacket(transaction.receiver, new ConfirmTransactionPacket { transaction = transaction, response = response });
         }
 
         [OnSerializing]
