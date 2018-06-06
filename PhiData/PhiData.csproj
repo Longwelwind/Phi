@@ -42,8 +42,10 @@
     <Compile Include="Packet.cs" />
     <Compile Include="RealmData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RealmAnimal.cs" />
     <Compile Include="RealmPawn.cs" />
     <Compile Include="RealmThing.cs" />
+    <Compile Include="TransactionSystem\AnimalTransaction.cs" />
     <Compile Include="TransactionSystem\ColonistTransaction.cs" />
     <Compile Include="TransactionSystem\ConfirmServerTransactionPacket.cs" />
     <Compile Include="TransactionSystem\ConfirmTransactionPacket.cs" />

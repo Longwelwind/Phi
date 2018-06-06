@@ -20,6 +20,10 @@ namespace PhiClient.TransactionSystem
 
         public override void Apply(User user, RealmData realmData)
         {
+            if (transaction.receiver != user)
+            {
+                return;
+            }
             if (transaction.state != TransactionResponse.WAITING)
             {
                 return;

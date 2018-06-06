@@ -82,7 +82,7 @@ namespace PhiServer
 
 		private void SendPacket(ServerClient client, User user, Packet packet)
 		{
-            Log(LogLevel.DEBUG, string.Format("Server -> {0}: {1}", user.name, packet));
+            Log(LogLevel.DEBUG, string.Format("Server -> {0}: {1}", user != null ?  user.name : "No", packet));
 			client.Send(Packet.Serialize(packet, realmData, user));
         }
 

@@ -177,6 +177,7 @@ namespace PhiClient
                 List<FloatMenuOption> options = new List<FloatMenuOption>();
                 options.Add(new FloatMenuOption("Ship items", () => { OnShipItemsOptionClick(user); }));
                 options.Add(new FloatMenuOption("Send colonist", () => { OnSendColonistOptionClick(user); }));
+                options.Add(new FloatMenuOption("Send animal", () => { OnSendAnimalOptionClick(user); }));
 
                 Find.WindowStack.Add(new FloatMenu(options));
             }
@@ -184,7 +185,6 @@ namespace PhiClient
 
         public void OnSendColonistOptionClick(User user)
         {
-            PhiClient phiClient = PhiClient.instance;
             // We open a trade window with this user
             if (user.preferences.receiveColonists)
             {
@@ -193,6 +193,19 @@ namespace PhiClient
             else
             {
                 Messages.Message(user.name + " does not accept colonists", MessageTypeDefOf.RejectInput);
+            }
+        }
+
+        public void OnSendAnimalOptionClick(User user)
+        {
+            // We open a trade window with this user
+            if (user.preferences.receiveAnimals)
+            {
+                Find.WindowStack.Add(new UserSendAnimalWindow(user));
+            }
+            else
+            {
+                Messages.Message(user.name + " does not accept animals", MessageTypeDefOf.RejectInput);
             }
         }
 
