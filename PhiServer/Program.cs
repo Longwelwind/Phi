@@ -126,35 +126,31 @@ namespace PhiServer
                     }
 
                     // Check if the user wants to use a specific id
+                    int userId;
                     if (authPacket.id != null)
                     {
                         // Link key to existing id, or a new one if it doesn't exist or the keys don't match
-                        RegisterUserKey(authPacket.id.Value, authPacket.hashedKey);
-                        user = this.realmData.users.FindLast(delegate (User u) { return u.id == authPacket.id; });
+                        userId = RegisterUserKey(authPacket.id.Value, authPacket.hashedKey);
                     }
                     else
                     {
                         // Generate a new id and link the key to it
-                        RegisterUserKey(++realmData.lastUserGivenId, authPacket.hashedKey);
+                        userId = RegisterUserKey(++realmData.lastUserGivenId, authPacket.hashedKey);
                     }
 
-                    bool newUser = false;
+                    user = this.realmData.users.FindLast(delegate (User u) { return userId == u.id; });
                     if (user == null)
                     {
-                        // Create the new user
-                        user = this.realmData.ServerAddUser(authPacket.name, realmData.lastUserGivenId);
-                        newUser = true;
-                    }
+                        user = this.realmData.ServerAddUser(authPacket.name, userId);
+                        user.connected = true;
 
-                    user.connected = true;
-
-                    if (newUser)
-                    {
                         // We send a notify to all users connected about the new user
                         this.realmData.BroadcastPacketExcept(new NewUserPacket { user = user }, user);
                     }
                     else
                     {
+                        user.connected = true;
+
                         // We send a connect notification to all users
                         this.realmData.BroadcastPacketExcept(new UserConnectedPacket { user = user, connected = true }, user);
                     }
