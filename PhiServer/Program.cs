@@ -211,7 +211,7 @@ namespace PhiServer
         private int RegisterUserKey(int id, string hashedKey)
         {
             // Check if this user exists
-            if (userKeys.ContainsKey(id))
+            if (userKeys.ContainsKey(id) && id <= realmData.lastUserGivenId)
             {
                 // Check if the two keys are different
                 if (hashedKey != userKeys[id])
