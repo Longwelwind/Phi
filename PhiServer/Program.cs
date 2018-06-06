@@ -185,7 +185,7 @@ namespace PhiServer
                     {
                         // Intercept the packet, returning it to sender
                         StartTransactionPacket transactionPacket = packet as StartTransactionPacket;
-                        transactionPacket.transaction.state = TransactionResponse.INTERCEPTED;
+                        transactionPacket.transaction.state = TransactionResponse.TOOFAST;
                         this.SendPacket(client, user, new ConfirmTransactionPacket { response = transactionPacket.transaction.state, toSender = true, transaction = transactionPacket.transaction});
 
                         // Report the packet to the log

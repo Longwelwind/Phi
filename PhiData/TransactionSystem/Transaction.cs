@@ -43,7 +43,7 @@ namespace PhiClient.TransactionSystem
             return state == TransactionResponse.ACCEPTED
                 || state == TransactionResponse.DECLINED
                 || state == TransactionResponse.INTERRUPTED
-                || state == TransactionResponse.INTERCEPTED;
+                || state == TransactionResponse.TOOFAST;
         }
 
         [OnSerializing]
@@ -73,6 +73,6 @@ namespace PhiClient.TransactionSystem
         ACCEPTED,
         DECLINED,
         INTERRUPTED,
-        INTERCEPTED
+        TOOFAST
     }
 }

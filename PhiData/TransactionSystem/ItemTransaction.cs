@@ -111,7 +111,7 @@ namespace PhiClient.TransactionSystem
             {
                 Messages.Message("Unexpected interruption during item transaction with " + sender.name, MessageTypeDefOf.RejectInput);
             }
-            else if (state == TransactionResponse.INTERCEPTED)
+            else if (state == TransactionResponse.TOOFAST)
             {
                 // This should never happen as the server rejects intercepted packets
             }
@@ -170,7 +170,7 @@ namespace PhiClient.TransactionSystem
             {
                 Messages.Message("Unexpected interruption during item transaction with " + receiver.name, MessageTypeDefOf.RejectInput);
             }
-            else if (state == TransactionResponse.INTERCEPTED)
+            else if (state == TransactionResponse.TOOFAST)
             {
                 Messages.Message("Transaction with " + receiver.name + " was declined by the server. Are you sending items too quickly?", MessageTypeDefOf.RejectInput);
             }
