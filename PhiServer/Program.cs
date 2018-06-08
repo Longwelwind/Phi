@@ -4,6 +4,7 @@ using SocketLibrary;
 using PhiClient;
 using System.Collections.Generic;
 using System.Collections;
+using PhiClient.TransactionSystem;
 
 namespace PhiServer
 {
@@ -12,6 +13,7 @@ namespace PhiServer
         private Server server;
         private RealmData realmData;
         private Dictionary<ServerClient, User> connectedUsers = new Dictionary<ServerClient, User>();
+        private Dictionary<int, string> userKeys = new Dictionary<int, string>();
         private LogLevel logLevel;
 
         private object lockProcessPacket = new object();
@@ -73,6 +75,7 @@ namespace PhiServer
                 if (u == user)
                 {
                     this.SendPacket(client, user, packet);
+                    return; // No need to continue iterating once we've found the right user
                 }
             }
         }
@@ -100,7 +103,7 @@ namespace PhiServer
         {
             lock (lockProcessPacket)
 			{
-				User user;
+			    User user;
 				this.connectedUsers.TryGetValue(client, out user);
 
 				Packet packet = Packet.Deserialize(data, realmData, user);
@@ -122,11 +125,23 @@ namespace PhiServer
                         return;
                     }
 
-                    // We check if an user already uses this key
-                    user = this.realmData.users.FindLast(delegate (User u) { return authPacket.name == u.name;  });
+                    // Check if the user wants to use a specific id
+                    int userId;
+                    if (authPacket.id != null)
+                    {
+                        // Link key to existing id, or a new one if it doesn't exist or the keys don't match
+                        userId = RegisterUserKey(authPacket.id.Value, authPacket.hashedKey);
+                    }
+                    else
+                    {
+                        // Generate a new id and link the key to it
+                        userId = RegisterUserKey(++realmData.lastUserGivenId, authPacket.hashedKey);
+                    }
+
+                    user = this.realmData.users.FindLast(delegate (User u) { return userId == u.id; });
                     if (user == null)
                     {
-                        user = this.realmData.ServerAddUser(authPacket.name, authPacket.hashedKey);
+                        user = this.realmData.ServerAddUser(authPacket.name, userId);
                         user.connected = true;
 
                         // We send a notify to all users connected about the new user
@@ -134,29 +149,44 @@ namespace PhiServer
                     }
                     else
                     {
-                        // Checks if he has the right key
-                        if (user.hashedKey == authPacket.hashedKey)
-                        {
-                            // We send a connect notification to all users
-                            user.connected = true;
-                            this.realmData.BroadcastPacketExcept(new UserConnectedPacket { user = user, connected = true }, user);
-                        } else
-                        {
-                            this.SendPacket(client, user, new AuthentificationErrorPacket
-                                {
-                                    error = "Wrong hash key"
-                                }
-                            );
-                            Log(LogLevel.INFO, "Wrong hash key");
-                            return;
-                        }
+                        user.connected = true;
+
+                        // We send a connect notification to all users
+                        this.realmData.BroadcastPacketExcept(new UserConnectedPacket { user = user, connected = true }, user);
                     }
 
                     this.connectedUsers.Add(client, user);
-                    Log(LogLevel.INFO, string.Format("Client {0} connected as {1} ({2})", client.ID, user.name, user.hashedKey));
+                    Log(LogLevel.INFO, string.Format("Client {0} connected as {1} ({2})", client.ID, user.name, user.id));
 
                     // We respond with a StatePacket that contains all synchronisation data
                     this.SendPacket(client, user, new SynchronisationPacket { user = user, realmData = this.realmData });
+                }
+                else if (packet is StartTransactionPacket)
+                {
+                    if (user == null)
+                    {
+                        // We ignore this packet
+                        Log(LogLevel.ERROR, string.Format("{0} ignored because unknown user {1}", packet, client.ID));
+                        return;
+                    }
+
+                    // Check whether the packet was sent too quickly
+                    TimeSpan timeSinceLastTransaction = DateTime.Now - user.lastTransactionTime;
+                    if (timeSinceLastTransaction > TimeSpan.FromSeconds(3))
+                    {
+                        // Apply the packet as normal
+                        packet.Apply(user, this.realmData);
+                    }
+                    else
+                    {
+                        // Intercept the packet, returning it to sender
+                        StartTransactionPacket transactionPacket = packet as StartTransactionPacket;
+                        transactionPacket.transaction.state = TransactionResponse.TOOFAST;
+                        this.SendPacket(client, user, new ConfirmTransactionPacket { response = transactionPacket.transaction.state, toSender = true, transaction = transactionPacket.transaction});
+
+                        // Report the packet to the log
+                        Log(LogLevel.ERROR, string.Format("{0} ignored because user {1} sent a packet less than 3 seconds ago", packet, client.ID));
+                    }
                 }
                 else
                 {
@@ -171,6 +201,34 @@ namespace PhiServer
                     packet.Apply(user, this.realmData);
                 }
             }
+        }
+
+        /// <summary>
+        /// Checks if the key matches an existing id. If it does not match, returns new id which the key is linked to. Returns the input id otherwise.
+        /// </summary>
+        /// <param name="id">The user's id</param>
+        /// <param name="hashedKey">The user's hashed key. This should only be kept on the server.</param>
+        private int RegisterUserKey(int id, string hashedKey)
+        {
+            // Check if this user exists
+            if (userKeys.ContainsKey(id) && id <= realmData.lastUserGivenId)
+            {
+                // Check if the two keys are different
+                if (hashedKey != userKeys[id])
+                {
+                    // Register a new id and key pair
+                    id = ++realmData.lastUserGivenId;
+                    userKeys.Add(id, hashedKey);
+                }
+            }
+            else
+            {
+                // Register a new id and key pair
+                id = ++realmData.lastUserGivenId;
+                userKeys.Add(id, hashedKey);
+            }
+
+            return id;
         }
 
         static void Main(string[] args)

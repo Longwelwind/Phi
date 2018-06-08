@@ -17,6 +17,7 @@ namespace PhiClient.TransactionSystem
         {
             realmData.transactions.Add(transaction);
             user.lastTransactionId = transaction.id;
+            user.lastTransactionTime = DateTime.Now;
 
             realmData.NotifyPacket(transaction.receiver, new ReceiveTransactionPacket { transaction = transaction });
         }

@@ -12,7 +12,7 @@ namespace PhiClient
     [Serializable]
     public class RealmData
     {
-        public const string VERSION = "0.12";
+        public const string VERSION = "0.14";
 		public const int CHAT_MESSAGES_TO_SEND = 30;
         public const int CHAT_MESSAGE_MAX_LENGTH = 250;
 
@@ -111,22 +111,19 @@ namespace PhiClient
             }
         }
 
-        public User ServerAddUser(string name, string hashKey)
+        public User ServerAddUser(string name, int id)
         {
-            this.lastUserGivenId++;
-            int id = this.lastUserGivenId;
 
             User user = new User
             {
                 id = id,
                 name = name,
                 connected = true,
-                inGame = false,
-                hashedKey= hashKey
+                inGame = false
             };
 
             AddUser(user);
-            EmitLog(LogLevel.INFO, string.Format("Created user {0} ({1})", name, hashKey));
+            EmitLog(LogLevel.INFO, string.Format("Created user {0} ({1})", name, id));
 
             return user;
         }

@@ -13,12 +13,12 @@ namespace PhiClient
 
         public int id;
         public string name;
-        public string hashedKey;
         public bool connected;
         public bool inGame;
         public UserPreferences preferences = new UserPreferences();
 
         public int lastTransactionId = 0;
+        public DateTime lastTransactionTime = DateTime.MinValue;
 
         public int getID()
         {

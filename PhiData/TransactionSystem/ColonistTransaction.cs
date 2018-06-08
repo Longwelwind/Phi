@@ -23,8 +23,19 @@ namespace PhiClient.TransactionSystem
 
         public override void OnStartReceiver(RealmData realmData)
         {
+            // Double check to ensure it wasn't bypassed by the sender
+            if (!receiver.preferences.receiveColonists)
+            {
+                realmData.NotifyPacketToServer(new ConfirmServerTransactionPacket
+                {
+                    transaction = this,
+                    response = TransactionResponse.DECLINED
+                });
+                return;
+            }
+
             // We ask for confirmation
-            
+
             Dialog_GeneralChoice choiceDialog = new Dialog_GeneralChoice(new DialogChoiceConfig
             {
                 text = sender.name + " wants to send you a colonist",
@@ -53,6 +64,12 @@ namespace PhiClient.TransactionSystem
 
         public override void OnEndReceiver(RealmData realmData)
         {
+            // Double check to ensure it wasn't bypassed by the sender
+            if (!receiver.preferences.receiveItems)
+            {
+                state = TransactionResponse.DECLINED;
+            }
+
             // Nothing
             if (state == TransactionResponse.ACCEPTED)
             {
@@ -78,10 +95,20 @@ namespace PhiClient.TransactionSystem
             {
                 Messages.Message("Unexpected interruption during item transaction with " + sender.name, MessageTypeDefOf.RejectInput);
             }
+            else if (state == TransactionResponse.TOOFAST)
+            {
+                // This should never happen as the server rejects intercepted packets.
+            }
         }
 
         public override void OnEndSender(RealmData realmData)
         {
+            // Double check to ensure it wasn't bypassed by the sender
+            if (!receiver.preferences.receiveItems)
+            {
+                state = TransactionResponse.DECLINED;
+            }
+
             if (state == TransactionResponse.ACCEPTED)
             {
                 pawn.Destroy();
@@ -94,6 +121,10 @@ namespace PhiClient.TransactionSystem
             else if (state == TransactionResponse.INTERRUPTED)
             {
                 Messages.Message("Unexpected interruption during item transaction with " + receiver.name, MessageTypeDefOf.RejectInput);
+            }
+            else if (state == TransactionResponse.TOOFAST)
+            {
+                Messages.Message("Transaction with " + receiver.name + " was declined by the server. Are you sending colonists too quickly?", MessageTypeDefOf.RejectInput);
             }
         }
     }

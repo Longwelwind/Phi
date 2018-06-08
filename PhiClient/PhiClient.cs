@@ -108,6 +108,8 @@ namespace PhiClient
                 this.realmData.PacketToServer += PacketToServerCallback;
                 this.realmData.Log += Log;
 
+                SaveCredentials();
+
                 if (OnUsable != null)
                 {
                     OnUsable();
@@ -117,6 +119,21 @@ namespace PhiClient
             {
                 packet.Apply(this.currentUser, this.realmData);
             }
+        }
+
+        private void SaveCredentials()
+        {
+            string key;
+            if (File.Exists(KEY_FILE))
+            {
+                key = File.ReadAllLines(KEY_FILE)[0];
+            }
+            else
+            {
+                key = GetAuthKey();
+            }
+
+            File.WriteAllLines(KEY_FILE, new string[] { key, currentUser.id.ToString() });
         }
 
         private void Log(LogLevel level, string message)
@@ -157,7 +174,8 @@ namespace PhiClient
 
             string nickname = SteamUtility.SteamPersonaName;
             string hashedKey = GetHashedAuthKey();
-            this.SendPacket(new AuthentificationPacket { name = nickname, hashedKey = hashedKey, version = RealmData.VERSION });
+            int? id = GetId();
+            this.SendPacket(new AuthentificationPacket { name = nickname, id = id, hashedKey = hashedKey, version = RealmData.VERSION });
             Log(LogLevel.INFO, "Trying to authenticate as " + nickname);
         }
 
@@ -192,6 +210,22 @@ namespace PhiClient
 
                 File.WriteAllLines(KEY_FILE, new string[] { key });
                 return key;
+            }
+        }
+
+        private int? GetId()
+        {
+            if (File.Exists(KEY_FILE))
+            {
+                if (File.ReadAllLines(KEY_FILE).Length > 1)
+                {
+                    return int.Parse(File.ReadAllLines(KEY_FILE)[1]);
+                }
+                else return null;
+            }
+            else
+            {
+                return null;
             }
         }
 
@@ -260,7 +294,7 @@ namespace PhiClient
 
                 realmThings.Add(new KeyValuePair<RealmThing, int>(realmThing, entry.Value));
             }
-
+            
             int id = ++this.currentUser.lastTransactionId;
             ItemTransaction transaction = new ItemTransaction(id, currentUser, user, chosenThings, realmThings);
             realmData.transactions.Add(transaction);

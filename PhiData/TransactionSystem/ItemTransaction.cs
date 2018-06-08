@@ -23,6 +23,17 @@ namespace PhiClient.TransactionSystem
 
         public override void OnStartReceiver(RealmData realmData)
         {
+            // Double check to ensure it wasn't bypassed by the sender
+            if (!receiver.preferences.receiveItems)
+            {
+                realmData.NotifyPacketToServer(new ConfirmServerTransactionPacket
+                {
+                    transaction = this,
+                    response = TransactionResponse.DECLINED
+                });
+                return;
+            }
+
             // We generate a detailed list of what the pack contains
             List<KeyValuePair<Thing, int>> things = realmThings.Select((r) => new KeyValuePair<Thing, int>(realmData.FromRealmThing(r.Key), r.Value)).ToList();
 
@@ -57,6 +68,12 @@ namespace PhiClient.TransactionSystem
 
         public override void OnEndReceiver(RealmData realmData)
         {
+            // Double check to ensure it wasn't bypassed by the sender
+            if (!receiver.preferences.receiveItems)
+            {
+                state = TransactionResponse.DECLINED;
+            }
+
             if (state == TransactionResponse.ACCEPTED)
             {
                 // We spawn the new items !
@@ -94,10 +111,20 @@ namespace PhiClient.TransactionSystem
             {
                 Messages.Message("Unexpected interruption during item transaction with " + sender.name, MessageTypeDefOf.RejectInput);
             }
+            else if (state == TransactionResponse.TOOFAST)
+            {
+                // This should never happen as the server rejects intercepted packets
+            }
         }
 
         public override void OnEndSender(RealmData realmData)
         {
+            // Double check to ensure it wasn't bypassed by the sender
+            if (!receiver.preferences.receiveItems)
+            {
+                state = TransactionResponse.DECLINED;
+            }
+
             if (state == TransactionResponse.ACCEPTED)
             {
                 foreach (KeyValuePair<List<Thing>, int> entry in things)
@@ -142,6 +169,10 @@ namespace PhiClient.TransactionSystem
             else if (state == TransactionResponse.INTERRUPTED)
             {
                 Messages.Message("Unexpected interruption during item transaction with " + receiver.name, MessageTypeDefOf.RejectInput);
+            }
+            else if (state == TransactionResponse.TOOFAST)
+            {
+                Messages.Message("Transaction with " + receiver.name + " was declined by the server. Are you sending items too quickly?", MessageTypeDefOf.RejectInput);
             }
         }
     }

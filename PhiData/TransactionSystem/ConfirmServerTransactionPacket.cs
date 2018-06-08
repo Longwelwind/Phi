@@ -7,7 +7,7 @@ using System.Text;
 namespace PhiClient.TransactionSystem
 {
     /// <summary>
-    /// Received by the server
+    /// Received by the server from the recipient
     /// </summary>
     [Serializable]
     public class ConfirmServerTransactionPacket : Packet
@@ -24,6 +24,7 @@ namespace PhiClient.TransactionSystem
             {
                 return;
             }
+
             if (transaction.state != TransactionResponse.WAITING)
             {
                 return;
