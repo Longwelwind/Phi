@@ -13,7 +13,7 @@ namespace PhiServer
         private Server server;
         private RealmData realmData;
         private Dictionary<ServerClient, User> connectedUsers = new Dictionary<ServerClient, User>();
-        private Dictionary<int, string> userKeys = new Dictionary<int, string>();
+        private Dictionary<string, int> userKeys = new Dictionary<string, int>();
         private LogLevel logLevel;
 
         private object lockProcessPacket = new object();
@@ -125,19 +125,21 @@ namespace PhiServer
                         return;
                     }
 
-                    // Check if the user wants to use a specific id
+                    // We check if this key has been used to authenticate before
                     int userId;
-                    if (authPacket.id != null)
+                    if (userKeys.ContainsKey(authPacket.hashedKey))
                     {
-                        // Link key to existing id, or a new one if it doesn't exist or the keys don't match
-                        userId = RegisterUserKey(authPacket.id.Value, authPacket.hashedKey);
+                        // Get corresponding id
+                        userId = userKeys[authPacket.hashedKey];
                     }
                     else
                     {
                         // Generate a new id and link the key to it
-                        userId = RegisterUserKey(++realmData.lastUserGivenId, authPacket.hashedKey);
+                        userId = ++realmData.lastUserGivenId;
+                        userKeys.Add(authPacket.hashedKey, userId);
                     }
 
+                    // We check if a user already uses this id
                     user = this.realmData.users.FindLast(delegate (User u) { return userId == u.id; });
                     if (user == null)
                     {
@@ -201,34 +203,6 @@ namespace PhiServer
                     packet.Apply(user, this.realmData);
                 }
             }
-        }
-
-        /// <summary>
-        /// Checks if the key matches an existing id. If it does not match, returns new id which the key is linked to. Returns the input id otherwise.
-        /// </summary>
-        /// <param name="id">The user's id</param>
-        /// <param name="hashedKey">The user's hashed key. This should only be kept on the server.</param>
-        private int RegisterUserKey(int id, string hashedKey)
-        {
-            // Check if this user exists
-            if (userKeys.ContainsKey(id) && id <= realmData.lastUserGivenId)
-            {
-                // Check if the two keys are different
-                if (hashedKey != userKeys[id])
-                {
-                    // Register a new id and key pair
-                    id = ++realmData.lastUserGivenId;
-                    userKeys.Add(id, hashedKey);
-                }
-            }
-            else
-            {
-                // Register a new id and key pair
-                id = ++realmData.lastUserGivenId;
-                userKeys.Add(id, hashedKey);
-            }
-
-            return id;
         }
 
         static void Main(string[] args)
