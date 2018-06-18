@@ -108,8 +108,6 @@ namespace PhiClient
                 this.realmData.PacketToServer += PacketToServerCallback;
                 this.realmData.Log += Log;
 
-                SaveCredentials();
-
                 if (OnUsable != null)
                 {
                     OnUsable();
@@ -119,21 +117,6 @@ namespace PhiClient
             {
                 packet.Apply(this.currentUser, this.realmData);
             }
-        }
-
-        private void SaveCredentials()
-        {
-            string key;
-            if (File.Exists(KEY_FILE))
-            {
-                key = File.ReadAllLines(KEY_FILE)[0];
-            }
-            else
-            {
-                key = GetAuthKey();
-            }
-
-            File.WriteAllLines(KEY_FILE, new string[] { key, currentUser.id.ToString() });
         }
 
         private void Log(LogLevel level, string message)
