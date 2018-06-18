@@ -157,8 +157,7 @@ namespace PhiClient
 
             string nickname = SteamUtility.SteamPersonaName;
             string hashedKey = GetHashedAuthKey();
-            int? id = GetId();
-            this.SendPacket(new AuthentificationPacket { name = nickname, id = id, hashedKey = hashedKey, version = RealmData.VERSION });
+            this.SendPacket(new AuthentificationPacket { name = nickname, hashedKey = hashedKey, version = RealmData.VERSION });
             Log(LogLevel.INFO, "Trying to authenticate as " + nickname);
         }
 
@@ -193,22 +192,6 @@ namespace PhiClient
 
                 File.WriteAllLines(KEY_FILE, new string[] { key });
                 return key;
-            }
-        }
-
-        private int? GetId()
-        {
-            if (File.Exists(KEY_FILE))
-            {
-                if (File.ReadAllLines(KEY_FILE).Length > 1)
-                {
-                    return int.Parse(File.ReadAllLines(KEY_FILE)[1]);
-                }
-                else return null;
-            }
-            else
-            {
-                return null;
             }
         }
 
