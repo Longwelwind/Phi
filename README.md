@@ -1,4 +1,7 @@
 # Phi
+
+**Warning:** This mod is no longer maintained. A reimplementation of it is currently in progress under the name [Phinix](https://github.com/PhinixTeam/Phinix), check it out!
+
 Phi is a Rimworld mod that enables online multiplayer interactions between players.
 
 ## Projects
