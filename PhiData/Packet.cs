@@ -42,7 +42,6 @@ namespace PhiClient
     public class AuthentificationPacket : Packet
     {
         public string name;
-        public int? id;
         public string hashedKey;
         public string version;
 

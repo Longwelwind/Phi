@@ -113,7 +113,6 @@ namespace PhiClient
 
         public User ServerAddUser(string name, int id)
         {
-
             User user = new User
             {
                 id = id,
